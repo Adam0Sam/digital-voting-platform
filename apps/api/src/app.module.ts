@@ -17,7 +17,7 @@ import { JwtAuthModule } from './auth/jwt/jwt-auth.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['apps/api/.env'],
-      // load: [appConfig],
+      load: [appConfig],
     }),
     PrismaModule,
     AuthModule,
