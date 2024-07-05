@@ -9,6 +9,90 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  PARENT
+  ADMIN
+  SUPER_ADMIN
+  GUEST
+}
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VoteStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Grade {
+  IA
+  IB
+  IC
+  ID
+  IE
+  IIA
+  IIB
+  IIC
+  IID
+  IIE
+  IIIA
+  IIIB
+  IIIC
+  IIID
+  TB1
+  IVA
+  IVB
+  IVC
+  IVD
+  TB2
+}
+
+model User {
+  id            String     @id @default(uuid())
+  personalNames String[]
+  lastName      String
+  grade         Grade?
+  roles         UserRole[] @default([GUEST])
+
+  logs     Log[]
+  UserVote UserVote[]
+
+  @@unique([personalNames, lastName])
+  @@index([personalNames, lastName, id])
+}
+
+model UserVote {
+  id         String     @id @default(uuid())
+  status     VoteStatus @default(PENDING)
+  user       User       @relation(fields: [userId], references: [id])
+  userId     String
+  proposal   Proposal   @relation(fields: [proposalId], references: [id])
+  proposalId String
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  action    String
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model Proposal {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  status      ProposalStatus @default(PENDING)
+  UserVote    UserVote[]
 }
