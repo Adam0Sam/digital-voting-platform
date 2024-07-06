@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
-import { RolesGuard } from './auth/rbac/guard/roles.guard';
 
 @Module({
   imports: [
