@@ -11,10 +11,10 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
       secretOrKey: config.get('auth.jwt.publicKey'),
+      issuer: config.get('auth.jwt.issuer'),
     });
   }
   async validate(payload: any) {
-    console.log('Payload', payload);
     return payload;
   }
 }

@@ -7,7 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
-import { JwtAuthModule } from './auth/jwt/jwt-auth.module';
+import { RolesGuard } from './auth/rbac/guard/roles.guard';
 
 @Module({
   imports: [
@@ -16,14 +16,20 @@ import { JwtAuthModule } from './auth/jwt/jwt-auth.module';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['apps/api/.env'],
+      envFilePath: ['.env'],
       load: [appConfig],
     }),
     PrismaModule,
     AuthModule,
-    JwtAuthModule,
     UserModule,
   ],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // should I register JwtAuthGuard here globally before the RolesGuard?
+    // {
+    //   provide: 'APP_GUARD',
+    //   useClass: RolesGuard,
+    // },
+  ],
 })
 export class AppModule {}

@@ -5,8 +5,10 @@ export default (): AppConfig => ({
   auth: {
     jwt: {
       // TODO: how to periodically fetch the publci key from the PUBLIC_KEY_ENDPOINT?
-      publicKey: getFormattedAsymKey(process.env.PUBLIC_KEY),
+      // publicKey: getFormattedAsymKey(process.env.JWT_PUBIC_KEY),
+      publicKey: getFormattedAsymKey(process.env.JWT_PUBLIC_KEY),
       expiresIn: process.env.JWT_EXPIRES_IN,
+      issuer: process.env.JWT_ISSUER,
     },
     publicKeyEndpoint: process.env.PUBLIC_KEY_ENDPOINT,
   },

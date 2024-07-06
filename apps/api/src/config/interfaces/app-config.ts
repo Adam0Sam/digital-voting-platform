@@ -4,6 +4,7 @@ export interface AppConfig {
     jwt: {
       publicKey: string;
       expiresIn: string;
+      issuer: string;
     };
     publicKeyEndpoint: string;
   };
@@ -14,6 +15,7 @@ export interface AppConfig {
   // not sure why, but I cant access nested properties without defining these here
   'auth.jwt.publicKey'?: string;
   'auth.jwt.expiresIn'?: string;
+  'auth.jwt.issuer'?: string;
   'auth.publicKeyEndpoint'?: string;
   'database.databaseUrl'?: string;
   'database.directUrl'?: string;
