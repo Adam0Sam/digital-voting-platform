@@ -11,7 +11,7 @@ CREATE TYPE "VoteStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "firstNames" TEXT[],
-    "lastName" TEXT NOT NULL,
+    "familyName" TEXT NOT NULL,
     "grade" TEXT,
     "roles" "UserRole"[] DEFAULT ARRAY['GUEST']::"UserRole"[],
 
@@ -49,10 +49,10 @@ CREATE TABLE "Proposal" (
 );
 
 -- CreateIndex
-CREATE INDEX "User_firstNames_lastName_idx" ON "User"("firstNames", "lastName");
+CREATE INDEX "User_firstNames_familyName_idx" ON "User"("firstNames", "familyName");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_firstNames_lastName_key" ON "User"("firstNames", "lastName");
+CREATE UNIQUE INDEX "User_firstNames_familyName_key" ON "User"("firstNames", "familyName");
 
 -- AddForeignKey
 ALTER TABLE "UserVote" ADD CONSTRAINT "UserVote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

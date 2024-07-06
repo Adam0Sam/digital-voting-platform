@@ -32,14 +32,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       {
         id: '1',
         personalNames: ['John', 'Michael'],
-        lastName: 'Doe',
+        familyName: 'Doe',
         grade: Grade.IA,
         roles: [UserRole.STUDENT],
       },
       {
         id: '2',
         personalNames: ['Jane', 'Anne'],
-        lastName: 'Smith',
+        familyName: 'Smith',
         grade: Grade.IB,
         roles: [UserRole.ADMIN],
       },
@@ -51,11 +51,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
           data: user,
         });
         console.log(
-          `User ${user.personalNames.join(' ')} ${user.lastName} created.`,
+          `User ${user.personalNames.join(' ')} ${user.familyName} created.`,
         );
       } catch (error) {
         console.error(
-          `Error creating user ${user.personalNames.join(' ')} ${user.lastName}:`,
+          `Error creating user ${user.personalNames.join(' ')} ${user.familyName}:`,
           error,
         );
       }

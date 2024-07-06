@@ -1,5 +1,5 @@
 -- DropIndex
-DROP INDEX "User_firstNames_lastName_idx";
+DROP INDEX "User_firstNames_familyName_idx";
 
 -- CreateIndex
-CREATE INDEX "User_firstNames_lastName_id_idx" ON "User"("firstNames", "lastName", "id");
+CREATE INDEX "User_firstNames_familyName_id_idx" ON "User"("firstNames", "familyName", "id");

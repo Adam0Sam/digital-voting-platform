@@ -1,2 +1,2 @@
 -- DropIndex
-DROP INDEX "User_firstNames_lastName_key";
+DROP INDEX "User_firstNames_familyName_key";

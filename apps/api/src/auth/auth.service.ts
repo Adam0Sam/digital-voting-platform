@@ -7,12 +7,12 @@ import { JwtDto } from './jwt/dto';
 export class AuthService {
   constructor(private prisma: PrismaService) {}
 
-  async validateUser(personalNames: string[], lastName: string) {
+  async validateUser(personalNames: string[], familyName: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        personalNames_lastName: {
+        personalNames_familyName: {
           personalNames,
-          lastName,
+          familyName,
         },
       },
     });
@@ -23,9 +23,9 @@ export class AuthService {
   async findUser(query: UserQueryDto) {
     const user = await this.prisma.user.findUnique({
       where: {
-        personalNames_lastName: {
+        personalNames_familyName: {
           personalNames: query.personalNames,
-          lastName: query.lastName,
+          familyName: query.familyName,
         },
       },
     });
@@ -58,7 +58,7 @@ export class AuthService {
   async createUser(userPayload: JwtDto & UserQueryDto) {
     const user: Omit<User, 'id'> = {
       personalNames: userPayload.personalNames,
-      lastName: userPayload.lastName,
+      familyName: userPayload.familyName,
       grade: this.mapGrade(userPayload.grade),
       roles: this.mapRoles(userPayload.roles),
     };

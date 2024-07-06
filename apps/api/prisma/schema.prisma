@@ -61,15 +61,15 @@ enum Grade {
 model User {
   id            String     @id @default(uuid())
   personalNames String[]
-  lastName      String
+  familyName    String
   grade         Grade?
   roles         UserRole[] @default([GUEST])
 
   logs     Log[]
   UserVote UserVote[]
 
-  @@unique([personalNames, lastName])
-  @@index([personalNames, lastName, id])
+  @@unique([personalNames, familyName])
+  @@index([personalNames, familyName, id])
 }
 
 model UserVote {

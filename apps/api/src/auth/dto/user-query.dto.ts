@@ -7,5 +7,5 @@ export class UserQueryDto {
   personalNames: string[];
   @IsString()
   @IsNotEmpty()
-  lastName: string;
+  familyName: string;
 }

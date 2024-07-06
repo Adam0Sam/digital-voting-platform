@@ -35,14 +35,14 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     const personalNames = this.splitNames(payload.first_name);
     const user: User | null = await this.authService.findUser({
       personalNames,
-      lastName: payload.last_name,
+      familyName: payload.last_name,
     });
 
     if (!user) {
       const newUser = await this.authService.createUser({
         ...payload,
         personalNames,
-        lastName: payload.last_name,
+        familyName: payload.last_name,
       });
       console.log('User created');
       return newUser;
