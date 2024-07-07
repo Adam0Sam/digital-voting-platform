@@ -8,19 +8,18 @@ import {
 import './App.css';
 import getAuthEndpoint from './lib/auth/getAuthEndpoint';
 
-import Greeting from './components/Greeting';
 import HomeLayout from './pages/HomeLayout';
 import { AuthLoader } from './lib/auth';
 import RedirectingPlaceholder from './components/RedirectingPlaceholder';
 import { Provider } from 'react-redux';
 import store from './store/store';
 import { ThemeProvider } from './components/theme-provider';
+import Greeting from './components/Greeting';
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route path="/">
-        <Route path="signin" loader={AuthLoader} element={<Greeting />} />
+      <Route path="/" loader={AuthLoader} element={<Greeting />}>
         <Route
           path="signup"
           loader={() => {
