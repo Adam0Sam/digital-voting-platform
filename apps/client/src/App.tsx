@@ -14,6 +14,7 @@ import { AuthLoader } from './lib/auth';
 import RedirectingPlaceholder from './components/RedirectingPlaceholder';
 import { Provider } from 'react-redux';
 import store from './store/store';
+import { ThemeProvider } from './components/theme-provider';
 
 function App() {
   const router = createBrowserRouter(
@@ -33,9 +34,11 @@ function App() {
   );
 
   return (
-    <Provider store={store}>
-      <RouterProvider router={router} />
-    </Provider>
+    <ThemeProvider>
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
+    </ThemeProvider>
   );
 }
 

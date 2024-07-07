@@ -7,7 +7,7 @@ export default function Greeting() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   return (
-    <main className="flex h-[100%] flex-col items-center justify-center gap-12">
+    <main className="bg-background flex h-[100%] flex-col items-center justify-center gap-12">
       <h3 className="text-4xl text-[lavender]">
         {t('Hello')}, {loadedUser.personalNames.join(' ')}
       </h3>
