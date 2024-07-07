@@ -32,6 +32,7 @@ export class AuthService {
 
     return user;
   }
+
   private mapGrade(gradeString: string): Grade {
     let grade: Grade | undefined;
     if (gradeString.toUpperCase().startsWith('TB')) {
@@ -47,7 +48,7 @@ export class AuthService {
 
   private mapRoles(roles: string[]): UserRole[] {
     return roles.map((roleString) => {
-      const role = UserRole[roleString.toUpperCase()];
+      const role: UserRole | undefined = UserRole[roleString.toUpperCase()];
       if (!role) {
         throw new Error(`Invalid role:${role}`);
       }

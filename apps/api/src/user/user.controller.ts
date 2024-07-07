@@ -9,9 +9,9 @@ export class UserController {
   constructor() {}
 
   @UseGuards(JwtAuthGuard)
-  @Get('profile')
+  @Get('')
   getProfile(@Req() req: any) {
-    return { msg: 'This is your profile. You are logged in.', user: req.user };
+    return req.user;
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

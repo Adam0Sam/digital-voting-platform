@@ -7,33 +7,25 @@ import {
 } from 'react-router-dom';
 import './app.css';
 import getAuthEndpoint from './lib/auth/getAuthEndpoint';
-// import { getSessionToken } from './lib/auth/authAsync';
+
+import Greeting from './components/Greeting';
+import Home from './pages/Home';
+import { AuthLoader } from './lib/auth';
+import RedirectingPlaceholder from './components/RedirectingPlaceholder';
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
-        <Route
-          path="signin"
-          loader={({ request }) => {
-            const url = new URL(request.url);
-            const idToken =
-              url.searchParams.get('id_token') ||
-              localStorage.getItem('id_token');
-            if (idToken === null) {
-              return redirect('/signup');
-            }
-            // const sessionToken = getSessionToken(idToken);
-            return '';
-          }}
-        />
+        <Route path="signin" loader={AuthLoader} element={<Greeting />} />
         <Route
           path="signup"
           loader={() => {
             return redirect(getAuthEndpoint());
           }}
+          element={<RedirectingPlaceholder />}
         />
-        <Route path="home"></Route>
+        <Route path="home" element={<Home />}></Route>
       </Route>,
     ),
   );

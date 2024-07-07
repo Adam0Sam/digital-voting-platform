@@ -16,4 +16,5 @@ export default (): AppConfig => ({
     databaseUrl: process.env.DATABASE_URL,
     directUrl: process.env.DIRECT_URL,
   },
+  clientUrl: process.env.CLIENT_URL,
 });
