@@ -9,10 +9,9 @@ import './app.css';
 import getAuthEndpoint from './lib/auth/getAuthEndpoint';
 
 import Greeting from './components/Greeting';
-import Home from './pages/Home';
+import HomeLayout from './pages/HomeLayout';
 import { AuthLoader } from './lib/auth';
 import RedirectingPlaceholder from './components/RedirectingPlaceholder';
-import { UserProvider } from './context/UserProvider';
 
 function App() {
   const router = createBrowserRouter(
@@ -26,16 +25,12 @@ function App() {
           }}
           element={<RedirectingPlaceholder />}
         />
-        <Route path="home" element={<Home />}></Route>
+        <Route path="home" element={<HomeLayout />}></Route>
       </Route>,
     ),
   );
 
-  return (
-    <UserProvider>
-      <RouterProvider router={router} />
-    </UserProvider>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

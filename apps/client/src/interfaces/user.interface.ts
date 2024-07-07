@@ -37,8 +37,3 @@ export interface User {
   grade: Grade;
   roles: string[];
 }
-
-export interface UserContextInterface {
-  user: User | null;
-  setUser: (user: User) => void;
-}

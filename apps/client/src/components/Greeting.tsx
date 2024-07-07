@@ -1,17 +1,11 @@
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { User } from '../interfaces';
 import { useTranslation } from 'react-i18next';
-import useUser from '../context/UserProvider';
-import { useEffect } from 'react';
 
 export default function Greeting() {
   const loadedUser: User = useLoaderData() as User;
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { setUser } = useUser();
-  useEffect(() => {
-    setUser(loadedUser);
-  }, [loadedUser.id]);
   return (
     <main className="flex h-[100%] flex-col items-center justify-center gap-12">
       <h3 className="text-4xl text-[lavender]">
@@ -20,6 +14,7 @@ export default function Greeting() {
       <div className="flex gap-10">
         {loadedUser.roles.map(role => (
           <button
+            key={role}
             onClick={() => navigate('/home')}
             className="hover:bg-lavender-light rounded-md bg-lavender px-8 py-4 text-rich-black transition-colors"
           >
