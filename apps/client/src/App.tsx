@@ -12,6 +12,8 @@ import Greeting from './components/Greeting';
 import HomeLayout from './pages/HomeLayout';
 import { AuthLoader } from './lib/auth';
 import RedirectingPlaceholder from './components/RedirectingPlaceholder';
+import { Provider } from 'react-redux';
+import store from './store/store';
 
 function App() {
   const router = createBrowserRouter(
@@ -30,7 +32,11 @@ function App() {
     ),
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+  );
 }
 
 export default App;
