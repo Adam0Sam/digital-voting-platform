@@ -5,7 +5,7 @@ import {
   createRoutesFromElements,
   redirect,
 } from 'react-router-dom';
-import './app.css';
+import './App.css';
 import getAuthEndpoint from './lib/auth/getAuthEndpoint';
 
 import Greeting from './components/Greeting';
