@@ -12,6 +12,7 @@ import Greeting from './components/Greeting';
 import Home from './pages/Home';
 import { AuthLoader } from './lib/auth';
 import RedirectingPlaceholder from './components/RedirectingPlaceholder';
+import { UserProvider } from './context/UserProvider';
 
 function App() {
   const router = createBrowserRouter(
@@ -30,7 +31,11 @@ function App() {
     ),
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
+  );
 }
 
 export default App;
