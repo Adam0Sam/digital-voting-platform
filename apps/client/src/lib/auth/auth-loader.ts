@@ -9,9 +9,7 @@ export async function AuthLoader({ request }: { request: Request }) {
   if (!idToken) {
     return redirect('/signup');
   }
-  console.log('fetching...');
   const response = await fetchUser(idToken);
-  console.log('fetched');
   if (!response.ok) {
     localStorage.removeItem('id_token');
     return redirect('/signup');
