@@ -15,6 +15,7 @@ import store from './store/store';
 import { ThemeProvider } from './components/theme-provider';
 import Greeting from './pages/Greeting';
 import RootLayout from './pages/RootLayout';
+import ProposalLayout from './pages/ProposalLayout';
 
 function App() {
   const router = createBrowserRouter(
@@ -28,7 +29,8 @@ function App() {
           }}
         />
         <Route path="home" element={<HomeLayout />}></Route>
-        <Route path="*" />
+        <Route path="proposals" element={<ProposalLayout />} />
+        <Route path="*" element={<div>404</div>} />
       </Route>,
     ),
   );
