@@ -1,4 +1,4 @@
-import { NavLink, type NavLinkProps } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 import {
@@ -11,61 +11,8 @@ import {
 } from '@/components/ui/navigation-menu';
 
 import { ClipboardPlus } from 'lucide-react';
-
-const components: { title: string; href: string; description: string }[] = [
-  {
-    title: 'Alert Dialog',
-    href: '/docs/primitives/alert-dialog',
-    description:
-      'A modal dialog that interrupts the user with important content and expects a response.',
-  },
-  {
-    title: 'Hover Card',
-    href: '/docs/primitives/hover-card',
-    description:
-      'For sighted users to preview content available behind a link.',
-  },
-  {
-    title: 'Progress',
-    href: '/docs/primitives/progress',
-    description:
-      'Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.',
-  },
-  {
-    title: 'Scroll-area',
-    href: '/docs/primitives/scroll-area',
-    description: 'Visually or semantically separates content.',
-  },
-  {
-    title: 'Tabs',
-    href: '/docs/primitives/tabs',
-    description:
-      'A set of layered sections of content—known as tab panels—that are displayed one at a time.',
-  },
-  {
-    title: 'dfsdf',
-    href: '/docs/primitives/tooltip',
-    description:
-      'A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.',
-  },
-  {
-    title: 'dsfs-area',
-    href: '/docs/primitives/scroll-area',
-    description: 'Visually or semantically separates content.',
-  },
-  {
-    title: 'dsfsfsdfdsf',
-    href: '/docs/primitives/tabs',
-    description:
-      'A set of layered sections of content—known as tab panels—that are displayed one at a time.',
-  },
-  {
-    title: 'sdfsdfsdf',
-    href: '/docs/primitives/tooltip',
-    description:
-      'A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.',
-  },
-];
+import { componentLinkItems, proposalLinkItems } from './links';
+import { LinkItemProps } from './interfaces';
 
 type getStyles = (isActive: boolean) => string;
 // why do i get error when I pass arrow fn directly?
@@ -78,7 +25,7 @@ const getLinkItemStyles: getStyles = isActive =>
     },
   );
 
-const getMenuLinkStyles: getStyles = isActive =>
+const getStandaloneLinkStyles: getStyles = isActive =>
   cn(
     'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-6 py-4 xs:text-sm sm:text-md md:text-lg font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50',
     { 'bg-accent/50': isActive },
@@ -88,11 +35,12 @@ const LinkItem = ({
   to,
   title,
   children,
+  className,
   ...props
-}: NavLinkProps & { children: string }) => (
+}: LinkItemProps) => (
   <li>
     <NavLink
-      className={({ isActive }) => getLinkItemStyles(isActive)}
+      className={({ isActive }) => cn(getLinkItemStyles(isActive), className)}
       to={to}
       end
       {...props}
@@ -107,33 +55,9 @@ const LinkItem = ({
 
 LinkItem.displayName = 'LinkItem';
 
-interface LinkItemProps {
-  title: string;
-  href: string;
-  description: string;
-}
-
-const proposalLinkItems: LinkItemProps[] = [
-  {
-    title: 'Active Proposals',
-    href: '/proposals/active',
-    description: 'Proposals that are currently being discussed.',
-  },
-  {
-    title: 'Past Proposals',
-    href: '/proposals/past',
-    description: 'Proposals that have been accepted or rejected.',
-  },
-  {
-    title: 'Create a Proposal',
-    href: '/proposals/create',
-    description: 'To put forward a change or elect a representative.',
-  },
-];
-
-export default function AppNavigationMenu() {
+export default function DesktopNav() {
   return (
-    <NavigationMenu className="pt-6">
+    <NavigationMenu className="hidden md:block">
       <NavigationMenuList className="gap-3">
         <NavigationMenuItem>
           <NavigationMenuTrigger>Proposals</NavigationMenuTrigger>
@@ -169,7 +93,7 @@ export default function AppNavigationMenu() {
           <NavigationMenuTrigger>Components</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              {components.map(component => (
+              {componentLinkItems.map(component => (
                 <LinkItem
                   key={component.title}
                   title={component.title}
@@ -185,7 +109,7 @@ export default function AppNavigationMenu() {
           <NavLink
             to="/docs"
             end
-            className={({ isActive }) => getMenuLinkStyles(isActive)}
+            className={({ isActive }) => getStandaloneLinkStyles(isActive)}
           >
             <NavigationMenuLink>Your Profile</NavigationMenuLink>
           </NavLink>
