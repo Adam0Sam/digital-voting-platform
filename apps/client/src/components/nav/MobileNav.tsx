@@ -37,7 +37,7 @@ const LinkItem = ({
 
 LinkItem.displayName = 'LinkItem';
 
-export function MobileNav() {
+export function MobileNav({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -45,7 +45,10 @@ export function MobileNav() {
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+          className={cn(
+            'mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0',
+            className,
+          )}
         >
           <svg
             strokeWidth="1.5"

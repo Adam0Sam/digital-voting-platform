@@ -4,10 +4,10 @@ import { Outlet } from 'react-router-dom';
 export default function RootLayout() {
   return (
     <>
-      <nav className="ml-5 mt-6 flex items-center justify-start md:ml-0 md:justify-center">
-        <DesktopNav />
-        <MobileNav />
-      </nav>
+      <div className="ml-5 mt-6 w-[100%] md:ml-0 md:justify-center">
+        <DesktopNav className="hidden md:flex" />
+        <MobileNav className="md:hidden" />
+      </div>
       <Outlet />
     </>
   );

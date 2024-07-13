@@ -10,7 +10,7 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 
-import { ClipboardPlus } from 'lucide-react';
+import { CircleUserRound, ClipboardPlus } from 'lucide-react';
 import { componentLinkItems, proposalLinkItems } from './links';
 import { LinkItemProps } from './interfaces';
 
@@ -55,66 +55,66 @@ const LinkItem = ({
 
 LinkItem.displayName = 'LinkItem';
 
-export default function DesktopNav() {
+export default function DesktopNav({ className }: { className?: string }) {
   return (
-    <NavigationMenu className="hidden md:block">
-      <NavigationMenuList className="gap-3">
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>Proposals</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-              <li className="row-span-3">
-                <NavLink
-                  className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                  to="/proposals"
-                >
-                  <ClipboardPlus className="h-6 w-6" />
-                  <div className="mb-2 mt-4 text-lg font-medium">Proposals</div>
-                  <p className="text-sm leading-tight text-muted-foreground">
-                    Proposals are a way to suggest changes to a project, to
-                    elect a representative and more. Here you can view, vote,
-                    comment on proposals and even create your own!.
-                  </p>
-                </NavLink>
-              </li>
-              {proposalLinkItems.map(proposal => (
-                <LinkItem
-                  key={proposal.title}
-                  title={proposal.title}
-                  to={proposal.href}
-                >
-                  {proposal.description}
-                </LinkItem>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>Components</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              {componentLinkItems.map(component => (
-                <LinkItem
-                  key={component.title}
-                  title={component.title}
-                  to={component.href}
-                >
-                  {component.description}
-                </LinkItem>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavLink
-            to="/docs"
-            end
-            className={({ isActive }) => getStandaloneLinkStyles(isActive)}
-          >
-            <NavigationMenuLink>Your Profile</NavigationMenuLink>
-          </NavLink>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+    <div className={cn('flex flex-1 items-center justify-center', className)}>
+      <NavigationMenu className="ml-auto">
+        <NavigationMenuList className="gap-3">
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>Proposals</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                <li className="row-span-3">
+                  <NavLink
+                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                    to="/proposals"
+                  >
+                    <ClipboardPlus className="h-6 w-6" />
+                    <div className="mb-2 mt-4 text-lg font-medium">
+                      Proposals
+                    </div>
+                    <p className="text-sm leading-tight text-muted-foreground">
+                      Proposals are a way to suggest changes to a project, to
+                      elect a representative and more. Here you can view, vote,
+                      comment on proposals and even create your own!.
+                    </p>
+                  </NavLink>
+                </li>
+                {proposalLinkItems.map(proposal => (
+                  <LinkItem
+                    key={proposal.title}
+                    title={proposal.title}
+                    to={proposal.href}
+                  >
+                    {proposal.description}
+                  </LinkItem>
+                ))}
+              </ul>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                {componentLinkItems.map(component => (
+                  <LinkItem
+                    key={component.title}
+                    title={component.title}
+                    to={component.href}
+                  >
+                    {component.description}
+                  </LinkItem>
+                ))}
+              </ul>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
+      <NavigationMenuItem className="ml-auto mr-10 flex max-w-max items-center">
+        <NavLink to="/profile" end className={'self-end'}>
+          <CircleUserRound />
+        </NavLink>
+      </NavigationMenuItem>
+    </div>
   );
 }
