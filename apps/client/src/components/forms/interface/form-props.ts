@@ -1,6 +1,4 @@
 export interface FormProps<T> {
-  formCardTitle: string;
-  formCardDescription?: string;
   formSubmitLabel?: string;
   formCancelLabel?: string;
   onSubmit: (values: T) => void;

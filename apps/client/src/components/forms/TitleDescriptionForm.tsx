@@ -13,13 +13,6 @@ import { ExtendedFormProps } from './interface';
 import { Input } from '../ui/input';
 import { FC } from 'react';
 import { Button } from '../ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../ui/card';
 
 export type TitleDescriptionFormProps = ExtendedFormProps<{
   title: string;
@@ -39,8 +32,6 @@ const zodFormSchema = z.object({
 type FormValues = z.infer<typeof zodFormSchema>;
 
 const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
-  formCardTitle,
-  formCardDescription,
   formSubmitLabel = 'Submit',
   titleLabel = 'Form Title',
   descriptionLabel = 'Form Description',
@@ -59,69 +50,59 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
   });
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-8">
-        <CardTitle>{formCardTitle}</CardTitle>
-        <CardDescription className="max-w-prose">
-          {formCardDescription}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex justify-center">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-          >
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel>{titleLabel}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={`Your ${titleLabel}`}
-                        type="text"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel>{descriptionLabel}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={`Your ${descriptionLabel}`}
-                        type="text"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-            <Button type="submit" className="w-full">
-              {formSubmitLabel}
-            </Button>
-            {onCancel && (
-              <Button onClick={onCancel} type="button" className="w-full">
-                Cancel
-              </Button>
-            )}
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>{titleLabel}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={`Your ${titleLabel}`}
+                    type="text"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>{descriptionLabel}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={`Your ${descriptionLabel}`}
+                    type="text"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <Button type="submit" className="w-full">
+          {formSubmitLabel}
+        </Button>
+        {onCancel && (
+          <Button onClick={onCancel} type="button" className="w-full">
+            Cancel
+          </Button>
+        )}
+      </form>
+    </Form>
   );
 };
 
