@@ -13,15 +13,15 @@ import { AuthLoader } from './lib/auth';
 import { Provider } from 'react-redux';
 import store from './store/store';
 import { ThemeProvider } from './components/theme-provider';
-import Greeting from './pages/Greeting';
+import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
-import ProposalLayout from './pages/ProposalLayout';
+import ProposalCreationPage from './pages/ProposalCreationPage';
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<RootLayout />}>
-        <Route path="signin" loader={AuthLoader} element={<Greeting />} />
+        <Route path="signin" loader={AuthLoader} element={<GreetingPage />} />
         <Route
           path="signup"
           loader={() => {
@@ -29,7 +29,9 @@ function App() {
           }}
         />
         <Route path="home" element={<HomeLayout />}></Route>
-        <Route path="proposals" element={<ProposalLayout />} />
+        <Route path="proposals">
+          <Route path="create" element={<ProposalCreationPage />} />
+        </Route>
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),

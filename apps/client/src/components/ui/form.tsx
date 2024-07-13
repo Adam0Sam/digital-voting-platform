@@ -149,7 +149,7 @@ const FormMessage = React.forwardRef<
   const body = error ? String(error?.message) : children;
 
   if (!body) {
-    return null;
+    return <p className="invisible text-sm">Error Placeholder</p>;
   }
 
   return (
