@@ -13,32 +13,39 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card';
+import { isValid } from 'date-fns';
+
+export type SubmitHandler<T> = (data: T) => void | Response;
 
 const FormCarouselSummary: FC<{
   data: Record<string, string>;
   summaryTitle: string;
-  handleClick: (data: Record<string, string>) => void | Response;
-  handleCancel: () => void;
-}> = ({ data, summaryTitle, handleClick, handleCancel }) => (
+  onSubmit: SubmitHandler<Record<string, string>>;
+  onCancel: () => void;
+}> = ({ data, summaryTitle, onSubmit, onCancel }) => (
   <Card>
     <CardHeader>
       <CardTitle>{summaryTitle} Summary</CardTitle>
     </CardHeader>
     <CardContent>
       {Object.keys(data).map(key => {
+        let value = data[key];
+        if (isValid(new Date(value))) {
+          value = new Date(value).toLocaleDateString();
+        }
         return (
           <div key={key}>
-            <span className="italic">{key}:</span> {data[key]}
+            <span className="italic">{key}:</span> {value}
           </div>
         );
       })}
     </CardContent>
     <CardFooter>
       <div className="flex gap-10">
-        <Button variant="secondary" onClick={handleCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Go Back
         </Button>
-        <Button onClick={() => handleClick(data)}>Create {summaryTitle}</Button>
+        <Button onClick={() => onSubmit(data)}>Create {summaryTitle}</Button>
       </div>
     </CardFooter>
   </Card>
@@ -49,10 +56,12 @@ const FormCarousel = ({
   formComponents,
   carouselData,
   carouselTitle,
+  submitHandler,
 }: {
   formComponents: FC<CarouselScrollHandles>[];
   carouselData: Record<string, string>;
   carouselTitle: string;
+  submitHandler: SubmitHandler<Record<string, string>>;
 }) => {
   const carouselRef = useRef<CarouselScrollHandles>(null);
   return (
@@ -79,8 +88,8 @@ const FormCarousel = ({
           <FormCarouselSummary
             data={carouselData}
             summaryTitle={carouselTitle}
-            handleClick={data => console.log(data, ' has been sent!')}
-            handleCancel={() => {
+            onSubmit={submitHandler}
+            onCancel={() => {
               if (carouselRef.current) carouselRef.current.scrollPrev();
             }}
           />

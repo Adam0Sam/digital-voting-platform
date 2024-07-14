@@ -1,14 +1,29 @@
-import FormCarousel from '@/components/FormCarousel';
+import FormCarousel, { SubmitHandler } from '@/components/FormCarousel';
 import CardForm from '@/components/forms/CardForm';
 import DateForm from '@/components/forms/DateForm';
 import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useState } from 'react';
 
-export default function ProposalCreationPage() {
-  const [proposalData, setProposalData] = useState<Record<string, string>>({});
+interface ProposalData extends Record<string, string> {
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
 
-  const mutateProposalData = (key: string, value: string | Date) => {
+export default function ProposalCreationPage() {
+  const [proposalData, setProposalData] = useState<ProposalData>({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+  });
+
+  const mutateProposalData = (
+    key: keyof ProposalData,
+    value: string | Date,
+  ) => {
     if (value instanceof Date) {
       value = value.toISOString();
     }
@@ -60,6 +75,10 @@ export default function ProposalCreationPage() {
     </CardForm>
   );
 
+  const submitHandler: SubmitHandler<ProposalData> = data => {
+    console.log(JSON.stringify({ proposal: data }));
+  };
+
   const formComponents: FC<CarouselScrollHandles>[] = [
     TitleDescriptionCard,
     DateCard,
@@ -70,6 +89,7 @@ export default function ProposalCreationPage() {
         formComponents={formComponents}
         carouselData={proposalData}
         carouselTitle="Proposal"
+        submitHandler={submitHandler}
       />
     </main>
   );
