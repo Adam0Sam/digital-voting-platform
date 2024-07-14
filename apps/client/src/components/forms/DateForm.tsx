@@ -3,50 +3,124 @@ import { ExtendedFormProps } from './interface';
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import CardForm from './CardForm';
-import { Form, FormField, FormItem } from '../ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
+import { CalendarIcon } from 'lucide-react';
+import { addDays, format } from 'date-fns';
+import { Calendar } from '../ui/calendar';
+import FormHandleButtons from './FormHandleButtons';
 
 export type DateFormProps = ExtendedFormProps<{
-  startDate: Date;
-  endDate: Date;
+  date: {
+    from: Date;
+    to: Date;
+  };
 }> & {
   defaultStartDate?: Date;
   defaultEndDate?: Date;
 };
 
-const zodFormSchema = z
-  .object({
-    startDate: z.date(),
-    endDate: z.date(),
-  })
-  .refine(data => data.startDate < data.endDate, {
-    message: 'Start date must be before end date',
-  });
+const zodFormSchema = z.object({
+  date: z
+    .object({
+      from: z.date({ message: 'Select a start date' }),
+      to: z.date({ message: 'Select an end date' }),
+    })
+    .refine(data => data.from > addDays(new Date(), -1), {
+      message: 'Start date must be set for a future date',
+    }),
+});
 
 type FormValues = z.infer<typeof zodFormSchema>;
 
 const DateForm: FC<DateFormProps> = ({
   defaultStartDate,
   defaultEndDate,
+  onCancel,
   onSubmit,
 }) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(zodFormSchema),
     defaultValues: {
-      startDate: defaultStartDate,
-      endDate: defaultEndDate,
+      date: {
+        from: defaultStartDate,
+        to: defaultEndDate,
+      },
     },
   });
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        // onSubmit={e => {
+        //   e.preventDefault();
+        //   form.handleSubmit(() => {
+        //     onSubmit({ date: form.getValues('date') });
+        //   })();
+        // }}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
-          name="startDate"
-          render={({ field }) => {
-            return <FormItem></FormItem>;
-          }}
-        ></FormField>
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date</FormLabel>
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !field.value && 'text-muted-foreground',
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value?.from ? (
+                        field.value.to ? (
+                          <>
+                            {format(field.value.from, 'LLL dd, y')} -{' '}
+                            {format(field.value.to, 'LLL dd, y')}
+                          </>
+                        ) : (
+                          format(field.value.from, 'LLL dd, y')
+                        )
+                      ) : (
+                        <span>Pick the two dates</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={field.value?.from}
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormHandleButtons
+          formSubmitLabel="Next"
+          handleCancelClick={onCancel}
+        />
       </form>
     </Form>
   );

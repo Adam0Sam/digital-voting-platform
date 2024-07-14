@@ -25,11 +25,13 @@ const FormCarouselSummary: FC<{
       <CardTitle>{summaryTitle} Summary</CardTitle>
     </CardHeader>
     <CardContent>
-      {Object.keys(data).map(key => (
-        <div key={key}>
-          <span className="italic">{key}:</span> {data[key]}
-        </div>
-      ))}
+      {Object.keys(data).map(key => {
+        return (
+          <div key={key}>
+            <span className="italic">{key}:</span> {data[key]}
+          </div>
+        );
+      })}
     </CardContent>
     <CardFooter>
       <div className="flex gap-10">

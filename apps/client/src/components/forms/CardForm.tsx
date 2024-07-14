@@ -11,7 +11,7 @@ const CardForm: FC<
   PropsWithChildren<{ cardTitle: string; cardDescription: string }>
 > = ({ children, cardTitle, cardDescription }) => {
   return (
-    <Card className="flex flex-col">
+    <Card className="shrink-1 flex flex-col">
       <CardHeader className="items-center pb-8">
         <CardTitle>{cardTitle}</CardTitle>
         <CardDescription>{cardDescription}</CardDescription>

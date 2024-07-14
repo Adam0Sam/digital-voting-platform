@@ -12,7 +12,7 @@ import {
 import { ExtendedFormProps } from './interface';
 import { Input } from '../ui/input';
 import { FC } from 'react';
-import { Button } from '../ui/button';
+import FormHandleButtons from './FormHandleButtons';
 
 export type TitleDescriptionFormProps = ExtendedFormProps<{
   title: string;
@@ -93,14 +93,10 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
             );
           }}
         />
-        <Button type="submit" className="w-full">
-          {formSubmitLabel}
-        </Button>
-        {onCancel && (
-          <Button onClick={onCancel} type="button" className="w-full">
-            Cancel
-          </Button>
-        )}
+        <FormHandleButtons
+          formSubmitLabel={formSubmitLabel}
+          handleCancelClick={onCancel}
+        />
       </form>
     </Form>
   );
