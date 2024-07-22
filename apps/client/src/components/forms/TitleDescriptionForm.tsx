@@ -14,11 +14,15 @@ import { Input } from '../ui/input';
 import { FC } from 'react';
 import FormHandleButtons from './FormHandleButtons';
 
+const zodFormSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }),
+  // description: z.string().min(1, { message: 'Description is required' }),
+  description: z.string().optional(),
+});
+type FormValues = z.infer<typeof zodFormSchema>;
+
 export type TitleDescriptionFormProps = ExtendedFormProps<
-  {
-    title: string;
-    description: string;
-  },
+  FormValues,
   {
     titleLabel?: string;
     descriptionLabel?: string;
@@ -26,13 +30,6 @@ export type TitleDescriptionFormProps = ExtendedFormProps<
     defaultDescription?: string;
   }
 >;
-
-const zodFormSchema = z.object({
-  title: z.string().min(1, { message: 'Title is required' }),
-  description: z.string().min(1, { message: 'Description is required' }),
-});
-
-type FormValues = z.infer<typeof zodFormSchema>;
 
 const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
   formSubmitLabel = 'Submit',

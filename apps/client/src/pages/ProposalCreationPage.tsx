@@ -4,13 +4,10 @@ import DateForm from '@/components/forms/DateForm';
 import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useState } from 'react';
-
-type ProposalData = {
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-};
+import { toast } from 'sonner';
+import { redirect, useSubmit } from 'react-router-dom';
+import { ProposalData } from '@/types/proposal.type';
+import { api } from '@/lib/auth';
 
 export default function ProposalCreationPage() {
   const [proposalData, setProposalData] = useState<ProposalData>({
@@ -20,10 +17,19 @@ export default function ProposalCreationPage() {
     endDate: '',
   });
 
+  const submit = useSubmit();
+
+  const submitHandler: SubmitHandler<ProposalData> = data => {
+    submit(data, {
+      method: 'POST',
+    });
+  };
+
   const mutateProposalData = (
     key: keyof ProposalData,
-    value: string | Date,
+    value: string | Date | undefined,
   ) => {
+    if (!value) return;
     if (value instanceof Date) {
       value = value.toISOString();
     }
@@ -75,10 +81,6 @@ export default function ProposalCreationPage() {
     </CardWrapper>
   );
 
-  const submitHandler: SubmitHandler<ProposalData> = data => {
-    console.log(JSON.stringify({ proposal: data }));
-  };
-
   const formComponents: FC<CarouselScrollHandles>[] = [
     TitleDescriptionCard,
     DateCard,
@@ -90,8 +92,50 @@ export default function ProposalCreationPage() {
         carouselData={proposalData}
         carouselTitle="Proposal"
         // TODO: How do I fix this?
-        submitHandler={submitHandler}
+        submitHandler={data => {
+          submitHandler(data);
+          toast('Proposal has been created', {
+            description: new Date().toLocaleString(),
+            action: {
+              label: 'Undo',
+              onClick: () => console.log('Undo'),
+            },
+          });
+        }}
       />
     </main>
   );
 }
+
+export const action = async ({ request }: { request: Request }) => {
+  const formData = await request.formData();
+  // TODO: Fix this so ProposalData is actually enforced, not partially
+  const title = formData.get('title') as string;
+  const description = formData.get('description') as string | undefined;
+  const startDate = formData.get('startDate') as string;
+  const endDate = formData.get('endDate') as string;
+
+  if (!title || !startDate || !endDate) {
+    // TODO: Make this a proper error (prob with some react router utility)
+    throw new Error('Missing required fields');
+  }
+
+  const proposalData: ProposalData = {
+    title,
+    description,
+    startDate,
+    endDate,
+  };
+
+  console.log('Creating proposal with data:', proposalData);
+
+  const response = await api.createProposal(proposalData);
+  if (!response.ok) {
+    if (response.status === 401) {
+      console.error('Unauthorized Request');
+      return redirect('/signin');
+    }
+    throw new Error('Failed to create proposal');
+  }
+  return response;
+};

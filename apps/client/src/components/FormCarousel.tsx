@@ -30,29 +30,36 @@ function FormCarouselSummary<T extends Record<string, string>>({
 }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{summaryTitle} Summary</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {Object.entries(data).map(([key, value]) => {
-          if (isValid(new Date(value))) {
-            value = new Date(value).toLocaleDateString();
-          }
-          return (
-            <div key={key}>
-              <span className="italic">{key}:</span> {value}
-            </div>
-          );
-        })}
-      </CardContent>
-      <CardFooter>
-        <div className="flex gap-10">
-          <Button variant="secondary" onClick={onCancel}>
-            Go Back
-          </Button>
-          <Button onClick={() => onSubmit(data)}>Create {summaryTitle}</Button>
-        </div>
-      </CardFooter>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          onSubmit(data);
+        }}
+      >
+        <CardHeader>
+          <CardTitle>{summaryTitle} Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {Object.entries(data).map(([key, value]) => {
+            if (isValid(new Date(value))) {
+              value = new Date(value).toLocaleDateString();
+            }
+            return (
+              <div key={key}>
+                <span className="italic">{key}:</span> {value}
+              </div>
+            );
+          })}
+        </CardContent>
+        <CardFooter>
+          <div className="flex gap-10">
+            <Button variant="secondary" onClick={onCancel}>
+              Go Back
+            </Button>
+            <Button type="submit">Create {summaryTitle}</Button>
+          </div>
+        </CardFooter>
+      </form>
     </Card>
   );
 }
