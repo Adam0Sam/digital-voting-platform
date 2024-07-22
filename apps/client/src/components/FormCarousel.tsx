@@ -15,54 +15,60 @@ import {
 } from './ui/card';
 import { isValid } from 'date-fns';
 
-export type SubmitHandler<T> = (data: T) => void | Response;
+export type SubmitHandler<T> = (data: T) => void | Promise<Response>;
 
-const FormCarouselSummary: FC<{
-  data: Record<string, string>;
+function FormCarouselSummary<T extends Record<string, string>>({
+  data,
+  summaryTitle,
+  onSubmit,
+  onCancel,
+}: {
+  data: T;
   summaryTitle: string;
-  onSubmit: SubmitHandler<Record<string, string>>;
+  onSubmit: SubmitHandler<T>;
   onCancel: () => void;
-}> = ({ data, summaryTitle, onSubmit, onCancel }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>{summaryTitle} Summary</CardTitle>
-    </CardHeader>
-    <CardContent>
-      {Object.keys(data).map(key => {
-        let value = data[key];
-        if (isValid(new Date(value))) {
-          value = new Date(value).toLocaleDateString();
-        }
-        return (
-          <div key={key}>
-            <span className="italic">{key}:</span> {value}
-          </div>
-        );
-      })}
-    </CardContent>
-    <CardFooter>
-      <div className="flex gap-10">
-        <Button variant="secondary" onClick={onCancel}>
-          Go Back
-        </Button>
-        <Button onClick={() => onSubmit(data)}>Create {summaryTitle}</Button>
-      </div>
-    </CardFooter>
-  </Card>
-);
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{summaryTitle} Summary</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {Object.entries(data).map(([key, value]) => {
+          if (isValid(new Date(value))) {
+            value = new Date(value).toLocaleDateString();
+          }
+          return (
+            <div key={key}>
+              <span className="italic">{key}:</span> {value}
+            </div>
+          );
+        })}
+      </CardContent>
+      <CardFooter>
+        <div className="flex gap-10">
+          <Button variant="secondary" onClick={onCancel}>
+            Go Back
+          </Button>
+          <Button onClick={() => onSubmit(data)}>Create {summaryTitle}</Button>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
 // TODO: Fix the type of formComponents
-const FormCarousel = ({
+function FormCarousel<T extends Record<string, string>>({
   formComponents,
   carouselData,
   carouselTitle,
   submitHandler,
 }: {
   formComponents: FC<CarouselScrollHandles>[];
-  carouselData: Record<string, string>;
+  carouselData: T;
   carouselTitle: string;
-  submitHandler: SubmitHandler<Record<string, string>>;
-}) => {
+  submitHandler: SubmitHandler<T>;
+}) {
   const carouselRef = useRef<CarouselScrollHandles>(null);
   return (
     // TODO: Fix the hardcoded max-w-[550px]
@@ -97,6 +103,6 @@ const FormCarousel = ({
       </CarouselContent>
     </Carousel>
   );
-};
+}
 
 export default FormCarousel;

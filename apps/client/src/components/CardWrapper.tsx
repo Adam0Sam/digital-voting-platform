@@ -5,9 +5,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../ui/card';
+} from './ui/card';
 
-const CardForm: FC<
+const CardWrapper: FC<
   PropsWithChildren<{ cardTitle: string; cardDescription: string }>
 > = ({ children, cardTitle, cardDescription }) => {
   return (
@@ -21,4 +21,4 @@ const CardForm: FC<
   );
 };
 
-export default CardForm;
+export default CardWrapper;

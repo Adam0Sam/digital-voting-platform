@@ -5,4 +5,7 @@ export interface FormProps<T> {
   onCancel?: () => void;
 }
 
-export type ExtendedFormProps<T extends object = object> = FormProps<T>;
+export type ExtendedFormProps<
+  T extends object = object,
+  K extends object = object,
+> = FormProps<T> & K;

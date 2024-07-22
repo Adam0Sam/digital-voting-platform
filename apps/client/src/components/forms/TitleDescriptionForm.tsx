@@ -14,15 +14,18 @@ import { Input } from '../ui/input';
 import { FC } from 'react';
 import FormHandleButtons from './FormHandleButtons';
 
-export type TitleDescriptionFormProps = ExtendedFormProps<{
-  title: string;
-  description: string;
-}> & {
-  titleLabel?: string;
-  descriptionLabel?: string;
-  defaultTitle?: string;
-  defaultDescription?: string;
-};
+export type TitleDescriptionFormProps = ExtendedFormProps<
+  {
+    title: string;
+    description: string;
+  },
+  {
+    titleLabel?: string;
+    descriptionLabel?: string;
+    defaultTitle?: string;
+    defaultDescription?: string;
+  }
+>;
 
 const zodFormSchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }),

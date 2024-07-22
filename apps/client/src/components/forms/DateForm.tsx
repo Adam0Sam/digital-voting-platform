@@ -19,15 +19,18 @@ import { addDays, format } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import FormHandleButtons from './FormHandleButtons';
 
-export type DateFormProps = ExtendedFormProps<{
-  date: {
-    from: Date;
-    to: Date;
-  };
-}> & {
-  defaultStartDate?: Date;
-  defaultEndDate?: Date;
-};
+export type DateFormProps = ExtendedFormProps<
+  {
+    date: {
+      from: Date;
+      to: Date;
+    };
+  },
+  {
+    defaultStartDate?: Date;
+    defaultEndDate?: Date;
+  }
+>;
 
 const zodFormSchema = z.object({
   date: z
@@ -62,12 +65,6 @@ const DateForm: FC<DateFormProps> = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        // onSubmit={e => {
-        //   e.preventDefault();
-        //   form.handleSubmit(() => {
-        //     onSubmit({ date: form.getValues('date') });
-        //   })();
-        // }}
         className="flex flex-col gap-4"
       >
         <FormField
@@ -89,10 +86,7 @@ const DateForm: FC<DateFormProps> = ({
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {field.value?.from ? (
                         field.value.to ? (
-                          <>
-                            {format(field.value.from, 'LLL dd, y')} -{' '}
-                            {format(field.value.to, 'LLL dd, y')}
-                          </>
+                          `${format(field.value.from, 'LLL dd, y')} - ${format(field.value.to, 'LLL dd, y')}`
                         ) : (
                           format(field.value.from, 'LLL dd, y')
                         )

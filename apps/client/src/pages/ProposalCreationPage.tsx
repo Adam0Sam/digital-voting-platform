@@ -1,16 +1,16 @@
 import FormCarousel, { SubmitHandler } from '@/components/FormCarousel';
-import CardForm from '@/components/forms/CardForm';
+import CardWrapper from '@/components/CardWrapper';
 import DateForm from '@/components/forms/DateForm';
 import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useState } from 'react';
 
-interface ProposalData extends Record<string, string> {
+type ProposalData = {
   title: string;
   description: string;
   startDate: string;
   endDate: string;
-}
+};
 
 export default function ProposalCreationPage() {
   const [proposalData, setProposalData] = useState<ProposalData>({
@@ -33,7 +33,7 @@ export default function ProposalCreationPage() {
   };
 
   const TitleDescriptionCard: FC<CarouselScrollHandles> = ({ scrollNext }) => (
-    <CardForm
+    <CardWrapper
       cardTitle="Create a Proposal"
       cardDescription="Create a proposal for your project. This will be the first thing that people see when they view your project. Get their attention with a short title that best describes your project."
     >
@@ -50,11 +50,11 @@ export default function ProposalCreationPage() {
         defaultTitle={proposalData.title}
         defaultDescription={proposalData.description}
       />
-    </CardForm>
+    </CardWrapper>
   );
 
   const DateCard: FC<CarouselScrollHandles> = ({ scrollNext, scrollPrev }) => (
-    <CardForm
+    <CardWrapper
       cardTitle="Set the Dates"
       cardDescription="The start and end dates will define the time period when users can vote for this proposal"
     >
@@ -72,7 +72,7 @@ export default function ProposalCreationPage() {
           proposalData.endDate ? new Date(proposalData.endDate) : undefined
         }
       />
-    </CardForm>
+    </CardWrapper>
   );
 
   const submitHandler: SubmitHandler<ProposalData> = data => {
@@ -89,6 +89,7 @@ export default function ProposalCreationPage() {
         formComponents={formComponents}
         carouselData={proposalData}
         carouselTitle="Proposal"
+        // TODO: How do I fix this?
         submitHandler={submitHandler}
       />
     </main>
