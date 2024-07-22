@@ -14,26 +14,30 @@ import {
   CardTitle,
 } from './ui/card';
 import { isValid } from 'date-fns';
+import { useSubmit } from 'react-router-dom';
 
 export type SubmitHandler<T> = (data: T) => void | Promise<Response>;
 
 function FormCarouselSummary<T extends Record<string, string>>({
   data,
   summaryTitle,
-  onSubmit,
   onCancel,
 }: {
   data: T;
   summaryTitle: string;
-  onSubmit: SubmitHandler<T>;
   onCancel: () => void;
 }) {
+  const submit = useSubmit();
+
   return (
     <Card>
       <form
+        method="post"
         onSubmit={e => {
           e.preventDefault();
-          onSubmit(data);
+          submit(data, {
+            method: 'POST',
+          });
         }}
       >
         <CardHeader>
@@ -69,12 +73,10 @@ function FormCarousel<T extends Record<string, string>>({
   formComponents,
   carouselData,
   carouselTitle,
-  submitHandler,
 }: {
   formComponents: FC<CarouselScrollHandles>[];
   carouselData: T;
   carouselTitle: string;
-  submitHandler: SubmitHandler<T>;
 }) {
   const carouselRef = useRef<CarouselScrollHandles>(null);
   return (
@@ -101,7 +103,6 @@ function FormCarousel<T extends Record<string, string>>({
           <FormCarouselSummary
             data={carouselData}
             summaryTitle={carouselTitle}
-            onSubmit={submitHandler}
             onCancel={() => {
               if (carouselRef.current) carouselRef.current.scrollPrev();
             }}
