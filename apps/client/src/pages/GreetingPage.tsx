@@ -1,5 +1,5 @@
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import { User } from '../interfaces';
+import { User } from '../types';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { useAppDispatch } from '@/store/hooks';

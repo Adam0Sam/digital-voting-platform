@@ -8,7 +8,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.setGlobalPrefix('api');
   const configService = app.get(ConfigService);
-  console.log(configService.get('CLIENT_URL'));
   app.enableCors({
     origin: configService.get('CLIENT_URL'),
   });
