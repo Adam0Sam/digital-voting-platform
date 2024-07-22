@@ -1,7 +1,7 @@
 import { redirect } from 'react-router-dom';
-import { api } from './auth-fetch';
 import { User } from '../../types';
 import { JWTController } from './jwt-controller';
+import { userApi } from '../api';
 
 export async function AuthLoader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -9,7 +9,7 @@ export async function AuthLoader({ request }: { request: Request }) {
   if (!idToken) {
     return redirect('/signup');
   }
-  const response = await api.getUser(idToken);
+  const response = await userApi.getOne(idToken);
   if (!response.ok) {
     localStorage.removeItem('id_token');
     return redirect('/signup');

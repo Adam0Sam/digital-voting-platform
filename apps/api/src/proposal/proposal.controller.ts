@@ -1,4 +1,13 @@
-import { Body, Controller, Post, UseGuards, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { Proposal } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ZodValidationPipe } from 'src/validation';
@@ -14,5 +23,12 @@ export class ProposalController {
   @Post('create')
   createProposal(@Body('proposal') proposal: Proposal) {
     return this.proposalService.createProposal(proposal);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  deleteProposal(@Param('id') id: string, @Req() req: any) {
+    console.log('req.user', req.user);
+    return this.proposalService.deleteProposal(id);
   }
 }

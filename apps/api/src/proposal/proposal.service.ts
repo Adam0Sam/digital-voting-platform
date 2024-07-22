@@ -9,4 +9,8 @@ export class ProposalService {
   async createProposal(proposalData: Proposal) {
     return this.prisma.proposal.create({ data: proposalData });
   }
+
+  async deleteProposal(id: string) {
+    return this.prisma.proposal.delete({ where: { id } });
+  }
 }
