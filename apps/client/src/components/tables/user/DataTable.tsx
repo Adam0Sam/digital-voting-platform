@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import useFilterColumn from './context/FilterColumnContext';
+import useWindowSize from '@/lib/hooks/useWindowSize';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -41,7 +42,11 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const { filterColumn } = useFilterColumn();
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const { width: windowWidth } = useWindowSize();
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    roles: windowWidth > 768,
+    grade: windowWidth > 768,
+  });
   const [rowSelection, setRowSelection] = useState({});
   const table = useReactTable({
     data,
@@ -61,6 +66,14 @@ export function DataTable<TData, TValue>({
       rowSelection,
     },
   });
+
+  useEffect(() => {
+    setColumnVisibility(prev => ({
+      ...prev,
+      roles: windowWidth > 768,
+      grade: windowWidth > 768,
+    }));
+  }, [windowWidth]);
 
   return (
     <div>
@@ -105,7 +118,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   return (
-                    <TableHead className="px-0 md:px-4" key={header.id}>
+                    <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -126,10 +139,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell
-                      key={cell.id}
-                      className="p-0 has-[div]:p-4 has-[p]:p-4"
-                    >
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),

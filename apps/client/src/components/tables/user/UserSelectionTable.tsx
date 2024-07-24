@@ -122,7 +122,7 @@ const mockUsers: UserSelectionRow[] = [
 export default function UserSelectionTable() {
   return (
     <div className="flex justify-center">
-      <div className="max-w-screen-md flex-1 px-4 py-10">
+      <div className="max-w-screen-lg flex-1 px-4 py-10">
         <FilterColumnContextProvider>
           <DataTable columns={columns} data={mockUsers} />
         </FilterColumnContextProvider>

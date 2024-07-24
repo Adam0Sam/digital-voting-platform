@@ -116,11 +116,11 @@ export const columns: ColumnDef<UserSelectionRow>[] = [
   {
     accessorKey: UserSelectionColumn.Roles,
     header: () => {
-      return <p className="hidden text-right md:block">Roles</p>;
+      return <p className="text-right">Roles</p>;
     },
     cell: ({ row }) => {
       return (
-        <div className="hidden text-right font-medium md:block">
+        <div className="text-right font-medium">
           {(row.getValue(UserSelectionColumn.Roles) as string[]).join(', ')}
         </div>
       );
@@ -129,11 +129,11 @@ export const columns: ColumnDef<UserSelectionRow>[] = [
   {
     accessorKey: UserSelectionColumn.Grade,
     header: () => {
-      return <p className="hidden text-right md:block">Grade</p>;
+      return <p className="text-right">Grade</p>;
     },
     cell: ({ row }) => {
       return (
-        <div className="hidden text-right font-medium md:block">
+        <div className="text-right font-medium">
           {row.getValue(UserSelectionColumn.Grade) ?? 'N/A'}
         </div>
       );
