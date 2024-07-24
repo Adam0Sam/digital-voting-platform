@@ -12,6 +12,7 @@ import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
 import { UserSelectionColumn } from './common/column.enum';
 import useFilterColumn from './context/FilterColumnContext';
 import { UserSelectionRow } from './common/user-selection.type';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const PersonalNamesHeader = ({
   column,
@@ -64,6 +65,32 @@ const FamilyNameHeader = ({
 };
 
 export const columns: ColumnDef<UserSelectionRow>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllRowsSelected() ||
+          (table.getIsSomeRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={value => table.toggleAllRowsSelected(!!value)}
+        aria-label="Select all rows"
+      />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={value => row.toggleSelected(!!value)}
+            aria-label={`Select row ${row.id}`}
+          />
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: UserSelectionColumn.PersonalNames,
     header: PersonalNamesHeader,
