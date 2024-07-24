@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 import { redirect } from 'react-router-dom';
 import { ProposalData } from '@/types/proposal.type';
 import { proposalApi } from '@/lib/api';
+import { User } from '@/types';
+import UserSelectionForm from '@/components/forms/UserSelectionForm';
 
 export default function ProposalCreationPage() {
   const [proposalData, setProposalData] = useState<ProposalData>({
@@ -15,11 +17,13 @@ export default function ProposalCreationPage() {
     description: '',
     startDate: '',
     endDate: '',
+    owners: [],
+    reviewers: [],
   });
 
   const mutateProposalData = (
     key: keyof ProposalData,
-    value: string | Date | undefined,
+    value: string | Date | User[] | undefined,
   ) => {
     if (!value) return;
     if (value instanceof Date) {
@@ -73,9 +77,31 @@ export default function ProposalCreationPage() {
     </CardWrapper>
   );
 
+  const UserSelectionCard: FC<CarouselScrollHandles> = ({
+    scrollNext,
+    scrollPrev,
+  }) => {
+    return (
+      <CardWrapper
+        cardTitle="Select Users"
+        cardDescription="Select the users who will be the owners and reviewers of this proposal"
+      >
+        <UserSelectionForm
+          onSubmit={values => {
+            mutateProposalData('owners', values.owners);
+            mutateProposalData('reviewers', values.reviewers);
+            scrollNext();
+          }}
+          onCancel={scrollPrev}
+        />
+      </CardWrapper>
+    );
+  };
+
   const formComponents: FC<CarouselScrollHandles>[] = [
     TitleDescriptionCard,
     DateCard,
+    UserSelectionCard,
   ];
   return (
     <main className="flex flex-1 items-center justify-center">
@@ -87,16 +113,6 @@ export default function ProposalCreationPage() {
     </main>
   );
 }
-
-// onSubmit={data => {
-//   toast(`Proposal ${data.title} has been created`, {
-//     description: new Date().toLocaleString(),
-//     action: {
-//       label: 'Undo',
-//       onClick: () => console.log('Undo'),
-//     },
-//   });
-// }}
 
 export const action = async ({ request }: { request: Request }) => {
   const formData = await request.formData();
@@ -116,6 +132,8 @@ export const action = async ({ request }: { request: Request }) => {
     description,
     startDate,
     endDate,
+    owners: [],
+    reviewers: [],
   };
 
   const response = await proposalApi.createOne(proposalData);

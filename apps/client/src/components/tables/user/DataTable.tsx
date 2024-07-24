@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import useFilterColumn from './context/FilterColumnContext';
 import useWindowSize from '@/lib/hooks/useWindowSize';
+import { UserSelectionColumn } from './common/column.enum';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,7 +39,8 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+  onFinish,
+}: DataTableProps<TData, TValue> & { onFinish?: () => void }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const { filterColumn } = useFilterColumn();
@@ -70,8 +72,8 @@ export function DataTable<TData, TValue>({
   useEffect(() => {
     setColumnVisibility(prev => ({
       ...prev,
-      roles: windowWidth > 768,
-      grade: windowWidth > 768,
+      roles: windowWidth > 840,
+      grade: windowWidth > 840,
     }));
   }, [windowWidth]);
 
@@ -162,6 +164,10 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{' '}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
         <Button
           variant="outline"
           size="sm"
@@ -179,6 +185,23 @@ export function DataTable<TData, TValue>({
           Next
         </Button>
       </div>
+      {true && (
+        <div className="flex justify-center py-4">
+          <Button
+            variant="secondary"
+            className="w-1/2"
+            onClick={() =>
+              table
+                .getSelectedRowModel()
+                .rows.forEach(row =>
+                  console.log(row.getValue(UserSelectionColumn.PersonalNames)),
+                )
+            }
+          >
+            Submit
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

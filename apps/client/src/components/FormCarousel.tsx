@@ -18,7 +18,8 @@ import { useSubmit } from 'react-router-dom';
 
 export type SubmitHandler<T> = (data: T) => void | Promise<Response>;
 
-function FormCarouselSummary<T extends Record<string, string>>({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function FormCarouselSummary<T extends Record<string, any>>({
   data,
   summaryTitle,
   onCancel,
@@ -57,7 +58,7 @@ function FormCarouselSummary<T extends Record<string, string>>({
         </CardContent>
         <CardFooter>
           <div className="flex gap-10">
-            <Button variant="secondary" onClick={onCancel}>
+            <Button type="button" variant="secondary" onClick={onCancel}>
               Go Back
             </Button>
             <Button type="submit">Create {summaryTitle}</Button>
@@ -68,8 +69,9 @@ function FormCarouselSummary<T extends Record<string, string>>({
   );
 }
 
-// TODO: Fix the type of formComponents
-function FormCarousel<T extends Record<string, string>>({
+//TODO: Fix the generic type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function FormCarousel<T extends Record<string, any>>({
   formComponents,
   carouselData,
   carouselTitle,

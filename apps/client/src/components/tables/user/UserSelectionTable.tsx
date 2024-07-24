@@ -115,16 +115,20 @@ const mockUsers: UserSelectionRow[] = [
   {
     personalNames: 'Tina',
     familyName: 'Smith',
-    roles: ['TEACHER'],
+    roles: ['TEACHER', 'ADMIN'],
   },
 ];
 
-export default function UserSelectionTable() {
+export default function UserSelectionTable({
+  onFinish,
+}: {
+  onFinish?: () => void;
+}) {
   return (
     <div className="flex justify-center">
       <div className="max-w-screen-lg flex-1 px-4 py-10">
         <FilterColumnContextProvider>
-          <DataTable columns={columns} data={mockUsers} />
+          <DataTable columns={columns} data={mockUsers} onFinish={onFinish} />
         </FilterColumnContextProvider>
       </div>
     </div>

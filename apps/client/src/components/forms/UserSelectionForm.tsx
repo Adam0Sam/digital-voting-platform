@@ -1,21 +1,36 @@
 import { User } from '@/types';
 import { ExtendedFormProps } from './interface';
-import { FC } from 'react';
-import { useForm } from 'react-hook-form';
-import { Form } from '../ui/form';
+import { FC, useState } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
+import { Button } from '../ui/button';
+import UserSelectionTable from '../tables/user/UserSelectionTable';
 
-type FormValues = { owner: User; managers: User[] };
+type FormValues = { owners: User[]; reviewers: User[] };
 export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
 
 const UserSelectionForm: FC<UserSelectionFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const form = useForm<FormValues>();
+  const [sheetIsOpen, setSheetIsOpen] = useState(false);
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}></form>
-    </Form>
+    <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+        >
+          Select Owners
+        </Button>
+      </SheetTrigger>
+      <SheetContent
+        side="right"
+        className="w-full max-w-full sm:w-3/4 sm:max-w-screen-xl"
+      >
+        <UserSelectionTable />
+      </SheetContent>
+    </Sheet>
   );
 };
 

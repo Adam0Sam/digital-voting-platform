@@ -19,6 +19,8 @@ import ProposalCreationPage, {
   action as proposalCreationAction,
 } from './pages/ProposalCreationPage';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
+import UserSelectionForm from './components/forms/UserSelectionForm';
+import { User } from './types';
 
 function App() {
   const router = createBrowserRouter(
@@ -39,7 +41,19 @@ function App() {
             action={proposalCreationAction}
           />
         </Route>
-        <Route path="user" element={<UserSelectionTable />} />
+        <Route
+          path="user"
+          element={
+            <UserSelectionForm
+              onSubmit={function (values: {
+                owner: User;
+                managers: User[];
+              }): void {
+                throw new Error('Function not implemented.');
+              }}
+            />
+          }
+        />
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),
