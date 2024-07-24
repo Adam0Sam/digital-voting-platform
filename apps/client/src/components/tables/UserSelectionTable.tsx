@@ -2,13 +2,7 @@ import { Grade } from '@/types';
 import { DataTable } from './DataTable';
 import { columns } from './UserColumns';
 import { FilterColumnContextProvider } from './FilterColumnContext';
-
-export type UserSelectionRow = {
-  personalNames: string;
-  familyName: string;
-  grade?: Grade;
-  roles: string[];
-};
+import { UserSelectionRow } from './common/user-selection.type';
 
 const mockUsers: UserSelectionRow[] = [
   {

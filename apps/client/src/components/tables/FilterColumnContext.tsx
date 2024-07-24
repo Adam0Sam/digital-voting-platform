@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import { UserSelectionColumn } from './enum';
+import { UserSelectionColumn } from './common/column.enum';
 
 type FilterColumnContextType = {
   filterColumn: string;

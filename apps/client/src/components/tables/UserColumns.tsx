@@ -9,9 +9,9 @@ import {
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
 import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
-import { UserSelectionRow } from './UserSelectionTable';
-import { UserSelectionColumn } from './enum';
+import { UserSelectionColumn } from './common/column.enum';
 import useFilterColumn from './FilterColumnContext';
+import { UserSelectionRow } from './common/user-selection.type';
 
 const PersonalNamesHeader = ({
   column,
