@@ -11,13 +11,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
 import { UserSelectionColumn } from './common/column.enum';
 import useFilterColumn from './context/FilterColumnContext';
-import { UserSelectionRow } from './common/user-selection.type';
 import { Checkbox } from '@/components/ui/checkbox';
+
+export type StringifiedUser = {
+  personalNames: string;
+  familyName: string;
+  roles: string;
+  grade: string;
+};
 
 const PersonalNamesHeader = ({
   column,
 }: {
-  column: Column<UserSelectionRow, unknown>;
+  column: Column<StringifiedUser, unknown>;
 }) => {
   const { setFilterColumn } = useFilterColumn();
   return (
@@ -42,7 +48,7 @@ const PersonalNamesHeader = ({
 const FamilyNameHeader = ({
   column,
 }: {
-  column: Column<UserSelectionRow, unknown>;
+  column: Column<StringifiedUser, unknown>;
 }) => {
   const { setFilterColumn } = useFilterColumn();
   return (
@@ -64,7 +70,7 @@ const FamilyNameHeader = ({
   );
 };
 
-export const columns: ColumnDef<UserSelectionRow>[] = [
+export const columns: ColumnDef<StringifiedUser>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -121,7 +127,7 @@ export const columns: ColumnDef<UserSelectionRow>[] = [
     cell: ({ row }) => {
       return (
         <div className="text-right font-medium">
-          {(row.getValue(UserSelectionColumn.Roles) as string[]).join(', ')}
+          {row.getValue(UserSelectionColumn.Roles)}
         </div>
       );
     },
@@ -134,7 +140,7 @@ export const columns: ColumnDef<UserSelectionRow>[] = [
     cell: ({ row }) => {
       return (
         <div className="text-right font-medium">
-          {row.getValue(UserSelectionColumn.Grade) ?? 'N/A'}
+          {row.getValue(UserSelectionColumn.Grade)}
         </div>
       );
     },
@@ -157,7 +163,7 @@ export const columns: ColumnDef<UserSelectionRow>[] = [
               onClick={() => {
                 console.log(`${user.familyName} info copied to clipboard`);
                 navigator.clipboard.writeText(
-                  `${user.personalNames}-${user.familyName}-${user.roles.join('_')}-${user.grade ?? 'NO_GRADE'}`,
+                  `${user.personalNames.split(' ').join('_')}-${user.familyName}-${user.roles.split(' ').join('_')}-${user.grade}`,
                 );
               }}
             >

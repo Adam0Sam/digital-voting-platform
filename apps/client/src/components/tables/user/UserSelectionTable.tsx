@@ -1,134 +1,144 @@
-import { Grade } from '@/types';
+import { Grade, User } from '@/types';
 import { DataTable } from './DataTable';
-import { columns } from './UserColumns';
+import { columns, StringifiedUser } from './UserColumns';
 import { FilterColumnContextProvider } from './context/FilterColumnContext';
-import { UserSelectionRow } from './common/user-selection.type';
 
-const mockUsers: UserSelectionRow[] = [
+const mockUsers: User[] = [
   {
-    personalNames: 'John Doe',
+    personalNames: ['John Doe'],
     familyName: 'Adams',
     grade: Grade.IA,
     roles: ['STUDENT'],
   },
   {
-    personalNames: 'Jane Doe',
+    personalNames: ['Jane Doe'],
     familyName: 'Smith',
     grade: Grade.IIIA,
     roles: ['STUDENT'],
   },
   {
-    personalNames: 'Alice',
+    personalNames: ['Alice'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Bob',
+    personalNames: ['Bob'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Charlie',
+    personalNames: ['Charlie'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'David',
+    personalNames: ['David'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Eve',
+    personalNames: ['Eve'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Frank',
+    personalNames: ['Frank'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Grace',
+    personalNames: ['Grace'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Hannah',
+    personalNames: ['Hannah'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Isaac',
+    personalNames: ['Isaac'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Jack',
+    personalNames: ['Jack'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Katie',
+    personalNames: ['Katie'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Liam',
+    personalNames: ['Liam'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Mia',
+    personalNames: ['Mia'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Noah',
+    personalNames: ['Noah'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Olivia',
+    personalNames: ['Olivia'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Peter',
+    personalNames: ['Peter'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Quinn',
+    personalNames: ['Quinn'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Rachel',
+    personalNames: ['Rachel'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Steve',
+    personalNames: ['Steve'],
     familyName: 'Smith',
     roles: ['TEACHER'],
   },
   {
-    personalNames: 'Tina',
+    personalNames: ['Tina'],
     familyName: 'Smith',
     roles: ['TEACHER', 'ADMIN'],
   },
 ];
 
+const tableData: StringifiedUser[] = mockUsers.map(user => ({
+  personalNames: user.personalNames.join(' '),
+  familyName: user.familyName,
+  roles: user.roles.join(', '),
+  grade: user.grade || 'N/A',
+}));
+
 export default function UserSelectionTable({
-  onFinish,
+  handleSelectionEnd,
 }: {
-  onFinish?: () => void;
+  handleSelectionEnd?: (selectedUsers: Partial<StringifiedUser>[]) => void;
 }) {
   return (
     <div className="flex justify-center">
-      <div className="max-w-screen-lg flex-1 px-4 py-10">
+      <div className="min-w-0 max-w-screen-lg flex-1 px-0 py-10 sm:px-4">
         <FilterColumnContextProvider>
-          <DataTable columns={columns} data={mockUsers} onFinish={onFinish} />
+          <DataTable
+            columns={columns}
+            data={tableData}
+            onEnd={handleSelectionEnd}
+          />
         </FilterColumnContextProvider>
       </div>
     </div>

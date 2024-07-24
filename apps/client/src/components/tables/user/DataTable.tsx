@@ -29,18 +29,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import useFilterColumn from './context/FilterColumnContext';
 import useWindowSize from '@/lib/hooks/useWindowSize';
-import { UserSelectionColumn } from './common/column.enum';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
-
+// TODO: Should I even make this a generic DataTable? Can I just bind it with UserColumns?
 export function DataTable<TData, TValue>({
   columns,
   data,
-  onFinish,
-}: DataTableProps<TData, TValue> & { onFinish?: () => void }) {
+  onEnd,
+}: DataTableProps<TData, TValue> & {
+  onEnd?: (selectedRows: Partial<TData>[]) => void;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const { filterColumn } = useFilterColumn();
@@ -190,13 +191,25 @@ export function DataTable<TData, TValue>({
           <Button
             variant="secondary"
             className="w-1/2"
-            onClick={() =>
-              table
-                .getSelectedRowModel()
-                .rows.forEach(row =>
-                  console.log(row.getValue(UserSelectionColumn.PersonalNames)),
-                )
-            }
+            onClick={() => {
+              const selectedRows: Partial<TData>[] = [];
+              table.getFilteredSelectedRowModel().rows.forEach(row => {
+                const selectedRow: Partial<TData> = {};
+                row.getAllCells().forEach(cell => {
+                  if (cell.getValue()) {
+                    //TODO: How to fix this?
+                    selectedRow[cell.column.id] = cell.getValue();
+                  }
+                }),
+                  selectedRows.push(selectedRow);
+              });
+              if (onEnd) {
+                console.log('Calling End Callback');
+                onEnd(selectedRows);
+              } else {
+                console.log('No End callback provided');
+              }
+            }}
           >
             Submit
           </Button>

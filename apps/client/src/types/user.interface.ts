@@ -19,9 +19,10 @@ export enum Grade {
   IVC = 'IVC',
   IVD = 'IVD',
   TB2 = 'TB2',
+  NONE = 'N/A',
 }
 
-export enum Role {
+export const enum Role {
   STUDENT = 'STUDENT',
   TEACHER = 'TEACHER',
   PARENT = 'PARENT',
@@ -32,7 +33,7 @@ export enum Role {
 
 export type User = {
   personalNames: string[];
-  familyName: string[];
+  familyName: string;
   grade?: Grade;
   roles: string[];
 };
