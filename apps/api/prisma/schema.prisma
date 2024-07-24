@@ -69,7 +69,7 @@ model User {
   UserVote UserVote[]
 
   @@unique([personalNames, familyName])
-  @@index([personalNames, familyName, id])
+  @@index([personalNames, familyName, grade])
 }
 
 model UserVote {

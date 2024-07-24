@@ -30,10 +30,9 @@ export enum Role {
   GUEST = 'GUEST',
 }
 
-export interface User {
-  id: string;
+export type User = {
   personalNames: string[];
   familyName: string[];
-  grade: Grade;
+  grade?: Grade;
   roles: string[];
-}
+};

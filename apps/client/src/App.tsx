@@ -18,6 +18,7 @@ import RootLayout from './pages/RootLayout';
 import ProposalCreationPage, {
   action as proposalCreationAction,
 } from './pages/ProposalCreationPage';
+import UserSelectionTable from './components/tables/UserSelectionTable';
 
 function App() {
   const router = createBrowserRouter(
@@ -38,6 +39,7 @@ function App() {
             action={proposalCreationAction}
           />
         </Route>
+        <Route path="user" element={<UserSelectionTable />} />
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),
