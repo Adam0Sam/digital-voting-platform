@@ -18,7 +18,7 @@ import RootLayout from './pages/RootLayout';
 import ProposalCreationPage, {
   action as proposalCreationAction,
 } from './pages/ProposalCreationPage';
-import UserSelectionTable from './components/tables/UserSelectionTable';
+import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 
 function App() {
   const router = createBrowserRouter(

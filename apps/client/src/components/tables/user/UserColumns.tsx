@@ -6,11 +6,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Button } from '../ui/button';
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
 import { UserSelectionColumn } from './common/column.enum';
-import useFilterColumn from './FilterColumnContext';
+import useFilterColumn from './context/FilterColumnContext';
 import { UserSelectionRow } from './common/user-selection.type';
 
 const PersonalNamesHeader = ({
@@ -20,8 +20,8 @@ const PersonalNamesHeader = ({
 }) => {
   const { setFilterColumn } = useFilterColumn();
   return (
-    <div className="flex items-center gap-1">
-      <p>Personal Names</p>
+    <div className="flex items-center justify-end gap-1">
+      <p className="hidden md:block">Personal Names</p>
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
@@ -45,8 +45,8 @@ const FamilyNameHeader = ({
 }) => {
   const { setFilterColumn } = useFilterColumn();
   return (
-    <div className="flex items-center gap-1">
-      <p>Family Names</p>
+    <div className="flex items-center justify-end gap-1">
+      <p className="hidden md:block">Family Names</p>
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
@@ -88,11 +88,29 @@ export const columns: ColumnDef<UserSelectionRow>[] = [
   },
   {
     accessorKey: UserSelectionColumn.Roles,
-    header: 'Roles',
+    header: () => {
+      return <p className="hidden text-right md:block">Roles</p>;
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="hidden text-right font-medium md:block">
+          {(row.getValue(UserSelectionColumn.Roles) as string[]).join(', ')}
+        </div>
+      );
+    },
   },
   {
     accessorKey: UserSelectionColumn.Grade,
-    header: 'Grade',
+    header: () => {
+      return <p className="hidden text-right md:block">Grade</p>;
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="hidden text-right font-medium md:block">
+          {row.getValue(UserSelectionColumn.Grade) ?? 'N/A'}
+        </div>
+      );
+    },
   },
   {
     id: 'actions',

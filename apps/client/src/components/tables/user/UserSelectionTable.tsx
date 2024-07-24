@@ -1,7 +1,7 @@
 import { Grade } from '@/types';
 import { DataTable } from './DataTable';
 import { columns } from './UserColumns';
-import { FilterColumnContextProvider } from './FilterColumnContext';
+import { FilterColumnContextProvider } from './context/FilterColumnContext';
 import { UserSelectionRow } from './common/user-selection.type';
 
 const mockUsers: UserSelectionRow[] = [
@@ -122,7 +122,7 @@ const mockUsers: UserSelectionRow[] = [
 export default function UserSelectionTable() {
   return (
     <div className="flex justify-center">
-      <div className="max-w-screen-md flex-1 py-10">
+      <div className="max-w-screen-md flex-1 px-4 py-10">
         <FilterColumnContextProvider>
           <DataTable columns={columns} data={mockUsers} />
         </FilterColumnContextProvider>

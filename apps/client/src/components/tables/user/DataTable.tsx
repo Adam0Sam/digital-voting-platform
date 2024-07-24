@@ -17,17 +17,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table';
-import { Button } from '../ui/button';
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { Input } from '../ui/input';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import useFilterColumn from './FilterColumnContext';
+} from '@/components/ui/dropdown-menu';
+import useFilterColumn from './context/FilterColumnContext';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -64,7 +64,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder={`Filter ${filterColumn}s...`}
+          placeholder={`Filter ${filterColumn}...`}
           value={table.getColumn(filterColumn)?.getFilterValue() as string}
           onChange={event =>
             table.getColumn(filterColumn)?.setFilterValue(event.target.value)
@@ -73,7 +73,7 @@ export function DataTable<TData, TValue>({
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="ml-auto hidden md:block">
               Columns
             </Button>
           </DropdownMenuTrigger>
@@ -103,7 +103,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead className="px-0 md:px-4" key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -124,7 +124,10 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="p-0 has-[div]:p-4 has-[p]:p-4"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -146,7 +149,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-between space-x-2 py-4">
         <Button
           variant="outline"
           size="sm"
