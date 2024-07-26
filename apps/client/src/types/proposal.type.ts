@@ -1,4 +1,4 @@
-import { User } from './user.interface';
+import { User } from './user.type';
 
 export type ProposalData = {
   title: string;

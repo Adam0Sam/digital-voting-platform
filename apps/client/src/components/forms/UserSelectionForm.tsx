@@ -1,30 +1,36 @@
-import { Grade, Role, User } from '@/types';
+import { Grade, isGrade, User } from '@/types';
 import { ExtendedFormProps } from './interface';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import { Button } from '../ui/button';
 import UserSelectionTable from '../tables/user/UserSelectionTable';
 import FormHandleButtons from './FormHandleButtons';
 import { ScrollArea } from '../ui/scroll-area';
-import { UserMinus } from 'lucide-react';
+import { UserMinus, UserPlus } from 'lucide-react';
 import { StringifiedUser } from '../tables/user/UserColumns';
+import { Separator } from '../ui/separator';
 
 type FormValues = { owners: User[]; reviewers: User[] };
 export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
 
-const SelectedUserScrollArea = ({ users }: { users: User[] }) => (
+const SelectedUserScrollArea = ({
+  users,
+  handleRemove,
+}: {
+  users: User[];
+  handleRemove: (user: User) => void;
+}) => (
   <ScrollArea className="h-48">
-    {users.map((user, index) => {
-      // console.log('user', user);
-      const userId = `${user.personalNames.join('_')}-${user.familyName}-${user.roles.join('_')}-${user.grade}`;
-      // const userId = index;
+    {users.map(user => {
       return (
         <div
           className="mb-4 flex items-center justify-between gap-12 rounded-md border px-2 py-4"
-          key={userId}
+          key={user.id}
         >
-          <p>{userId}</p>
-          <Button variant="ghost">
+          <p>
+            {user.personalNames.join(' ')}, {user.familyName}
+          </p>
+          <Button variant="ghost" onClick={() => handleRemove(user)}>
             <UserMinus size={22} />
           </Button>
         </div>
@@ -49,10 +55,24 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
 
   const [selectedOwners, setSelectedOwners] = useState<User[]>([]);
   const [selectedReviewers, setSelectedReviewers] = useState<User[]>([]);
+
+  const removeUser = (targetUser: User, selectionType: SelectionType) => {
+    if (selectionType === SelectionType.Owners) {
+      setSelectedOwners(
+        selectedOwners.filter(user => user.id !== targetUser.id),
+      );
+    } else {
+      setSelectedReviewers(
+        selectedReviewers.filter(user => user.id !== targetUser.id),
+      );
+    }
+  };
+
   //TODO: This is disgusting
   const handleSelectionEnd = (selectedUsers: Partial<StringifiedUser>[]) => {
     const normalizedUsers = selectedUsers.map(user => {
-      if (!user.personalNames || !user.familyName || !user.roles) {
+      if (!user.id || !user.personalNames || !user.familyName || !user.roles) {
+        console.log('user', user);
         throw new Error(`Necessary info is missing are missing`);
       }
 
@@ -64,9 +84,10 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
       const roles =
         user.roles.indexOf(' ') > -1 ? user.roles.split(' ') : [user.roles];
       //TODO: What does this mean and how do I fix it
-      const grade = Grade[user.grade] ?? Grade.NONE;
+      const grade = isGrade(user.grade) ? user.grade : Grade.NONE;
 
       return {
+        id: user.id,
         personalNames,
         familyName,
         roles,
@@ -84,48 +105,79 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
-          <div className="flex gap-5">
-            <div>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                  onClick={() => {
-                    setSelectionType(SelectionType.Owners);
-                  }}
-                >
-                  Select Owners
-                </Button>
-              </SheetTrigger>
-              <SelectedUserScrollArea users={selectedOwners} />
-            </div>
-            <div>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                  onClick={() => {
-                    setSelectionType(SelectionType.Reviewers);
-                  }}
-                >
-                  Select Reviewers
-                </Button>
-              </SheetTrigger>
-              <SelectedUserScrollArea users={selectedReviewers} />
-            </div>
+    <div className="flex w-full flex-col gap-8">
+      <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
+        <div className="flex flex-col gap-16 md:flex-row">
+          <div className="flex-1">
+            <SheetTrigger asChild>
+              <div>
+                <div className="flex items-center justify-between">
+                  Owners
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectionType(SelectionType.Owners);
+                    }}
+                  >
+                    <UserPlus />
+                  </Button>
+                </div>
+                <Separator className="mb-5 mt-2" />
+              </div>
+            </SheetTrigger>
+            <SelectedUserScrollArea
+              users={selectedOwners}
+              handleRemove={(user: User) =>
+                removeUser(user, SelectionType.Owners)
+              }
+            />
           </div>
-          <SheetContent
-            side="right"
-            className="w-full max-w-full sm:w-3/4 sm:max-w-screen-xl"
-          >
-            <UserSelectionTable handleSelectionEnd={handleSelectionEnd} />
-          </SheetContent>
-        </Sheet>
-      </div>
-      <FormHandleButtons formSubmitLabel="Next" handleCancelClick={onCancel} />
+          <div className="flex-1">
+            <SheetTrigger asChild>
+              <div>
+                <div className="flex items-center justify-between">
+                  Reviewers
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectionType(SelectionType.Reviewers);
+                    }}
+                  >
+                    <UserPlus />
+                  </Button>
+                </div>
+                <Separator className="mb-5 mt-2" />
+              </div>
+            </SheetTrigger>
+            <SelectedUserScrollArea
+              users={selectedReviewers}
+              handleRemove={(user: User) => {
+                removeUser(user, SelectionType.Reviewers);
+              }}
+            />
+          </div>
+        </div>
+        <SheetContent
+          side="right"
+          className="w-full max-w-full sm:w-3/4 sm:max-w-screen-xl"
+        >
+          <UserSelectionTable
+            handleSelectionEnd={handleSelectionEnd}
+            selectedUsers={
+              selectionType === SelectionType.Owners
+                ? selectedOwners
+                : selectedReviewers
+            }
+          />
+        </SheetContent>
+      </Sheet>
+      <FormHandleButtons
+        formSubmitLabel="Next"
+        handleCancelClick={onCancel}
+        handleSubmitClick={() =>
+          onSubmit({ owners: selectedOwners, reviewers: selectedReviewers })
+        }
+      />
     </div>
   );
 };

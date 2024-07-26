@@ -33,11 +33,15 @@ import useWindowSize from '@/lib/hooks/useWindowSize';
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  idKey: keyof TData;
+  selectedRows: TData[];
 }
 // TODO: Should I even make this a generic DataTable? Can I just bind it with UserColumns?
 export function DataTable<TData, TValue>({
   columns,
   data,
+  idKey,
+  selectedRows,
   onEnd,
 }: DataTableProps<TData, TValue> & {
   onEnd?: (selectedRows: Partial<TData>[]) => void;
@@ -50,7 +54,14 @@ export function DataTable<TData, TValue>({
     roles: windowWidth > 768,
     grade: windowWidth > 768,
   });
-  const [rowSelection, setRowSelection] = useState({});
+
+  //TODO: Make this more javascripty
+
+  const [rowSelection, setRowSelection] = useState(() => {
+    const selectedRowsObj = {};
+    selectedRows.forEach(row => (selectedRowsObj[row[idKey] as string] = true));
+    return selectedRowsObj;
+  });
   const table = useReactTable({
     data,
     columns,
@@ -62,6 +73,8 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    //TODO: How to fix this?
+    getRowId: row => row[idKey] as string,
     state: {
       sorting,
       columnFilters,
@@ -200,6 +213,7 @@ export function DataTable<TData, TValue>({
                     //TODO: How to fix this?
                     selectedRow[cell.column.id] = cell.getValue();
                   }
+                  selectedRow[idKey] = row.id;
                 }),
                   selectedRows.push(selectedRow);
               });

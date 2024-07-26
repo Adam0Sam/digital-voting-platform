@@ -14,6 +14,7 @@ import useFilterColumn from './context/FilterColumnContext';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export type StringifiedUser = {
+  id: string;
   personalNames: string;
   familyName: string;
   roles: string;
@@ -161,10 +162,7 @@ export const columns: ColumnDef<StringifiedUser>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() => {
-                console.log(`${user.familyName} info copied to clipboard`);
-                navigator.clipboard.writeText(
-                  `${user.personalNames.split(' ').join('_')}-${user.familyName}-${user.roles.split(' ').join('_')}-${user.grade}`,
-                );
+                navigator.clipboard.writeText(user.id);
               }}
             >
               Copy User Info

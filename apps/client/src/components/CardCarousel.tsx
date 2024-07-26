@@ -5,7 +5,7 @@ import {
   CarouselScrollHandles,
 } from './ui/carousel';
 import { Button } from './ui/button';
-import { FC, useRef } from 'react';
+import { forwardRef, ReactNode } from 'react';
 import {
   Card,
   CardContent,
@@ -15,8 +15,6 @@ import {
 } from './ui/card';
 import { isValid } from 'date-fns';
 import { useSubmit } from 'react-router-dom';
-
-export type SubmitHandler<T> = (data: T) => void | Promise<Response>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FormCarouselSummary<T extends Record<string, any>>({
@@ -49,6 +47,9 @@ function FormCarouselSummary<T extends Record<string, any>>({
             if (isValid(new Date(value))) {
               value = new Date(value).toLocaleDateString();
             }
+            // if(Array.isArray(value)) {
+            //   if()
+            // }
             return (
               <div key={key}>
                 <span className="italic">{key}:</span> {value}
@@ -69,50 +70,23 @@ function FormCarouselSummary<T extends Record<string, any>>({
   );
 }
 
-//TODO: Fix the generic type
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function FormCarousel<T extends Record<string, any>>({
-  formComponents,
-  carouselData,
-  carouselTitle,
-}: {
-  formComponents: FC<CarouselScrollHandles>[];
-  carouselData: T;
-  carouselTitle: string;
-}) {
-  const carouselRef = useRef<CarouselScrollHandles>(null);
+const CardCarousel = forwardRef<
+  CarouselScrollHandles,
+  { children: ReactNode[] }
+>(function CardCarousel({ children }, ref) {
   return (
-    // TODO: Fix the hardcoded max-w-[550px]
     <Carousel
-      className="max-w-[550px] flex-1"
+      className="min-w-0 max-w-screen-lg flex-1 px-2 md:px-10"
       opts={{ watchDrag: false }}
-      ref={carouselRef}
+      ref={ref}
     >
       <CarouselContent>
-        {[...formComponents].map((Component, index) => (
-          <CarouselItem key={index}>
-            <Component
-              scrollNext={() => {
-                if (carouselRef.current) carouselRef.current.scrollNext();
-              }}
-              scrollPrev={() => {
-                if (carouselRef.current) carouselRef.current.scrollPrev();
-              }}
-            />
-          </CarouselItem>
+        {children?.map((child, index) => (
+          <CarouselItem key={index}>{child}</CarouselItem>
         ))}
-        <CarouselItem>
-          <FormCarouselSummary
-            data={carouselData}
-            summaryTitle={carouselTitle}
-            onCancel={() => {
-              if (carouselRef.current) carouselRef.current.scrollPrev();
-            }}
-          />
-        </CarouselItem>
       </CarouselContent>
     </Carousel>
   );
-}
+});
 
-export default FormCarousel;
+export default CardCarousel;

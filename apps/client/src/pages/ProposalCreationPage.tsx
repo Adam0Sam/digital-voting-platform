@@ -1,40 +1,94 @@
-import FormCarousel from '@/components/FormCarousel';
+import CardCarousel from '@/components/CardCarousel';
 import CardWrapper from '@/components/CardWrapper';
 import DateForm from '@/components/forms/DateForm';
 import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { redirect } from 'react-router-dom';
+import { redirect, useSubmit } from 'react-router-dom';
 import { ProposalData } from '@/types/proposal.type';
 import { proposalApi } from '@/lib/api';
-import { User } from '@/types';
 import UserSelectionForm from '@/components/forms/UserSelectionForm';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { isValid } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { isUserArray, User } from '@/types';
+
+function ProposalSummary({
+  data,
+  onCancel,
+}: {
+  data: ProposalData;
+  onCancel: () => void;
+}) {
+  const submit = useSubmit();
+
+  return (
+    <Card>
+      <form
+        method="post"
+        onSubmit={e => {
+          e.preventDefault();
+          submit(data, {
+            method: 'POST',
+          });
+        }}
+      >
+        <CardHeader>
+          <CardTitle>Proposal Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {Object.entries(data).map(([key, value]) => {
+            let outputString: string;
+            if (isUserArray(value)) {
+              outputString = value
+                .map(
+                  user => `${user.personalNames.join(' ')} ${user.familyName}`,
+                )
+                .join(', ');
+            } else if (isValid(new Date(value))) {
+              outputString = new Date(value).toLocaleDateString();
+            } else {
+              outputString = value;
+            }
+            return (
+              <div key={key}>
+                <span className="italic">{key}:</span> {outputString}
+              </div>
+            );
+          })}
+        </CardContent>
+        <CardFooter>
+          <div className="flex gap-10">
+            <Button type="button" variant="secondary" onClick={onCancel}>
+              Go Back
+            </Button>
+            <Button type="submit">Create Proposal</Button>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+}
 
 export default function ProposalCreationPage() {
-  const [proposalData, setProposalData] = useState<ProposalData>({
-    title: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    owners: [],
-    reviewers: [],
-  });
+  const [proposalTitle, setProposalTitle] = useState('');
+  const [proposalDescription, setProposalDescription] = useState('');
+  const [proposalStartDate, setProposalStartDate] = useState('');
+  const [proposalEndDate, setProposalEndDate] = useState('');
+  const [proposalOwners, setProposalOwners] = useState<User[]>([]);
+  const [proposalReviewers, setProposalReviewers] = useState<User[]>([]);
 
-  const mutateProposalData = (
-    key: keyof ProposalData,
-    value: string | Date | User[] | undefined,
-  ) => {
-    if (!value) return;
-    if (value instanceof Date) {
-      value = value.toISOString();
-    }
-    setProposalData(prev => {
-      return { ...prev, [key]: value };
-    });
-  };
-
-  const TitleDescriptionCard: FC<CarouselScrollHandles> = ({ scrollNext }) => (
+  // TODO: Rethink defining components in a component
+  const TitleDescriptionCard: FC<Omit<CarouselScrollHandles, 'scrollPrev'>> = ({
+    scrollNext,
+  }) => (
     <CardWrapper
       cardTitle="Create a Proposal"
       cardDescription="Create a proposal for your project. This will be the first thing that people see when they view your project. Get their attention with a short title that best describes your project."
@@ -42,15 +96,15 @@ export default function ProposalCreationPage() {
       <TitleDescriptionForm
         formSubmitLabel="Next"
         onSubmit={values => {
-          mutateProposalData('title', values.title);
-          mutateProposalData('description', values.description);
+          setProposalTitle(values.title);
+          setProposalDescription(values.description ?? '');
           scrollNext();
         }}
         titleLabel="Proposal Title"
         descriptionLabel="Proposal Description"
         // this seems silly but ok
-        defaultTitle={proposalData.title}
-        defaultDescription={proposalData.description}
+        defaultTitle={proposalTitle}
+        defaultDescription={proposalDescription}
       />
     </CardWrapper>
   );
@@ -62,17 +116,15 @@ export default function ProposalCreationPage() {
     >
       <DateForm
         onSubmit={values => {
-          mutateProposalData('startDate', values.date.from);
-          mutateProposalData('endDate', values.date.to);
+          setProposalStartDate(values.date.from.toISOString());
+          setProposalEndDate(values.date.to.toISOString());
           scrollNext();
         }}
         onCancel={scrollPrev}
         defaultStartDate={
-          proposalData.startDate ? new Date(proposalData.startDate) : undefined
+          proposalStartDate ? new Date(proposalStartDate) : undefined
         }
-        defaultEndDate={
-          proposalData.endDate ? new Date(proposalData.endDate) : undefined
-        }
+        defaultEndDate={proposalEndDate ? new Date(proposalEndDate) : undefined}
       />
     </CardWrapper>
   );
@@ -88,8 +140,8 @@ export default function ProposalCreationPage() {
       >
         <UserSelectionForm
           onSubmit={values => {
-            mutateProposalData('owners', values.owners);
-            mutateProposalData('reviewers', values.reviewers);
+            setProposalOwners(values.owners);
+            setProposalReviewers(values.reviewers);
             scrollNext();
           }}
           onCancel={scrollPrev}
@@ -98,18 +150,40 @@ export default function ProposalCreationPage() {
     );
   };
 
-  const formComponents: FC<CarouselScrollHandles>[] = [
-    TitleDescriptionCard,
-    DateCard,
-    UserSelectionCard,
-  ];
+  const carouselRef = useRef<CarouselScrollHandles>(null);
+
+  const scrollNext = () => {
+    console.log('scrollNext');
+    if (carouselRef.current) {
+      carouselRef.current.scrollNext();
+    }
+  };
+
+  const scrollPrev = () => {
+    console.log('scrollPrev');
+    if (carouselRef.current) {
+      carouselRef.current.scrollPrev();
+    }
+  };
+
   return (
     <main className="flex flex-1 items-center justify-center">
-      <FormCarousel
-        formComponents={formComponents}
-        carouselData={proposalData}
-        carouselTitle="Proposal"
-      />
+      <CardCarousel ref={carouselRef}>
+        <TitleDescriptionCard scrollNext={scrollNext} />
+        <DateCard scrollNext={scrollNext} scrollPrev={scrollPrev} />
+        <UserSelectionCard scrollNext={scrollNext} scrollPrev={scrollPrev} />
+        <ProposalSummary
+          data={{
+            title: proposalTitle,
+            description: proposalDescription,
+            startDate: proposalStartDate,
+            endDate: proposalEndDate,
+            owners: proposalOwners,
+            reviewers: proposalReviewers,
+          }}
+          onCancel={scrollPrev}
+        />
+      </CardCarousel>
     </main>
   );
 }
