@@ -5,7 +5,7 @@ import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { redirect, useSubmit } from 'react-router-dom';
+import { redirect } from 'react-router-dom';
 import { ProposalData } from '@/types/proposal.type';
 import { ProposalApi } from '@/lib/api';
 import UserSelectionForm from '@/components/forms/UserSelectionForm';
@@ -20,6 +20,27 @@ import { isValid } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { isUserArray, User } from '@/types';
 
+const createProposal = async (data: ProposalData) => {
+  console.log('Creating proposal: ', data);
+  const response = await ProposalApi.createOne(data);
+  if (!response.ok) {
+    if (response.status === 401) {
+      console.error('Unauthorized Request');
+      return redirect('/signin');
+    }
+    throw new Error('Failed to create proposal');
+  }
+  const { id } = await response.json();
+  // TODO: Undo proposal creation via scheduled worker request disruption
+  toast(`Proposal ${data.title} has been created`, {
+    description: new Date().toLocaleTimeString(),
+    action: {
+      label: 'Undo',
+      onClick: () => ProposalApi.deleteOne(id),
+    },
+  });
+};
+
 function ProposalSummary({
   data,
   onCancel,
@@ -27,17 +48,13 @@ function ProposalSummary({
   data: ProposalData;
   onCancel: () => void;
 }) {
-  const submit = useSubmit();
-
   return (
     <Card>
       <form
         method="post"
         onSubmit={e => {
           e.preventDefault();
-          submit(data, {
-            method: 'POST',
-          });
+          createProposal(data);
         }}
       >
         <CardHeader>
@@ -219,46 +236,3 @@ export default function ProposalCreationPage() {
     </main>
   );
 }
-
-export const action = async ({ request }: { request: Request }) => {
-  const formData = await request.formData();
-
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string | undefined;
-  const startDate = formData.get('startDate') as string;
-  const endDate = formData.get('endDate') as string;
-
-  if (!title || !startDate || !endDate) {
-    // TODO: Make this a proper error (prob with some react router utility)
-    throw new Response('Invalid form data', { status: 400 });
-  }
-
-  const proposalData: ProposalData = {
-    title,
-    description,
-    startDate,
-    endDate,
-    owners: [],
-    reviewers: [],
-  };
-
-  const response = await ProposalApi.createOne(proposalData);
-  if (!response.ok) {
-    if (response.status === 401) {
-      console.error('Unauthorized Request');
-      return redirect('/signin');
-    }
-    throw new Error('Failed to create proposal');
-  }
-  const { id } = await response.json();
-  // TODO: Undo proposal creation via scheduled worker request disruption
-  toast(`Proposal ${title} has been created`, {
-    description: new Date().toLocaleTimeString(),
-    action: {
-      label: 'Undo',
-      onClick: () => ProposalApi.deleteOne(id),
-    },
-  });
-
-  return null;
-};
