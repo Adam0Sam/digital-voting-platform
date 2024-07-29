@@ -21,7 +21,7 @@ export enum Grade {
   IVC = 'IVC',
   IVD = 'IVD',
   TB2 = 'TB2',
-  NONE = 'N/A',
+  NONE = 'NONE',
 }
 
 export function isGrade(grade: unknown): grade is Grade {

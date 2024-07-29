@@ -30,4 +30,5 @@ export type ProposalData = {
   owners: User[];
   reviewers?: User[];
   resolutionValues: ResolutionValue[];
+  voters: User[];
 };

@@ -10,6 +10,8 @@ import { ResolutionValue } from '@/types/proposal.type';
 import { ScrollArea } from '../../ui/scroll-area';
 import ChoiceCountPopover from './ChoiceCountPopover';
 
+import { cn } from '@/lib/utils';
+
 type FormValues = ResolutionValue[];
 export type ResolutionValueFormProps = ExtendedFormProps<FormValues>;
 
@@ -21,6 +23,7 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
   const [resolutionValues, setResolutionValues] = useState<ResolutionValue[]>(
     [],
   );
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="flex max-w-md flex-1 flex-col gap-8">
@@ -30,7 +33,9 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
             <SheetTrigger asChild>
               <div>
                 <div className="flex items-center justify-between">
-                  Resolution Values
+                  <p className={cn({ 'text-destructive': error })}>
+                    Resolution Values
+                  </p>
                   <Button variant="ghost">
                     <SquarePlus />
                   </Button>
@@ -39,6 +44,7 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
               </div>
             </SheetTrigger>
             <ScrollArea className="h-48">
+              {error && <p className="text-md text-destructive">{error}</p>}
               {resolutionValues.map(resolution => (
                 <div
                   className="mb-4 flex items-center justify-between rounded-md border px-2 py-2"
@@ -76,6 +82,7 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
                   ...prevResolutions,
                   { value: title, description },
                 ]);
+                setError(null);
                 setSheetIsOpen(false);
               }}
               titleLabel="Resolution Value"
@@ -88,7 +95,14 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
       <FormHandleButtons
         formSubmitLabel="Next"
         formCancelLabel="Cancel"
-        handleSubmitClick={() => onSubmit(resolutionValues)}
+        handleSubmitClick={() => {
+          if (resolutionValues.length === 0) {
+            setError('Please add at least one resolution value');
+            return;
+          }
+          setError(null);
+          onSubmit(resolutionValues);
+        }}
         handleCancelClick={onCancel}
       />
     </div>

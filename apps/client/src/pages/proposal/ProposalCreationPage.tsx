@@ -19,11 +19,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { isValid } from 'date-fns';
+import { isValid, set } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { isUserArray, User } from '@/types';
-import ProposalManagerSelectionForm from '@/components/forms/ProposalManagerSelectionForm';
 import ResolutionValueForm from '@/components/forms/resolution-value/ResolutionValueSelectionForm';
+import ProposalManagerSelectionForm from '@/components/forms/user/ProposalManagerSelectionForm';
+import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 
 const createProposal = async (data: ProposalData) => {
   const response = await ProposalApi.createOne(data);
@@ -32,7 +33,8 @@ const createProposal = async (data: ProposalData) => {
       console.error('Unauthorized Request');
       return redirect('/signin');
     }
-    throw new Error('Failed to create proposal');
+    console.error('Failed to create proposal ', response);
+    // throw new Error('Failed to create proposal');
   }
   const { id } = await response.json();
   // TODO: Undo proposal creation via scheduled worker request disruption
@@ -173,18 +175,38 @@ const ResolutionValueCard: FC<{
   );
 };
 
-const UserSelectionCard: FC<{
+const ManagerSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: (owners: User[], reviewers: User[]) => void;
 }> = ({ carouselApi, handleSubmit }) => {
   return (
     <CardWrapper
-      cardTitle="Select Users"
+      cardTitle="Select Managers"
       cardDescription="Select the users who will be the owners and reviewers of this proposal"
     >
       <ProposalManagerSelectionForm
         onSubmit={values => {
           handleSubmit(values.owners, values.reviewers);
+          carouselApi.scrollNext();
+        }}
+        onCancel={carouselApi.scrollPrev}
+      />
+    </CardWrapper>
+  );
+};
+
+const VoterSelectionCard: FC<{
+  carouselApi: CarouselScrollHandles;
+  handleSubmit: (users: User[]) => void;
+}> = ({ carouselApi, handleSubmit }) => {
+  return (
+    <CardWrapper
+      cardTitle="Select Voters"
+      cardDescription="Select the users who will be able to vote on this proposal"
+    >
+      <UserSelectionForm
+        onSubmit={values => {
+          handleSubmit(values);
           carouselApi.scrollNext();
         }}
         onCancel={carouselApi.scrollPrev}
@@ -203,6 +225,8 @@ export default function ProposalCreationPage() {
   const [proposalResolutionValues, setProposalResolutionValues] = useState<
     ResolutionValue[]
   >([]);
+  const [proposalVoters, setProposalVoters] = useState<User[]>([]);
+
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
   const carouselApi = {
@@ -249,11 +273,17 @@ export default function ProposalCreationPage() {
             endDate: proposalEndDate,
           }}
         />
-        <UserSelectionCard
+        <ManagerSelectionCard
           carouselApi={carouselApi}
           handleSubmit={(owners, reviewers) => {
             setProposalOwners(owners);
             setProposalReviewers(reviewers);
+          }}
+        />
+        <VoterSelectionCard
+          carouselApi={carouselApi}
+          handleSubmit={users => {
+            setProposalVoters(users);
           }}
         />
         <ProposalSummary
@@ -265,6 +295,7 @@ export default function ProposalCreationPage() {
             owners: proposalOwners,
             reviewers: proposalReviewers,
             resolutionValues: proposalResolutionValues,
+            voters: proposalVoters,
           }}
           onCancel={carouselApi.scrollPrev}
         />

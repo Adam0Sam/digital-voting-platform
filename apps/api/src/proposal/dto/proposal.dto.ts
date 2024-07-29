@@ -18,6 +18,7 @@ export const ProposalDtoSchema = z.object({
   owners: z.array(UserSchema).min(1),
   reviewers: z.array(UserSchema).optional(),
   resolutionValues: z.array(ProposalResolutionSchema).min(1),
+  voters: z.array(UserSchema).min(1),
 });
 
 export type ProposalDto = z.infer<typeof ProposalDtoSchema>;

@@ -1,52 +1,26 @@
 import { User } from '@/types';
-import { ExtendedFormProps } from './interface';
+import { ExtendedFormProps } from '../interface';
 import { FC, useEffect, useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import { Button } from '../ui/button';
-import UserSelectionTable from '../tables/user/UserSelectionTable';
-import FormHandleButtons from './FormHandleButtons';
-import { ScrollArea } from '../ui/scroll-area';
-import { UserMinus, UserPlus } from 'lucide-react';
-import { StringifiedUser } from '../tables/user/UserColumns';
-import { Separator } from '../ui/separator';
+import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
+import { Button } from '../../ui/button';
+import UserSelectionTable from '../../tables/user/UserSelectionTable';
+import FormHandleButtons from '../FormHandleButtons';
+import { UserPlus } from 'lucide-react';
+import { StringifiedUser } from '../../tables/user/UserColumns';
+import { Separator } from '../../ui/separator';
 import useSignedInUser from '@/context/userContext';
-import getNormalizedTableUsers from '../tables/user/utils/normalize-users';
+import getNormalizedTableUsers from '../../tables/user/utils/normalize-users';
+import SelectedUserScrollArea from './SelectedUserScrollArea';
 
 type FormValues = { owners: User[]; reviewers: User[] };
-export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
-
-const SelectedUserScrollArea = ({
-  users,
-  handleRemove,
-}: {
-  users: User[];
-  handleRemove: (user: User) => void;
-}) => (
-  <ScrollArea className="h-48">
-    {users.map(user => {
-      return (
-        <div
-          className="mb-4 flex items-center justify-between gap-12 rounded-md border px-2 py-4"
-          key={user.id}
-        >
-          <p>
-            {user.personalNames.join(' ')}, {user.familyName}
-          </p>
-          <Button variant="ghost" onClick={() => handleRemove(user)}>
-            <UserMinus size={22} />
-          </Button>
-        </div>
-      );
-    })}
-  </ScrollArea>
-);
+export type ProposalManagerSelectionFormProps = ExtendedFormProps<FormValues>;
 
 const enum SelectionType {
   Owners,
   Reviewers,
 }
 
-const ProposalManagerSelectionForm: FC<UserSelectionFormProps> = ({
+const ProposalManagerSelectionForm: FC<ProposalManagerSelectionFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
@@ -59,6 +33,8 @@ const ProposalManagerSelectionForm: FC<UserSelectionFormProps> = ({
 
   const [selectedOwners, setSelectedOwners] = useState<User[]>([]);
   const [selectedReviewers, setSelectedReviewers] = useState<User[]>([]);
+
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (signedInUSer) {
@@ -111,6 +87,7 @@ const ProposalManagerSelectionForm: FC<UserSelectionFormProps> = ({
                 <Separator className="mb-5 mt-2" />
               </div>
             </SheetTrigger>
+            {error && <p className="text-md text-destructive">{error}</p>}
             <SelectedUserScrollArea
               users={selectedOwners}
               handleRemove={(user: User) =>
@@ -149,7 +126,10 @@ const ProposalManagerSelectionForm: FC<UserSelectionFormProps> = ({
           className="w-full max-w-full sm:w-3/4 sm:max-w-screen-xl"
         >
           <UserSelectionTable
-            handleSelectionEnd={handleSelectionEnd}
+            handleSelectionEnd={selectedUsers => {
+              setError(null);
+              handleSelectionEnd(selectedUsers);
+            }}
             selectedUsers={
               selectionType === SelectionType.Owners
                 ? selectedOwners
@@ -161,9 +141,14 @@ const ProposalManagerSelectionForm: FC<UserSelectionFormProps> = ({
       <FormHandleButtons
         formSubmitLabel="Next"
         handleCancelClick={onCancel}
-        handleSubmitClick={() =>
-          onSubmit({ owners: selectedOwners, reviewers: selectedReviewers })
-        }
+        handleSubmitClick={() => {
+          if (selectedOwners.length === 0) {
+            setError('At least one owner is required');
+            return;
+          }
+          setError(null);
+          onSubmit({ owners: selectedOwners, reviewers: selectedReviewers });
+        }}
       />
     </div>
   );

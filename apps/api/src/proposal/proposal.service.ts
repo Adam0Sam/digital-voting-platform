@@ -17,6 +17,7 @@ export class ProposalService {
         owners: true,
         reviewers: true,
         resolutionValues: true,
+        userVotes: true,
       },
     });
   }
@@ -28,6 +29,10 @@ export class ProposalService {
     const reviewerIds =
       proposal.reviewers?.map((reviewer) => ({
         id: reviewer.id,
+      })) ?? [];
+    const voterIds =
+      proposal.voters?.map((voter) => ({
+        id: voter.id,
       })) ?? [];
 
     const resolutionValues: Omit<
@@ -48,6 +53,11 @@ export class ProposalService {
         reviewers: { connect: reviewerIds },
         resolutionValues: {
           create: resolutionValues,
+        },
+        userVotes: {
+          create: voterIds.map((voterId) => ({
+            userId: voterId.id,
+          })),
         },
       },
     });

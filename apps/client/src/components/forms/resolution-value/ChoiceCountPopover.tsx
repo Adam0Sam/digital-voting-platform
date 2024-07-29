@@ -16,6 +16,7 @@ export default function ChoiceCountPopover({
 }) {
   const [choiceCount, setChoiceCount] = useState(1);
   const [error, setError] = useState<string | null>(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     console.log('value', value);
@@ -58,9 +59,7 @@ export default function ChoiceCountPopover({
               />
             </div>
             {error && (
-              <p className="text-center text-sm text-destructive-foreground">
-                {error}
-              </p>
+              <p className="text-center text-sm text-destructive">{error}</p>
             )}
           </div>
         </div>
