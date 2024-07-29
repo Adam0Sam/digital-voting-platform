@@ -12,7 +12,6 @@ import {
   ResolutionValue,
 } from '@/types/proposal.type';
 import { ProposalApi } from '@/lib/api';
-import UserSelectionForm from '@/components/forms/UserSelectionForm';
 import {
   Card,
   CardContent,
@@ -23,7 +22,8 @@ import {
 import { isValid } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { isUserArray, User } from '@/types';
-import ResolutionValueForm from '@/components/forms/ResolutionValueSelectionForm';
+import ProposalManagerSelectionForm from '@/components/forms/ProposalManagerSelectionForm';
+import ResolutionValueForm from '@/components/forms/resolution-value/ResolutionValueSelectionForm';
 
 const createProposal = async (data: ProposalData) => {
   const response = await ProposalApi.createOne(data);
@@ -182,7 +182,7 @@ const UserSelectionCard: FC<{
       cardTitle="Select Users"
       cardDescription="Select the users who will be the owners and reviewers of this proposal"
     >
-      <UserSelectionForm
+      <ProposalManagerSelectionForm
         onSubmit={values => {
           handleSubmit(values.owners, values.reviewers);
           carouselApi.scrollNext();

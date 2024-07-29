@@ -55,11 +55,11 @@ export function DataTable<TData, TValue>({
     grade: windowWidth > 768,
   });
 
-  //TODO: Make this more javascripty
-
   const [rowSelection, setRowSelection] = useState(() => {
-    const selectedRowsObj = {};
-    selectedRows.forEach(row => (selectedRowsObj[row[idKey] as string] = true));
+    const selectedRowsObj: Record<string, boolean> = {};
+    for (const row of selectedRows) {
+      selectedRowsObj[row[idKey] as string] = true;
+    }
     return selectedRowsObj;
   });
   const table = useReactTable({
@@ -210,8 +210,10 @@ export function DataTable<TData, TValue>({
                 const selectedRow: Partial<TData> = {};
                 row.getAllCells().forEach(cell => {
                   if (cell.getValue()) {
+                    const typedKey = cell.column.id as keyof TData;
+                    const typedValue = cell.getValue() as TData[keyof TData];
                     //TODO: How to fix this?
-                    selectedRow[cell.column.id] = cell.getValue();
+                    selectedRow[typedKey] = typedValue;
                   }
                   selectedRow[idKey] = row.id;
                 }),

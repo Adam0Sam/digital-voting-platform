@@ -15,7 +15,10 @@ import store from './store/store';
 import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
-import ProposalCreationPage from './pages/ProposalCreationPage';
+import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
+import ActiveProposalsPage, {
+  loader as activeProposalsLoader,
+} from './pages/proposal/ActiveProposalsPage';
 
 function App() {
   const router = createBrowserRouter(
@@ -31,6 +34,11 @@ function App() {
         <Route path="home" element={<HomeLayout />}></Route>
         <Route path="proposals">
           <Route path="create" element={<ProposalCreationPage />} />
+          <Route
+            path="active"
+            loader={activeProposalsLoader}
+            element={<ActiveProposalsPage />}
+          />
         </Route>
 
         <Route path="*" element={<div>404</div>} />

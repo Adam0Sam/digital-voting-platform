@@ -1,3 +1,5 @@
+import { WithValuesAsStrings } from './type-utils';
+
 export enum Grade {
   IA = 'IA',
   IB = 'IB',
@@ -45,6 +47,8 @@ export type User = {
   grade?: Grade;
   roles: string[];
 };
+
+export type StringifiedUser = WithValuesAsStrings<User>;
 
 export function isUser(user: unknown): user is User {
   if (typeof user === 'object' && user !== null) {

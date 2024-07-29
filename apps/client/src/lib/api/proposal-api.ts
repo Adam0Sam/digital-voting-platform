@@ -16,7 +16,7 @@ export class ProposalApi {
       method: 'DELETE',
     });
   }
-  static getAll() {
-    return api.fetchWithAuth('/proposals');
+  static async getAllActive() {
+    return await api.fetchWithAuth('/proposal/all/active');
   }
 }

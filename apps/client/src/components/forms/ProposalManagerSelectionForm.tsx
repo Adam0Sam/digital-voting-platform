@@ -1,4 +1,4 @@
-import { Grade, isGrade, User } from '@/types';
+import { User } from '@/types';
 import { ExtendedFormProps } from './interface';
 import { FC, useEffect, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
@@ -10,6 +10,7 @@ import { UserMinus, UserPlus } from 'lucide-react';
 import { StringifiedUser } from '../tables/user/UserColumns';
 import { Separator } from '../ui/separator';
 import useSignedInUser from '@/context/userContext';
+import getNormalizedTableUsers from '../tables/user/utils/normalize-users';
 
 type FormValues = { owners: User[]; reviewers: User[] };
 export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
@@ -45,7 +46,7 @@ const enum SelectionType {
   Reviewers,
 }
 
-const UserSelectionForm: FC<UserSelectionFormProps> = ({
+const ProposalManagerSelectionForm: FC<UserSelectionFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
@@ -77,31 +78,8 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
     }
   };
 
-  //TODO: This is disgusting
   const handleSelectionEnd = (selectedUsers: Partial<StringifiedUser>[]) => {
-    const normalizedUsers = selectedUsers.map(user => {
-      if (!user.id || !user.personalNames || !user.familyName || !user.roles) {
-        throw new Error(`Necessary info is missing are missing`);
-      }
-
-      const personalNames =
-        user.personalNames.indexOf(' ') > -1
-          ? user.personalNames.split(' ')
-          : [user.personalNames];
-      const familyName = user.familyName;
-      const roles =
-        user.roles.indexOf(' ') > -1 ? user.roles.split(' ') : [user.roles];
-      //TODO: What does this mean and how do I fix it
-      const grade = isGrade(user.grade) ? user.grade : Grade.NONE;
-
-      return {
-        id: user.id,
-        personalNames,
-        familyName,
-        roles,
-        grade,
-      };
-    });
+    const normalizedUsers = getNormalizedTableUsers(selectedUsers);
 
     if (selectionType === SelectionType.Owners) {
       setSelectedOwners(normalizedUsers);
@@ -191,4 +169,4 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
   );
 };
 
-export default UserSelectionForm;
+export default ProposalManagerSelectionForm;

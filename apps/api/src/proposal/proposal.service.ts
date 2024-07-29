@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Proposal, ProposalResolutionValue } from '@prisma/client';
+import {
+  Proposal,
+  ProposalResolutionValue,
+  ProposalStatus,
+} from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProposalDto } from './dto';
 
