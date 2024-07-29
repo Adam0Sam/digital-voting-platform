@@ -16,8 +16,6 @@ import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/ProposalCreationPage';
-import UserSelectionForm from './components/forms/UserSelectionForm';
-import { User } from './types';
 
 function App() {
   const router = createBrowserRouter(
@@ -34,19 +32,7 @@ function App() {
         <Route path="proposals">
           <Route path="create" element={<ProposalCreationPage />} />
         </Route>
-        <Route
-          path="user"
-          element={
-            <UserSelectionForm
-              onSubmit={function (values: {
-                owner: User;
-                managers: User[];
-              }): void {
-                throw new Error('Function not implemented.');
-              }}
-            />
-          }
-        />
+
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),

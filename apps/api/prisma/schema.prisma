@@ -25,14 +25,13 @@ enum UserRole {
 
 enum ProposalStatus {
   PENDING
-  APPROVED
-  REJECTED
+  RESOLVED
+  ABORTED
 }
 
-enum VoteStatus {
+enum UserVoteStatus {
   PENDING
-  APPROVED
-  REJECTED
+  RESOLVED
 }
 
 enum Grade {
@@ -67,22 +66,24 @@ model User {
   roles         UserRole[] @default([GUEST])
 
   logs     Log[]
-  UserVote UserVote[]
+  userVote UserVote[]
 
-  ProposalsOwnedBy    Proposal[] @relation("Owners")
-  ProposalsReviewedBy Proposal[] @relation("Reviewers")
+  proposalsOwnedBy    Proposal[] @relation("Owners")
+  proposalsReviewedBy Proposal[] @relation("Reviewers")
 
   @@unique([personalNames, familyName])
   @@index([personalNames, familyName, grade])
 }
 
 model UserVote {
-  id         String     @id @default(uuid())
-  status     VoteStatus @default(PENDING)
-  user       User       @relation(fields: [userId], references: [id])
-  userId     String
-  proposal   Proposal   @relation(fields: [proposalId], references: [id])
-  proposalId String
+  id                        String                  @id @default(uuid())
+  status                    UserVoteStatus          @default(PENDING)
+  user                      User                    @relation(fields: [userId], references: [id])
+  userId                    String
+  proposal                  Proposal                @relation(fields: [proposalId], references: [id])
+  proposalId                String
+  chosenResolution          ProposalResolutionValue @relation(fields: [proposalResolutionValueId], references: [id])
+  proposalResolutionValueId String
 }
 
 model Log {
@@ -94,14 +95,23 @@ model Log {
 }
 
 model Proposal {
-  id          String         @id @default(uuid())
-  title       String
-  description String?
-  startDate   DateTime
-  endDate     DateTime
-  status      ProposalStatus @default(PENDING)
-  UserVote    UserVote[]
+  id               String                    @id @default(uuid())
+  title            String
+  description      String?
+  startDate        DateTime
+  endDate          DateTime
+  status           ProposalStatus            @default(PENDING)
+  userVote         UserVote[]
+  resolutionValues ProposalResolutionValue[]
+  owners           User[]                    @relation("Owners")
+  reviewers        User[]                    @relation("Reviewers")
+}
 
-  Owners    User[] @relation("Owners")
-  Reviewers User[] @relation("Reviewers")
+model ProposalResolutionValue {
+  id          String     @id @default(uuid())
+  value       String
+  description String?
+  proposal    Proposal   @relation(fields: [proposalId], references: [id])
+  proposalId  String
+  userVote    UserVote[]
 }
