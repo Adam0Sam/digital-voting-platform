@@ -6,7 +6,11 @@ import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { redirect } from 'react-router-dom';
-import { ProposalData } from '@/types/proposal.type';
+import {
+  isResolutionValueArray,
+  ProposalData,
+  ResolutionValue,
+} from '@/types/proposal.type';
 import { ProposalApi } from '@/lib/api';
 import UserSelectionForm from '@/components/forms/UserSelectionForm';
 import {
@@ -19,9 +23,9 @@ import {
 import { isValid } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { isUserArray, User } from '@/types';
+import ResolutionValueForm from '@/components/forms/ResolutionValueSelectionForm';
 
 const createProposal = async (data: ProposalData) => {
-  console.log('Creating proposal: ', data);
   const response = await ProposalApi.createOne(data);
   if (!response.ok) {
     if (response.status === 401) {
@@ -69,6 +73,10 @@ function ProposalSummary({
                   user => `${user.personalNames.join(' ')} ${user.familyName}`,
                 )
                 .join(', ');
+            } else if (isResolutionValueArray(value)) {
+              outputString = value
+                .map(resolution => resolution.value)
+                .join(', ');
             } else if (isValid(new Date(value))) {
               outputString = new Date(value).toLocaleDateString();
             } else {
@@ -94,7 +102,6 @@ function ProposalSummary({
   );
 }
 
-// TODO: Rethink defining components in a component
 const TitleDescriptionCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: (title: string, description: string) => void;
@@ -112,7 +119,6 @@ const TitleDescriptionCard: FC<{
       }}
       titleLabel="Proposal Title"
       descriptionLabel="Proposal Description"
-      // this seems silly but ok
       defaultTitle={defaultValues.title}
       defaultDescription={defaultValues.description}
     />
@@ -147,6 +153,26 @@ const DateCard: FC<{
   </CardWrapper>
 );
 
+const ResolutionValueCard: FC<{
+  carouselApi: CarouselScrollHandles;
+  handleSubmit: (resolutioValue: ResolutionValue[]) => void;
+}> = ({ carouselApi, handleSubmit }) => {
+  return (
+    <CardWrapper
+      cardTitle="Set Resolution Values"
+      cardDescription="Set the possible resolution values for this proposal"
+    >
+      <ResolutionValueForm
+        onSubmit={values => {
+          handleSubmit(values);
+          carouselApi.scrollNext();
+        }}
+        onCancel={carouselApi.scrollPrev}
+      />
+    </CardWrapper>
+  );
+};
+
 const UserSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: (owners: User[], reviewers: User[]) => void;
@@ -174,6 +200,9 @@ export default function ProposalCreationPage() {
   const [proposalEndDate, setProposalEndDate] = useState('');
   const [proposalOwners, setProposalOwners] = useState<User[]>([]);
   const [proposalReviewers, setProposalReviewers] = useState<User[]>([]);
+  const [proposalResolutionValues, setProposalResolutionValues] = useState<
+    ResolutionValue[]
+  >([]);
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
   const carouselApi = {
@@ -203,6 +232,12 @@ export default function ProposalCreationPage() {
             description: proposalDescription,
           }}
         />
+        <ResolutionValueCard
+          carouselApi={carouselApi}
+          handleSubmit={resolutionValue => {
+            setProposalResolutionValues(resolutionValue);
+          }}
+        />
         <DateCard
           carouselApi={carouselApi}
           handleSubmit={(startDate, endDate) => {
@@ -229,6 +264,7 @@ export default function ProposalCreationPage() {
             endDate: proposalEndDate,
             owners: proposalOwners,
             reviewers: proposalReviewers,
+            resolutionValues: proposalResolutionValues,
           }}
           onCancel={carouselApi.scrollPrev}
         />

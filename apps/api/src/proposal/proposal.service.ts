@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Proposal } from '@prisma/client';
+import { Proposal, ProposalResolutionValue } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProposalDto } from './dto';
 
@@ -10,8 +10,9 @@ export class ProposalService {
   async getAllProposals(): Promise<Proposal[]> {
     return this.prisma.proposal.findMany({
       include: {
-        Owners: true,
-        Reviewers: true,
+        owners: true,
+        reviewers: true,
+        resolutionValues: true,
       },
     });
   }
@@ -25,6 +26,13 @@ export class ProposalService {
         id: reviewer.id,
       })) ?? [];
 
+    const resolutionValues: Omit<
+      ProposalResolutionValue,
+      'id' | 'proposalId'
+    >[] = proposal.resolutionValues.map((val) => {
+      return { value: val.value, description: val.description };
+    });
+
     return this.prisma.proposal.create({
       data: {
         title: proposal.title,
@@ -32,8 +40,11 @@ export class ProposalService {
         startDate: proposal.startDate,
         endDate: proposal.endDate,
         status: proposal.status,
-        Owners: { connect: ownerIds },
-        Reviewers: { connect: reviewerIds },
+        owners: { connect: ownerIds },
+        reviewers: { connect: reviewerIds },
+        resolutionValues: {
+          create: resolutionValues,
+        },
       },
     });
   }

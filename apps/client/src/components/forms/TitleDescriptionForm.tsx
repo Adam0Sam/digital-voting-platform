@@ -13,6 +13,8 @@ import { ExtendedFormProps } from './interface';
 import { Input } from '../ui/input';
 import { FC } from 'react';
 import FormHandleButtons from './FormHandleButtons';
+import { Textarea } from '../ui/textarea';
+import { cn } from '@/lib/utils';
 
 const zodFormSchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }),
@@ -28,6 +30,7 @@ export type TitleDescriptionFormProps = ExtendedFormProps<
     descriptionLabel?: string;
     defaultTitle?: string;
     defaultDescription?: string;
+    className?: string;
   }
 >;
 
@@ -39,6 +42,7 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
   defaultDescription = '',
   onCancel,
   onSubmit,
+  className,
 }) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(zodFormSchema),
@@ -53,7 +57,7 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-4"
+        className={cn('flex max-w-sm flex-1 flex-col gap-4', className)}
       >
         <FormField
           control={form.control}
@@ -82,9 +86,8 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
               <FormItem>
                 <FormLabel>{descriptionLabel}</FormLabel>
                 <FormControl>
-                  <Input
+                  <Textarea
                     placeholder={`Your ${descriptionLabel}`}
-                    type="text"
                     {...field}
                   />
                 </FormControl>

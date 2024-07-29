@@ -65,7 +65,7 @@ const DateForm: FC<DateFormProps> = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-4"
+        className="flex max-w-sm flex-1 flex-col gap-4"
       >
         <FormField
           control={form.control}

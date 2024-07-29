@@ -115,7 +115,7 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
   return (
     <div className="flex w-full flex-col gap-8">
       <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
-        <div className="flex flex-col gap-16 md:flex-row">
+        <div className="flex flex-1 flex-col gap-16 md:flex-row">
           <div className="flex-1">
             <SheetTrigger asChild>
               <div>
@@ -167,6 +167,7 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
         </div>
         <SheetContent
           side="right"
+          // TODO: Make this a generic classname?
           className="w-full max-w-full sm:w-3/4 sm:max-w-screen-xl"
         >
           <UserSelectionTable
