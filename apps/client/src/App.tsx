@@ -18,7 +18,6 @@ import RootLayout from './pages/RootLayout';
 import ProposalCreationPage, {
   action as proposalCreationAction,
 } from './pages/ProposalCreationPage';
-import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import UserSelectionForm from './components/forms/UserSelectionForm';
 import { User } from './types';
 

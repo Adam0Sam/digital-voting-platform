@@ -21,7 +21,6 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
   async signup(@Headers('authentication') auth: string) {
-    console.log(auth);
     return auth;
   }
 }

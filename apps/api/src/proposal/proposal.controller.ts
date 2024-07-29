@@ -4,7 +4,6 @@ import {
   Delete,
   Param,
   Post,
-  Req,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -27,8 +26,7 @@ export class ProposalController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('delete/:id')
-  deleteProposal(@Param('id') id: string, @Req() req: any) {
-    console.log('req.user', req.user);
+  deleteProposal(@Param('id') id: string) {
     return this.proposalService.deleteProposal(id);
   }
 }

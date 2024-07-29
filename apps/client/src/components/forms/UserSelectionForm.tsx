@@ -1,6 +1,6 @@
 import { Grade, isGrade, User } from '@/types';
 import { ExtendedFormProps } from './interface';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import { Button } from '../ui/button';
 import UserSelectionTable from '../tables/user/UserSelectionTable';
@@ -9,6 +9,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { UserMinus, UserPlus } from 'lucide-react';
 import { StringifiedUser } from '../tables/user/UserColumns';
 import { Separator } from '../ui/separator';
+import useSignedInUser from '@/context/userContext';
 
 type FormValues = { owners: User[]; reviewers: User[] };
 export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
@@ -53,8 +54,16 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
     SelectionType.Owners,
   );
 
+  const { user: signedInUSer } = useSignedInUser();
+
   const [selectedOwners, setSelectedOwners] = useState<User[]>([]);
   const [selectedReviewers, setSelectedReviewers] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (signedInUSer) {
+      setSelectedOwners(prev => [...prev, signedInUSer]);
+    }
+  }, [signedInUSer?.id]);
 
   const removeUser = (targetUser: User, selectionType: SelectionType) => {
     if (selectionType === SelectionType.Owners) {
@@ -72,7 +81,6 @@ const UserSelectionForm: FC<UserSelectionFormProps> = ({
   const handleSelectionEnd = (selectedUsers: Partial<StringifiedUser>[]) => {
     const normalizedUsers = selectedUsers.map(user => {
       if (!user.id || !user.personalNames || !user.familyName || !user.roles) {
-        console.log('user', user);
         throw new Error(`Necessary info is missing are missing`);
       }
 

@@ -41,7 +41,7 @@ export class AuthService {
       grade = Grade[gradeString.toUpperCase()];
     }
     if (!grade) {
-      throw new Error(`Invalid grade:${gradeString}`);
+      return Grade.NONE;
     }
     return grade;
   }

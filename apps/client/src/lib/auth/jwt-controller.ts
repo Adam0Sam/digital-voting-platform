@@ -1,15 +1,5 @@
-export class JWTController {
-  private static localStorageTokenId = 'id_token' as const;
+import StorageController from '../storage-controller';
 
-  static getToken() {
-    return localStorage.getItem(this.localStorageTokenId);
-  }
+const JWTController = new StorageController<string>(localStorage, 'id_token');
 
-  static setToken(id_token: string) {
-    localStorage.setItem(this.localStorageTokenId, id_token);
-  }
-
-  static removeToken() {
-    localStorage.removeItem(this.localStorageTokenId);
-  }
-}
+export default JWTController;

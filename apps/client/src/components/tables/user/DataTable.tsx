@@ -217,12 +217,7 @@ export function DataTable<TData, TValue>({
                 }),
                   selectedRows.push(selectedRow);
               });
-              if (onEnd) {
-                console.log('Calling End Callback');
-                onEnd(selectedRows);
-              } else {
-                console.log('No End callback provided');
-              }
+              onEnd?.(selectedRows);
             }}
           >
             Submit

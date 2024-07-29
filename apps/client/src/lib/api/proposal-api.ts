@@ -1,7 +1,7 @@
 import { ProposalData } from '@/types/proposal.type';
 import { api } from '../auth/auth-fetch';
 
-export class proposalApi {
+export class ProposalApi {
   static async createOne(data: ProposalData) {
     return await api.fetchWithAuth('/proposal/create', {
       method: 'POST',
