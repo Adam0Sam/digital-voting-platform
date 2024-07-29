@@ -1,19 +1,24 @@
 import URI from '../constants/uri-constants';
-import { JWTController } from './jwt-controller';
+import JWTController from './jwt-controller';
+// TODO: Consider making these non-static for tree shaking support
 export class api {
-  static fetchWithAuth(url: string, options?: RequestInit, id_token?: string) {
-    let endpoint: string;
+  static getEndpoint(url: string) {
     if (url.startsWith('/')) {
-      endpoint = `${URI.API}${url}`;
+      return `${URI.API}${url}`;
     } else {
-      endpoint = `${URI.API}/${url}`;
+      return `${URI.API}/${url}`;
     }
-    return fetch(endpoint, {
+  }
+  static fetchWithAuth(url: string, options?: RequestInit, id_token?: string) {
+    return fetch(this.getEndpoint(url), {
       ...options,
       headers: {
         ...options?.headers,
-        Authorization: `Bearer ${id_token ?? JWTController.getToken()}`,
+        Authorization: `Bearer ${id_token ?? JWTController.getItem()}`,
       },
     });
+  }
+  static fetch(url: string, options?: RequestInit) {
+    return fetch(this.getEndpoint(url), options);
   }
 }

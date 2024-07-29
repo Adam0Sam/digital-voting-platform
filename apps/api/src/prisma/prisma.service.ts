@@ -50,9 +50,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         await this.user.create({
           data: user,
         });
-        console.log(
-          `User ${user.personalNames.join(' ')} ${user.familyName} created.`,
-        );
       } catch (error) {
         console.error(
           `Error creating user ${user.personalNames.join(' ')} ${user.familyName}:`,

@@ -3,15 +3,21 @@ import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
 import { RolesGuard } from 'src/auth/rbac/guard';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  constructor() {}
+  constructor(private userService: UserService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('')
   getProfile(@Req() req: any) {
     return req.user;
+  }
+
+  @Get('all')
+  getAllUsers() {
+    return this.userService.getAllUsers();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

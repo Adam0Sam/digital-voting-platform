@@ -44,10 +44,8 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
         personalNames,
         familyName: payload.last_name,
       });
-      console.log('User created');
       return newUser;
     }
-    console.log('User found');
     return user;
   }
 }

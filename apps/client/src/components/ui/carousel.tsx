@@ -144,7 +144,7 @@ const Carousel = React.forwardRef<
         }}
       >
         <div
-          // why do I need a ref here?
+          // TODO: why do I need a ref here?
           // ref={ref}
           onKeyDownCapture={handleKeyDown}
           className={cn('relative', className)}
