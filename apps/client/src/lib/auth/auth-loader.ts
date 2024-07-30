@@ -1,8 +1,8 @@
 import { redirect } from 'react-router-dom';
-import { User } from '../../types';
 import JWTController from './jwt-controller';
 import { UserApi } from '../api';
 import UserController from '../user-controller';
+import { APIError } from './auth-fetch';
 
 export async function AuthLoader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -11,14 +11,24 @@ export async function AuthLoader({ request }: { request: Request }) {
     console.error('No id_token found');
     return redirect('/signup');
   }
-  const response = await UserApi.getOne(idToken);
-  if (!response.ok) {
+
+  try {
+    const user = await UserApi.getOne(idToken);
+    window.history.replaceState({}, '', `${url.origin}${url.pathname}`);
+    JWTController.setItem(idToken);
+    UserController.setItem(user);
+    return user;
+  } catch (error) {
     JWTController.removeItem();
-    return redirect('/signup');
+    UserController.removeItem();
+    if (error instanceof APIError) {
+      console.error(
+        `APIError:\nmessage ${error.message}\nstatus ${error.status}`,
+        error,
+      );
+      if (error.status === 401) {
+        return redirect('/signup');
+      }
+    }
   }
-  const user: User = await response.json();
-  window.history.replaceState({}, '', `${url.origin}${url.pathname}`);
-  JWTController.setItem(idToken);
-  UserController.setItem(user);
-  return user;
 }

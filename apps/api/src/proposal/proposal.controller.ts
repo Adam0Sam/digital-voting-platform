@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Req,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -20,6 +21,12 @@ export class ProposalController {
   @Get('all')
   getAllProposals() {
     return this.proposalService.getAllProposals();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('restricted/active')
+  getAllRestrictedActiveProposals(@Req() req: any) {
+    return this.proposalService.getAllRestrictedProposals(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)

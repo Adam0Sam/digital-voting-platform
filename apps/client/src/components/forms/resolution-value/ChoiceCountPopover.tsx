@@ -28,7 +28,7 @@ export default function ChoiceCountPopover({
     console.log('max', maxChoiceCount);
     setChoiceCount(value);
   };
-
+  // TODO: Make this mobile friendly with Drawer component
   return (
     <Popover>
       <PopoverTrigger asChild>

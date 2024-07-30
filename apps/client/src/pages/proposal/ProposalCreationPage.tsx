@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import { redirect } from 'react-router-dom';
 import {
   isResolutionValueArray,
-  ProposalData,
+  ProposalDto,
+  ProposalVisibility,
   ResolutionValue,
 } from '@/types/proposal.type';
 import { ProposalApi } from '@/lib/api';
@@ -19,39 +20,47 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { isValid, set } from 'date-fns';
+import { isValid } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { isUserArray, User } from '@/types';
 import ResolutionValueForm from '@/components/forms/resolution-value/ResolutionValueSelectionForm';
 import ProposalManagerSelectionForm from '@/components/forms/user/ProposalManagerSelectionForm';
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
+import { APIError } from '@/lib/auth/auth-fetch';
+import Combobox from '@/components/Combobox';
+import { ComboboxDemo } from '@/test components/test-combo';
 
-const createProposal = async (data: ProposalData) => {
-  const response = await ProposalApi.createOne(data);
-  if (!response.ok) {
-    if (response.status === 401) {
-      console.error('Unauthorized Request');
-      return redirect('/signin');
+const createProposal = async (data: ProposalDto) => {
+  try {
+    const createdProposal = await ProposalApi.createOne(data);
+    const { id } = createdProposal;
+    // TODO: Undo proposal creation via scheduled worker request disruption
+    toast(`Proposal ${data.title} has been created`, {
+      description: new Date().toLocaleTimeString(),
+      action: {
+        label: 'Undo',
+        onClick: () => ProposalApi.deleteOne(id),
+      },
+    });
+  } catch (error) {
+    if (error instanceof APIError) {
+      if (error.status === 401) {
+        console.error('Unauthorized Request');
+        return redirect('/signin');
+      } else {
+        console.error(`API Error: ${error.message}, ${error.status}`);
+      }
+    } else {
+      console.error('Failed to create proposal ', error);
     }
-    console.error('Failed to create proposal ', response);
-    // throw new Error('Failed to create proposal');
   }
-  const { id } = await response.json();
-  // TODO: Undo proposal creation via scheduled worker request disruption
-  toast(`Proposal ${data.title} has been created`, {
-    description: new Date().toLocaleTimeString(),
-    action: {
-      label: 'Undo',
-      onClick: () => ProposalApi.deleteOne(id),
-    },
-  });
 };
 
 function ProposalSummary({
   data,
   onCancel,
 }: {
-  data: ProposalData;
+  data: ProposalDto;
   onCancel: () => void;
 }) {
   return (
@@ -195,10 +204,27 @@ const ManagerSelectionCard: FC<{
   );
 };
 
+const proposalVisibilityOptions = [
+  {
+    value: ProposalVisibility.PUBLIC,
+    label: 'Public',
+  },
+  {
+    value: ProposalVisibility.RESTRICTED,
+    label: 'Private',
+  },
+  {
+    value: ProposalVisibility.MANAGER_ONLY,
+    label: 'Manager Only',
+  },
+];
+
 const VoterSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
-  handleSubmit: (users: User[]) => void;
+  handleSubmit: (users: User[], proposalVisibility: ProposalVisibility) => void;
 }> = ({ carouselApi, handleSubmit }) => {
+  const [proposalVisibility, setProposalVisibility] =
+    useState<ProposalVisibility>(ProposalVisibility.RESTRICTED);
   return (
     <CardWrapper
       cardTitle="Select Voters"
@@ -206,11 +232,17 @@ const VoterSelectionCard: FC<{
     >
       <UserSelectionForm
         onSubmit={values => {
-          handleSubmit(values);
+          handleSubmit(values, proposalVisibility);
           carouselApi.scrollNext();
         }}
         onCancel={carouselApi.scrollPrev}
-      />
+      >
+        {/* <Combobox
+          items={proposalVisibilityOptions}
+          handleSelect={value => setProposalVisibility(value)}
+          defaultValue={ProposalVisibility.RESTRICTED}
+        /> */}
+      </UserSelectionForm>
     </CardWrapper>
   );
 };
@@ -226,6 +258,8 @@ export default function ProposalCreationPage() {
     ResolutionValue[]
   >([]);
   const [proposalVoters, setProposalVoters] = useState<User[]>([]);
+  const [proposalVisibility, setProposalVisibility] =
+    useState<ProposalVisibility>();
 
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
@@ -245,6 +279,13 @@ export default function ProposalCreationPage() {
   return (
     <main className="flex flex-1 items-center justify-center">
       <CardCarousel ref={carouselRef}>
+        <VoterSelectionCard
+          carouselApi={carouselApi}
+          handleSubmit={(users, proposalVisibility) => {
+            setProposalVoters(users);
+            setProposalVisibility(proposalVisibility);
+          }}
+        />
         <TitleDescriptionCard
           carouselApi={carouselApi}
           handleSubmit={(title, description) => {
@@ -280,12 +321,6 @@ export default function ProposalCreationPage() {
             setProposalReviewers(reviewers);
           }}
         />
-        <VoterSelectionCard
-          carouselApi={carouselApi}
-          handleSubmit={users => {
-            setProposalVoters(users);
-          }}
-        />
         <ProposalSummary
           data={{
             title: proposalTitle,
@@ -296,6 +331,7 @@ export default function ProposalCreationPage() {
             reviewers: proposalReviewers,
             resolutionValues: proposalResolutionValues,
             voters: proposalVoters,
+            visibility: proposalVisibility ?? ProposalVisibility.RESTRICTED,
           }}
           onCancel={carouselApi.scrollPrev}
         />

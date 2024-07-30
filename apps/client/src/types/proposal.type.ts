@@ -22,7 +22,7 @@ export function isResolutionValueArray(
   return false;
 }
 
-export type ProposalData = {
+export type ProposalDto = {
   title: string;
   description?: string;
   startDate: string;
@@ -31,4 +31,11 @@ export type ProposalData = {
   reviewers?: User[];
   resolutionValues: ResolutionValue[];
   voters: User[];
+  visibility: ProposalVisibility;
 };
+
+export enum ProposalVisibility {
+  PUBLIC = 'PUBLIC',
+  RESTRICTED = 'RESTRICTED',
+  MANAGER_ONLY = 'MANAGER_ONLY',
+}

@@ -16,9 +16,10 @@ import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
-import ActiveProposalsPage, {
-  loader as activeProposalsLoader,
-} from './pages/proposal/ActiveProposalsPage';
+import RestrictedActiveProposalsPage, {
+  loader as restrictedActiveProposalsLoader,
+} from './pages/proposal/RestrictedActiveProposalsPage';
+import { ComboboxDemo } from './test components/test-combo';
 
 function App() {
   const router = createBrowserRouter(
@@ -34,13 +35,17 @@ function App() {
         <Route path="home" element={<HomeLayout />}></Route>
         <Route path="proposals">
           <Route path="create" element={<ProposalCreationPage />} />
-          <Route
-            path="active"
-            loader={activeProposalsLoader}
-            element={<ActiveProposalsPage />}
-          />
+          <Route path="restricted">
+            <Route
+              path="active"
+              loader={restrictedActiveProposalsLoader}
+              element={<RestrictedActiveProposalsPage />}
+            />
+          </Route>
+          <Route path="manager"></Route>
+          <Route path="public"></Route>
         </Route>
-
+        <Route path="test" element={<ComboboxDemo />} />
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),

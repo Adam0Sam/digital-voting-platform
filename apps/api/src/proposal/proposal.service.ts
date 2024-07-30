@@ -22,6 +22,48 @@ export class ProposalService {
     });
   }
 
+  async getAllRestrictedProposals(
+    userId: string,
+    proposalStatus?: ProposalStatus,
+  ): Promise<Proposal[]> {
+    return this.prisma.proposal.findMany({
+      where: {
+        OR: [
+          {
+            status: proposalStatus ?? ProposalStatus.DRAFT,
+            userVotes: {
+              some: {
+                userId: userId,
+              },
+            },
+          },
+          {
+            status: proposalStatus ?? ProposalStatus.DRAFT,
+            owners: {
+              some: {
+                id: userId,
+              },
+            },
+          },
+          {
+            status: proposalStatus ?? ProposalStatus.DRAFT,
+            reviewers: {
+              some: {
+                id: userId,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        owners: true,
+        reviewers: true,
+        resolutionValues: true,
+        userVotes: true,
+      },
+    });
+  }
+
   async createProposal(proposal: ProposalDto) {
     const ownerIds = proposal.owners.map((owner) => ({
       id: owner.id,

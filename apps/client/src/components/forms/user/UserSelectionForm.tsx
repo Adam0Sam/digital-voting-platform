@@ -1,6 +1,6 @@
 import { StringifiedUser, User } from '@/types';
 import { ExtendedFormProps } from '../interface';
-import { FC, useState } from 'react';
+import { FC, ReactNode, useState } from 'react';
 import getNormalizedTableUsers from '@/components/tables/user/utils/normalize-users';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -10,14 +10,14 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import FormHandleButtons from '../FormHandleButtons';
+import { ComboboxDemo } from '@/test components/test-combo';
 
 type FormValues = User[];
 export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
 
-const UserSelectionForm: FC<UserSelectionFormProps> = ({
-  onSubmit,
-  onCancel,
-}) => {
+const UserSelectionForm: FC<
+  UserSelectionFormProps & { children?: ReactNode }
+> = ({ onSubmit, onCancel, children }) => {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);

@@ -14,7 +14,7 @@ export const ProposalDtoSchema = z.object({
   description: z.string().optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
-  status: z.nativeEnum(ProposalStatus).default(ProposalStatus.PENDING),
+  status: z.nativeEnum(ProposalStatus).default(ProposalStatus.DRAFT),
   owners: z.array(UserSchema).min(1),
   reviewers: z.array(UserSchema).optional(),
   resolutionValues: z.array(ProposalResolutionSchema).min(1),

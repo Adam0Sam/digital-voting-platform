@@ -1,10 +1,17 @@
+import { User } from '@/types';
 import { api } from '../auth/auth-fetch';
 
 export class UserApi {
-  static getOne(id_token: string) {
-    return api.fetchWithAuth('/user', undefined, id_token);
+  static async getOne(id_token: string) {
+    const user = (await api.fetchWithAuth(
+      '/user',
+      undefined,
+      id_token,
+    )) as User;
+    return user;
   }
-  static getAll() {
-    return api.fetch('/user/all');
+  static async getAll() {
+    const allUsers = (await api.fetch('/user/all')) as User[];
+    return allUsers;
   }
 }

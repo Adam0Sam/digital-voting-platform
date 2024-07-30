@@ -38,19 +38,25 @@ export const componentLinkItems: LinkItemProps[] = [
 
 export const proposalLinkItems: LinkItemProps[] = [
   {
-    title: 'Active Proposals',
-    href: '/proposals/active',
-    description: 'Proposals that are currently being discussed.',
+    title: 'Restricted Proposals',
+    href: 'proposals/restricted/active',
+    description: 'Only included voters and managers can view these proposals',
   },
   {
-    title: 'Past Proposals',
-    href: '/proposals/past',
-    description: 'Proposals that have been accepted or rejected.',
+    title: 'Public Proposals',
+    href: 'proposals/public/active',
+    description: 'All users can view these proposals',
+  },
+  {
+    title: 'Draft Proposals',
+    href: 'proposals/manager/active',
+    description:
+      'Proposals that are still being drafted or have been abandoned, only managers can view these proposals',
   },
   {
     title: 'Create a Proposal',
-    href: '/proposals/create',
-    description: 'To put forward a change or elect a representative.',
+    href: 'proposals/create',
+    description: 'Create a new proposal',
   },
 ];
 

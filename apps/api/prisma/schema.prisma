@@ -24,7 +24,8 @@ enum UserRole {
 }
 
 enum ProposalStatus {
-  PENDING
+  DRAFT
+  ACTIVE
   RESOLVED
   ABORTED
 }
@@ -86,7 +87,7 @@ model UserVote {
   status            UserVoteStatus            @default(PENDING)
   user              User                      @relation(fields: [userId], references: [id])
   userId            String
-  proposal          Proposal                  @relation(fields: [proposalId], references: [id])
+  proposal          Proposal                  @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   proposalId        String
   chosenResolutions ProposalResolutionValue[]
 }
@@ -105,13 +106,13 @@ model Proposal {
   description      String?
   startDate        DateTime
   endDate          DateTime
-  status           ProposalStatus            @default(PENDING)
+  status           ProposalStatus            @default(DRAFT)
   userVotes        UserVote[]
   resolutionValues ProposalResolutionValue[]
   owners           User[]                    @relation("Owners")
   reviewers        User[]                    @relation("Reviewers")
   choiceCount      Int                       @default(1)
-  visibility       Visibility                @default(PUBLIC)
+  visibility       Visibility                @default(RESTRICTED)
 }
 
 model ProposalResolutionValue {
