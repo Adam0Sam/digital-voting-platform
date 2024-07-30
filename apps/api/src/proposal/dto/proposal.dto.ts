@@ -1,4 +1,4 @@
-import { ProposalStatus } from '@prisma/client';
+import { ProposalStatus, ProposalVisibility } from '@prisma/client';
 import { UserSchema } from 'src/user/schema/user.schema';
 import { z } from 'zod';
 
@@ -15,6 +15,9 @@ export const ProposalDtoSchema = z.object({
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
   status: z.nativeEnum(ProposalStatus).default(ProposalStatus.DRAFT),
+  visibility: z
+    .nativeEnum(ProposalVisibility)
+    .default(ProposalVisibility.RESTRICTED),
   owners: z.array(UserSchema).min(1),
   reviewers: z.array(UserSchema).optional(),
   resolutionValues: z.array(ProposalResolutionSchema).min(1),

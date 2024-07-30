@@ -19,9 +19,9 @@ import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import RestrictedActiveProposalsPage, {
   loader as restrictedActiveProposalsLoader,
 } from './pages/proposal/RestrictedActiveProposalsPage';
-import ProposalVisibilityPage, {
-  loader as proposalCategoryLoader,
-} from './pages/proposal/ProposalVisibilityPage';
+import ProposalByVisibilityPage, {
+  loader as proposalsByVisibilityLoader,
+} from './pages/proposal/ProposalsByVisibilityPage';
 import SpecificProposalsPage from './pages/proposal/SpecificProposalsPage';
 
 function App() {
@@ -40,8 +40,8 @@ function App() {
           <Route path="create" element={<ProposalCreationPage />} />
           <Route
             path=":visibility"
-            loader={proposalCategoryLoader}
-            element={<ProposalVisibilityPage />}
+            loader={proposalsByVisibilityLoader}
+            element={<ProposalByVisibilityPage />}
           >
             <Route path=":status" element={<SpecificProposalsPage />} />
             <Route path="all" />

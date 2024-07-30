@@ -33,10 +33,8 @@ export class ProposalApi {
     return proposals;
   }
 
-  static async getProposalCategories(visibility: ProposalVisibility) {
-    const categories = await api.fetchWithAuth(
-      `/proposal/${visibility}/categories`,
-    );
+  static async getProposalsByVisibility(visibility: ProposalVisibility) {
+    const categories = await api.fetchWithAuth(`/proposal/${visibility}`);
     return categories;
   }
 }

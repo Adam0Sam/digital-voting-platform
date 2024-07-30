@@ -15,14 +15,13 @@ import { ProposalService } from './proposal.service';
 import { ProposalDto, ProposalDtoSchema } from './dto';
 import { ProposalStatus, ProposalVisibility } from '@prisma/client';
 
-export const ProposalEndpointVisibilityMap: Record<string, ProposalVisibility> =
-  {
-    public: ProposalVisibility.PUBLIC,
-    restricted: ProposalVisibility.RESTRICTED,
-    manager_only: ProposalVisibility.MANAGER_ONLY,
-  };
+export const proposalVisibilityValueMap: Record<string, ProposalVisibility> = {
+  public: ProposalVisibility.PUBLIC,
+  restricted: ProposalVisibility.RESTRICTED,
+  manager_only: ProposalVisibility.MANAGER_ONLY,
+};
 
-export const ProposalEndpointStatusMap: Record<string, ProposalStatus> = {
+export const proposalStatusValueMap: Record<string, ProposalStatus> = {
   draft: ProposalStatus.DRAFT,
   active: ProposalStatus.ACTIVE,
   resolved: ProposalStatus.RESOLVED,
@@ -39,12 +38,24 @@ export class ProposalController {
   //   return this.proposalService.getAllProposalsDemo();
   // }
 
+  @Get(':visibility')
+  getProposalsByVisibility(
+    @Req() req: any,
+    @Param('visibility', new ParseObjectKeyPipe(proposalVisibilityValueMap))
+    visibility: ProposalVisibility,
+  ) {
+    return this.proposalService.getProposalsByVisibility(
+      req.user.id,
+      visibility,
+    );
+  }
+
   @Get(':visibility/:status/all')
   getAllSpecificProposals(
     @Req() req: any,
-    @Param('visibility', new ParseObjectKeyPipe(ProposalEndpointVisibilityMap))
+    @Param('visibility', new ParseObjectKeyPipe(proposalVisibilityValueMap))
     visibility: ProposalVisibility,
-    @Param('status', new ParseObjectKeyPipe(ProposalEndpointStatusMap))
+    @Param('status', new ParseObjectKeyPipe(proposalStatusValueMap))
     status: ProposalStatus,
   ) {
     console.log('Request', visibility, status);
@@ -53,15 +64,6 @@ export class ProposalController {
       visibility,
       status,
     );
-  }
-
-  @Get(':visibility/categories')
-  getProposalCategories(
-    @Req() req: any,
-    @Param('visibility', new ParseObjectKeyPipe(ProposalEndpointVisibilityMap))
-    visibility: ProposalVisibility,
-  ) {
-    return this.proposalService.getProposalCategories(req.user.id, visibility);
   }
 
   @UsePipes(new ZodValidationPipe(ProposalDtoSchema))

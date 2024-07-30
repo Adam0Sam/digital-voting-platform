@@ -7,6 +7,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProposalDto } from './dto';
+import { PrismaQuery } from 'src/lib/types';
 
 @Injectable()
 export class ProposalService {
@@ -27,7 +28,7 @@ export class ProposalService {
         { reviewers: { some: { id: userId } } },
         { userVotes: { some: { userId: userId } } },
       ],
-    } satisfies Record<ProposalVisibility, Record<string, any>[]>;
+    } satisfies PrismaQuery<ProposalVisibility, Record<string, any>[]>;
 
     return requiredRolesByVisibility[visibility];
   }
@@ -46,7 +47,7 @@ export class ProposalService {
     userId: string,
     proposalVisibility: ProposalVisibility,
     proposalStatus: ProposalStatus,
-  ): Promise<Proposal[]> {
+  ) {
     return this.prisma.proposal.findMany({
       where: {
         status: proposalStatus,
@@ -62,18 +63,30 @@ export class ProposalService {
     });
   }
 
-  async getProposalCategories(
+  async getProposalsByVisibility(
     userId: string,
     proposalVisibility: ProposalVisibility,
-  ): Promise<string[]> {
-    const proposals = await this.prisma.proposal.findMany({
+  ) {
+    const requiredRoles = this.getRequiredRolesByVisibility(
+      userId,
+      proposalVisibility,
+    );
+    const query: PrismaQuery = {
       where: {
         visibility: proposalVisibility,
-        OR: this.getRequiredRolesByVisibility(userId, proposalVisibility),
+      },
+    };
+    if (requiredRoles.length > 0) {
+      query.where.OR = requiredRoles;
+    }
+
+    return this.prisma.proposal.findMany({
+      where: query.where,
+      include: {
+        resolutionValues: true,
+        userVotes: true,
       },
     });
-
-    return proposals.map((proposal) => proposal.title);
   }
 
   async createProposal(proposal: ProposalDto) {
@@ -103,6 +116,7 @@ export class ProposalService {
         startDate: proposal.startDate,
         endDate: proposal.endDate,
         status: proposal.status,
+        visibility: proposal.visibility,
         owners: { connect: ownerIds },
         reviewers: { connect: reviewerIds },
         resolutionValues: {
