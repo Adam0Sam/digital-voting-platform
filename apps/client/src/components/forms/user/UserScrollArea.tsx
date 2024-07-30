@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { User } from '@/types';
 import { UserMinus } from 'lucide-react';
 
-const SelectedUserScrollArea = ({
+const UserScrollArea = ({
   users,
   handleRemove,
 }: {
@@ -29,4 +29,4 @@ const SelectedUserScrollArea = ({
   </ScrollArea>
 );
 
-export default SelectedUserScrollArea;
+export default UserScrollArea;

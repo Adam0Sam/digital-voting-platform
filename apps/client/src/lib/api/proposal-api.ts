@@ -13,6 +13,12 @@ export class ProposalApi {
     return createdProposal;
   }
 
+  static async deleteOne(id: string) {
+    return await api.fetchWithAuth(`/proposal/delete/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   static async getAllRestrictedActive() {
     const proposals = await api.fetchWithAuth('/proposal/restricted/active');
     return proposals;

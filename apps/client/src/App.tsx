@@ -19,8 +19,6 @@ import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import RestrictedActiveProposalsPage, {
   loader as restrictedActiveProposalsLoader,
 } from './pages/proposal/RestrictedActiveProposalsPage';
-import { ComboboxDemo } from './test components/test-combo';
-import Combobox from './components/Combobox';
 
 function App() {
   const router = createBrowserRouter(
@@ -46,19 +44,7 @@ function App() {
           <Route path="manager"></Route>
           <Route path="public"></Route>
         </Route>
-        <Route
-          path="test"
-          element={
-            <Combobox
-              items={[
-                { label: '1', value: '1' },
-                { label: '2', value: '2' },
-                { label: '3', value: '3' },
-              ]}
-              handleSelect={item => console.log(item)}
-            />
-          }
-        />
+        <Route path="test" element={<></>} />
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),

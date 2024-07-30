@@ -1,6 +1,6 @@
 import { User } from '@/types';
 import { ExtendedFormProps } from '../interface';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import { Button } from '../../ui/button';
 import UserSelectionTable from '../../tables/user/UserSelectionTable';
@@ -10,7 +10,8 @@ import { StringifiedUser } from '../../tables/user/UserColumns';
 import { Separator } from '../../ui/separator';
 import useSignedInUser from '@/context/userContext';
 import getNormalizedTableUsers from '../../tables/user/utils/normalize-users';
-import SelectedUserScrollArea from './SelectedUserScrollArea';
+import UserScrollArea from './UserScrollArea';
+import { cn } from '@/lib/utils';
 
 type FormValues = { owners: User[]; reviewers: User[] };
 export type ProposalManagerSelectionFormProps = ExtendedFormProps<FormValues>;
@@ -29,18 +30,14 @@ const ProposalManagerSelectionForm: FC<ProposalManagerSelectionFormProps> = ({
     SelectionType.Owners,
   );
 
-  const { user: signedInUSer } = useSignedInUser();
+  const { user: signedInUser } = useSignedInUser();
 
-  const [selectedOwners, setSelectedOwners] = useState<User[]>([]);
+  const [selectedOwners, setSelectedOwners] = useState<User[]>(
+    signedInUser ? [signedInUser] : [],
+  );
   const [selectedReviewers, setSelectedReviewers] = useState<User[]>([]);
 
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (signedInUSer) {
-      setSelectedOwners(prev => [...prev, signedInUSer]);
-    }
-  }, [signedInUSer?.id]);
 
   const removeUser = (targetUser: User, selectionType: SelectionType) => {
     if (selectionType === SelectionType.Owners) {
@@ -74,7 +71,7 @@ const ProposalManagerSelectionForm: FC<ProposalManagerSelectionFormProps> = ({
             <SheetTrigger asChild>
               <div>
                 <div className="flex items-center justify-between">
-                  Owners
+                  <p className={cn({ 'text-destructive': error })}>Owners</p>
                   <Button
                     variant="ghost"
                     onClick={() => {
@@ -88,7 +85,7 @@ const ProposalManagerSelectionForm: FC<ProposalManagerSelectionFormProps> = ({
               </div>
             </SheetTrigger>
             {error && <p className="text-md text-destructive">{error}</p>}
-            <SelectedUserScrollArea
+            <UserScrollArea
               users={selectedOwners}
               handleRemove={(user: User) =>
                 removeUser(user, SelectionType.Owners)
@@ -112,7 +109,7 @@ const ProposalManagerSelectionForm: FC<ProposalManagerSelectionFormProps> = ({
                 <Separator className="mb-5 mt-2" />
               </div>
             </SheetTrigger>
-            <SelectedUserScrollArea
+            <UserScrollArea
               users={selectedReviewers}
               handleRemove={(user: User) => {
                 removeUser(user, SelectionType.Reviewers);

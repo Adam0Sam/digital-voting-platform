@@ -28,7 +28,7 @@ import ProposalManagerSelectionForm from '@/components/forms/user/ProposalManage
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 import { APIError } from '@/lib/auth/auth-fetch';
 import Combobox from '@/components/Combobox';
-import { ComboboxDemo } from '@/test components/test-combo';
+import { View } from 'lucide-react';
 
 const createProposal = async (data: ProposalDto) => {
   try {
@@ -208,23 +208,28 @@ const proposalVisibilityOptions = [
   {
     value: ProposalVisibility.PUBLIC,
     label: 'Public',
+    description: 'Visible to all users',
   },
   {
     value: ProposalVisibility.RESTRICTED,
-    label: 'Private',
+    label: 'Restricted',
+    description: 'Visible to selected voters and managers',
   },
   {
     value: ProposalVisibility.MANAGER_ONLY,
     label: 'Manager Only',
+    description: 'Only visible to managers',
   },
 ];
+
+const DEFAULT_PROPOSAL_VISIBILITY = ProposalVisibility.RESTRICTED;
 
 const VoterSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: (users: User[], proposalVisibility: ProposalVisibility) => void;
 }> = ({ carouselApi, handleSubmit }) => {
   const [proposalVisibility, setProposalVisibility] =
-    useState<ProposalVisibility>(ProposalVisibility.RESTRICTED);
+    useState<ProposalVisibility>(DEFAULT_PROPOSAL_VISIBILITY);
   return (
     <CardWrapper
       cardTitle="Select Voters"
@@ -237,11 +242,13 @@ const VoterSelectionCard: FC<{
         }}
         onCancel={carouselApi.scrollPrev}
       >
-        {/* <Combobox
+        <Combobox
           items={proposalVisibilityOptions}
-          handleSelect={value => setProposalVisibility(value)}
-          defaultValue={ProposalVisibility.RESTRICTED}
-        /> */}
+          handleSelectedValue={value => setProposalVisibility(value)}
+          defaultItem={proposalVisibilityOptions.find(
+            option => option.value === DEFAULT_PROPOSAL_VISIBILITY,
+          )}
+        />
       </UserSelectionForm>
     </CardWrapper>
   );
@@ -279,13 +286,6 @@ export default function ProposalCreationPage() {
   return (
     <main className="flex flex-1 items-center justify-center">
       <CardCarousel ref={carouselRef}>
-        <VoterSelectionCard
-          carouselApi={carouselApi}
-          handleSubmit={(users, proposalVisibility) => {
-            setProposalVoters(users);
-            setProposalVisibility(proposalVisibility);
-          }}
-        />
         <TitleDescriptionCard
           carouselApi={carouselApi}
           handleSubmit={(title, description) => {
@@ -312,6 +312,13 @@ export default function ProposalCreationPage() {
           defaultValues={{
             startDate: proposalStartDate,
             endDate: proposalEndDate,
+          }}
+        />
+        <VoterSelectionCard
+          carouselApi={carouselApi}
+          handleSubmit={(users, proposalVisibility) => {
+            setProposalVoters(users);
+            setProposalVisibility(proposalVisibility);
           }}
         />
         <ManagerSelectionCard

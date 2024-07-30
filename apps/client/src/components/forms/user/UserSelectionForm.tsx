@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import FormHandleButtons from '../FormHandleButtons';
 import { ComboboxDemo } from '@/test components/test-combo';
+import UserScrollArea from './UserScrollArea';
 
 type FormValues = User[];
 export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
@@ -33,11 +34,11 @@ const UserSelectionForm: FC<
   };
 
   return (
-    <div className="flex max-w-md flex-1 flex-col gap-8">
+    <div className="flex max-w-lg flex-1 flex-col gap-8">
       <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
         <div className="flex flex-col-reverse gap-10 md:flex-row">
           <div className="flex flex-1 flex-col">
-            <SheetTrigger asChild>
+            <SheetTrigger asChild className="flex-1">
               <div>
                 <div className="flex items-center justify-between">
                   <p className={cn({ 'text-destructive': error })}>
@@ -50,8 +51,8 @@ const UserSelectionForm: FC<
                 <Separator className="mb-5 mt-2" />
               </div>
             </SheetTrigger>
-            <ScrollArea className="h-48">
-              {error && <p className="text-md text-destructive">{error}</p>}
+            {error && <p className="text-md text-destructive">{error}</p>}
+            {/* <ScrollArea className="h-48">
               {selectedUsers.map(user => (
                 <div
                   className="mb-4 flex items-center justify-between rounded-md border px-2 py-2"
@@ -65,8 +66,10 @@ const UserSelectionForm: FC<
                   </Button>
                 </div>
               ))}
-            </ScrollArea>
+            </ScrollArea> */}
+            <UserScrollArea users={selectedUsers} />
           </div>
+          <div className="self-center md:self-auto">{children}</div>
         </div>
         <SheetContent
           side="right"
