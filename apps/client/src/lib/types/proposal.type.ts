@@ -32,6 +32,7 @@ export type ProposalDto = {
   resolutionValues: ResolutionValue[];
   voters: User[];
   visibility: ProposalVisibility;
+  status: ProposalStatus;
 };
 
 export enum ProposalVisibility {
@@ -40,9 +41,19 @@ export enum ProposalVisibility {
   MANAGER_ONLY = 'MANAGER_ONLY',
 }
 
+export function isProposalVisibility(
+  item: unknown,
+): item is ProposalVisibility {
+  return Object.values(ProposalVisibility).includes(item as ProposalVisibility);
+}
+
 export enum ProposalStatus {
   DRAFT = 'DRAFT',
   ACTIVE = 'ACTIVE',
   RESOLVED = 'RESOLVED',
   ABORTED = 'ABORTED',
+}
+
+export function isProposalStatus(item: unknown): item is ProposalStatus {
+  return Object.values(ProposalStatus).includes(item as ProposalStatus);
 }
