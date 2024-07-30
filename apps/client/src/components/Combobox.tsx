@@ -12,25 +12,29 @@ import {
 } from './ui/command';
 import { cn } from '@/lib/utils';
 
+type ComboboxItem<T> = {
+  label: string;
+  value: T;
+};
+
 export default function Combobox<T>({
   items,
-  handleSelect,
-  defaultValue,
+  handleSelectedValue,
+  defaultItem,
   children = 'Select',
   itemNamePlural = 'items',
 }: {
-  items: { label: string; value: T }[];
-  handleSelect: (value: T) => void;
-  defaultValue?: T;
+  items: ComboboxItem<T>[];
+  handleSelectedValue: (value: T) => void;
+  defaultItem?: ComboboxItem<T>;
   children?: React.ReactNode;
   itemNamePlural?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState<T | null>(
-    defaultValue ?? null,
+  const [selectedItem, setSelectedItem] = useState<ComboboxItem<T> | null>(
+    defaultItem ?? null,
   );
 
-  console.log('items', items);
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -40,11 +44,7 @@ export default function Combobox<T>({
           aria-expanded={isOpen}
           className="w-[200px] justify-between"
         >
-          {selectedValue ? (
-            items.find(item => item.value === selectedValue)?.label
-          ) : (
-            <>{children}</>
-          )}
+          {selectedItem ? selectedItem.label : <>{children}</>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -55,17 +55,18 @@ export default function Combobox<T>({
             <CommandList>
               {items.map(item => (
                 <CommandItem
-                  key={item.value}
-                  value={item.value}
+                  key={String(item.value)}
+                  value={item.label}
                   onSelect={() => {
-                    setSelectedValue(item.value);
+                    setSelectedItem(item);
+                    handleSelectedValue(item.value);
                     setIsOpen(false);
                   }}
                 >
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      item.value === selectedValue
+                      item.value === selectedItem?.value
                         ? 'opacity-100'
                         : 'opacity-0',
                     )}
