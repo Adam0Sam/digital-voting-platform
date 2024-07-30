@@ -19,6 +19,10 @@ import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import RestrictedActiveProposalsPage, {
   loader as restrictedActiveProposalsLoader,
 } from './pages/proposal/RestrictedActiveProposalsPage';
+import ProposalVisibilityPage, {
+  loader as proposalCategoryLoader,
+} from './pages/proposal/ProposalVisibilityPage';
+import SpecificProposalsPage from './pages/proposal/SpecificProposalsPage';
 
 function App() {
   const router = createBrowserRouter(
@@ -34,15 +38,19 @@ function App() {
         <Route path="home" element={<HomeLayout />}></Route>
         <Route path="proposals">
           <Route path="create" element={<ProposalCreationPage />} />
-          <Route path="restricted">
-            <Route
+          <Route
+            path=":visibility"
+            loader={proposalCategoryLoader}
+            element={<ProposalVisibilityPage />}
+          >
+            <Route path=":status" element={<SpecificProposalsPage />} />
+            <Route path="all" />
+            {/* <Route
               path="active"
               loader={restrictedActiveProposalsLoader}
               element={<RestrictedActiveProposalsPage />}
-            />
+            /> */}
           </Route>
-          <Route path="manager"></Route>
-          <Route path="public"></Route>
         </Route>
         <Route path="test" element={<></>} />
         <Route path="*" element={<div>404</div>} />

@@ -1,5 +1,5 @@
 import UserController from '@/lib/user-controller';
-import { User } from '@/types';
+import { User } from '@/lib/types';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 

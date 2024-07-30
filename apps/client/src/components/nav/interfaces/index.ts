@@ -1,1 +1,1 @@
-export * from './link-item-props';
+export * from './link-component.interface';

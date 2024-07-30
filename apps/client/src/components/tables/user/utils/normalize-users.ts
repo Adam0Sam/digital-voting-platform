@@ -1,4 +1,4 @@
-import { Grade, isGrade, User } from '@/types';
+import { Grade, isGrade, User } from '@/lib/types';
 import { StringifiedUser } from '../UserColumns';
 
 const getNormalizedTableUsers: (

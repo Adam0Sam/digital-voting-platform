@@ -12,7 +12,7 @@ import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
 import { UserSelectionColumn } from './common/column.enum';
 import useFilterColumn from './context/FilterColumnContext';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User } from '@/types';
+import { User } from '@/lib/types';
 
 export type WithValuesAsStrings<T> = {
   [K in keyof T]: string;

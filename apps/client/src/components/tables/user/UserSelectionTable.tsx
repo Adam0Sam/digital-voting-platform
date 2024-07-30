@@ -1,4 +1,4 @@
-import { Grade, User } from '@/types';
+import { Grade, User } from '@/lib/types';
 import { DataTable } from './DataTable';
 import { columns, StringifiedUser } from './UserColumns';
 import { FilterColumnContextProvider } from './context/FilterColumnContext';

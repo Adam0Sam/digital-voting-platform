@@ -39,3 +39,10 @@ export enum ProposalVisibility {
   RESTRICTED = 'RESTRICTED',
   MANAGER_ONLY = 'MANAGER_ONLY',
 }
+
+export enum ProposalStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  RESOLVED = 'RESOLVED',
+  ABORTED = 'ABORTED',
+}

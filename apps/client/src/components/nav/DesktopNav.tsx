@@ -5,14 +5,13 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 
-import { CircleUserRound, ClipboardPlus } from 'lucide-react';
-import { componentLinkItems, proposalLinkItems } from './links';
-import { LinkItemProps } from './interfaces';
+import { CircleUserRound, Clipboard } from 'lucide-react';
+import { LinkComponentProps } from './interfaces';
+import { proposalLinkCollection, testLinkCollection } from './link-collections';
 
 type getStyles = (isActive: boolean) => string;
 // why do i get error when I pass arrow fn directly?
@@ -37,7 +36,7 @@ const LinkItem = ({
   children,
   className,
   ...props
-}: LinkItemProps) => (
+}: LinkComponentProps) => (
   <li>
     <NavLink
       className={({ isActive }) => cn(getLinkItemStyles(isActive), className)}
@@ -61,26 +60,30 @@ export default function DesktopNav({ className }: { className?: string }) {
       <NavigationMenu className="ml-auto">
         <NavigationMenuList className="gap-3">
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Proposals</NavigationMenuTrigger>
+            <NavigationMenuTrigger>
+              {proposalLinkCollection.name}
+            </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                 <li className="row-span-4">
                   <NavLink
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                    className="flex h-full w-full select-none flex-col justify-center rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                     to="/proposals"
                   >
-                    <ClipboardPlus className="h-6 w-6" />
-                    <div className="mb-2 mt-4 text-lg font-medium">
-                      Proposals
+                    <div className="mb-2 mt-4 flex items-center gap-2">
+                      {proposalLinkCollection.icon && (
+                        <proposalLinkCollection.icon />
+                      )}
+                      <p className="text-lg font-medium">
+                        {proposalLinkCollection.name}
+                      </p>
                     </div>
                     <p className="text-sm leading-tight text-muted-foreground">
-                      Proposals are a way to suggest changes to a project, to
-                      elect a representative and more. Here you can view, vote,
-                      comment on proposals and even create your own!.
+                      {proposalLinkCollection.description}
                     </p>
                   </NavLink>
                 </li>
-                {proposalLinkItems.map(proposal => (
+                {proposalLinkCollection.items.map(proposal => (
                   <LinkItem
                     key={proposal.title}
                     title={proposal.title}
@@ -93,10 +96,12 @@ export default function DesktopNav({ className }: { className?: string }) {
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+            <NavigationMenuTrigger>
+              {testLinkCollection.name}
+            </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                {componentLinkItems.map(component => (
+                {testLinkCollection.items.map(component => (
                   <LinkItem
                     key={component.title}
                     title={component.title}

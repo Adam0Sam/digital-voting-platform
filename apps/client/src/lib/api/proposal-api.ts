@@ -1,4 +1,8 @@
-import { ProposalDto } from '@/types/proposal.type';
+import {
+  ProposalDto,
+  ProposalStatus,
+  ProposalVisibility,
+} from '@/lib/types/proposal.type';
 import { api } from '../auth/auth-fetch';
 
 export class ProposalApi {
@@ -19,8 +23,20 @@ export class ProposalApi {
     });
   }
 
-  static async getAllRestrictedActive() {
-    const proposals = await api.fetchWithAuth('/proposal/restricted/active');
+  static async getAllSpecificProposals(
+    visibility: ProposalVisibility,
+    status: ProposalStatus,
+  ) {
+    const proposals = await api.fetchWithAuth(
+      `/proposal/${visibility}/${status}/all`,
+    );
     return proposals;
+  }
+
+  static async getProposalCategories(visibility: ProposalVisibility) {
+    const categories = await api.fetchWithAuth(
+      `/proposal/${visibility}/categories`,
+    );
+    return categories;
   }
 }

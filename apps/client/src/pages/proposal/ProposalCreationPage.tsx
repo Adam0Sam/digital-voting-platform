@@ -11,7 +11,7 @@ import {
   ProposalDto,
   ProposalVisibility,
   ResolutionValue,
-} from '@/types/proposal.type';
+} from '@/lib/types/proposal.type';
 import { ProposalApi } from '@/lib/api';
 import {
   Card,
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/card';
 import { isValid } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { isUserArray, User } from '@/types';
+import { isUserArray, User } from '@/lib/types';
 import ResolutionValueForm from '@/components/forms/resolution-value/ResolutionValueSelectionForm';
 import ProposalManagerSelectionForm from '@/components/forms/user/ProposalManagerSelectionForm';
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';

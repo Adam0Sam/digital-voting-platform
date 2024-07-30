@@ -1,4 +1,4 @@
-import { StringifiedUser, User } from '@/types';
+import { StringifiedUser, User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
 import { FC, ReactNode, useState } from 'react';
 import getNormalizedTableUsers from '@/components/tables/user/utils/normalize-users';

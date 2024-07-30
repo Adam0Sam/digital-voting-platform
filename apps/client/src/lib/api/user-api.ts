@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { User } from '@/lib/types';
 import { api } from '../auth/auth-fetch';
 
 export class UserApi {

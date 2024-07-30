@@ -6,7 +6,7 @@ import { SquareMinus, SquarePlus } from 'lucide-react';
 import FormHandleButtons from '../FormHandleButtons';
 import TitleDescriptionForm from '../TitleDescriptionForm';
 import { Separator } from '../../ui/separator';
-import { ResolutionValue } from '@/types/proposal.type';
+import { ResolutionValue } from '@/lib/types/proposal.type';
 import { ScrollArea } from '../../ui/scroll-area';
 import ChoiceCountPopover from './ChoiceCountPopover';
 

@@ -1,9 +1,9 @@
-import { User } from '@/types';
+import { User } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { UserApi } from '../api';
 
 export default function useAllUsers() {
-  const [allUSers, setAllUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
     UserApi.getAll()
@@ -13,5 +13,5 @@ export default function useAllUsers() {
       .catch(error => console.error(error));
   }, []);
 
-  return allUSers;
+  return allUsers;
 }

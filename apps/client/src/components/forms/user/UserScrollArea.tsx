@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User } from '@/types';
+import { User } from '@/lib/types';
 import { UserMinus } from 'lucide-react';
 
 const UserScrollArea = ({

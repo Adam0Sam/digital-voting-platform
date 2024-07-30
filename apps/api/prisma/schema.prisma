@@ -59,7 +59,7 @@ enum Grade {
   NONE
 }
 
-enum Visibility {
+enum ProposalVisibility {
   PUBLIC
   RESTRICTED
   MANAGER_ONLY
@@ -112,7 +112,7 @@ model Proposal {
   owners           User[]                    @relation("Owners")
   reviewers        User[]                    @relation("Reviewers")
   choiceCount      Int                       @default(1)
-  visibility       Visibility                @default(RESTRICTED)
+  visibility       ProposalVisibility        @default(RESTRICTED)
 }
 
 model ProposalResolutionValue {

@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
 import { FC, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';

@@ -3,6 +3,7 @@ import {
   Proposal,
   ProposalResolutionValue,
   ProposalStatus,
+  ProposalVisibility,
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProposalDto } from './dto';
@@ -11,7 +12,27 @@ import { ProposalDto } from './dto';
 export class ProposalService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllProposals(): Promise<Proposal[]> {
+  private getRequiredRolesByVisibility(
+    userId: string,
+    visibility: ProposalVisibility,
+  ) {
+    const requiredRolesByVisibility = {
+      PUBLIC: [],
+      MANAGER_ONLY: [
+        { owners: { some: { id: userId } } },
+        { reviewers: { some: { id: userId } } },
+      ],
+      RESTRICTED: [
+        { owners: { some: { id: userId } } },
+        { reviewers: { some: { id: userId } } },
+        { userVotes: { some: { userId: userId } } },
+      ],
+    } satisfies Record<ProposalVisibility, Record<string, any>[]>;
+
+    return requiredRolesByVisibility[visibility];
+  }
+
+  async getAllProposalsDemo(): Promise<Proposal[]> {
     return this.prisma.proposal.findMany({
       include: {
         owners: true,
@@ -21,39 +42,16 @@ export class ProposalService {
       },
     });
   }
-
-  async getAllRestrictedProposals(
+  async getAllSpecificProposals(
     userId: string,
-    proposalStatus?: ProposalStatus,
+    proposalVisibility: ProposalVisibility,
+    proposalStatus: ProposalStatus,
   ): Promise<Proposal[]> {
     return this.prisma.proposal.findMany({
       where: {
-        OR: [
-          {
-            status: proposalStatus ?? ProposalStatus.DRAFT,
-            userVotes: {
-              some: {
-                userId: userId,
-              },
-            },
-          },
-          {
-            status: proposalStatus ?? ProposalStatus.DRAFT,
-            owners: {
-              some: {
-                id: userId,
-              },
-            },
-          },
-          {
-            status: proposalStatus ?? ProposalStatus.DRAFT,
-            reviewers: {
-              some: {
-                id: userId,
-              },
-            },
-          },
-        ],
+        status: proposalStatus,
+        visibility: proposalVisibility,
+        OR: this.getRequiredRolesByVisibility(userId, proposalVisibility),
       },
       include: {
         owners: true,
@@ -62,6 +60,20 @@ export class ProposalService {
         userVotes: true,
       },
     });
+  }
+
+  async getProposalCategories(
+    userId: string,
+    proposalVisibility: ProposalVisibility,
+  ): Promise<string[]> {
+    const proposals = await this.prisma.proposal.findMany({
+      where: {
+        visibility: proposalVisibility,
+        OR: this.getRequiredRolesByVisibility(userId, proposalVisibility),
+      },
+    });
+
+    return proposals.map((proposal) => proposal.title);
   }
 
   async createProposal(proposal: ProposalDto) {
