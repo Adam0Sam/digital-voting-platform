@@ -5,12 +5,10 @@ import getNormalizedTableUsers from '@/components/tables/user/utils/normalize-us
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { UserMinus, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import FormHandleButtons from '../FormHandleButtons';
-import { ComboboxDemo } from '@/test components/test-combo';
 import UserScrollArea from './UserScrollArea';
 
 type FormValues = User[];
@@ -52,22 +50,7 @@ const UserSelectionForm: FC<
               </div>
             </SheetTrigger>
             {error && <p className="text-md text-destructive">{error}</p>}
-            {/* <ScrollArea className="h-48">
-              {selectedUsers.map(user => (
-                <div
-                  className="mb-4 flex items-center justify-between rounded-md border px-2 py-2"
-                  key={user.id}
-                >
-                  <p className="ml-4">
-                    {user.personalNames.join(' ')}, {user.familyName}
-                  </p>
-                  <Button variant="ghost" onClick={() => removeUser(user)}>
-                    <UserMinus size={22} />
-                  </Button>
-                </div>
-              ))}
-            </ScrollArea> */}
-            <UserScrollArea users={selectedUsers} />
+            <UserScrollArea users={selectedUsers} handleRemove={removeUser} />
           </div>
           <div className="self-center md:self-auto">{children}</div>
         </div>

@@ -28,7 +28,6 @@ import ProposalManagerSelectionForm from '@/components/forms/user/ProposalManage
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 import { APIError } from '@/lib/auth/auth-fetch';
 import Combobox from '@/components/Combobox';
-import { View } from 'lucide-react';
 
 const createProposal = async (data: ProposalDto) => {
   try {
@@ -55,7 +54,7 @@ const createProposal = async (data: ProposalDto) => {
     }
   }
 };
-
+// TODO: Make a prettier proposal summary component
 function ProposalSummary({
   data,
   onCancel,
