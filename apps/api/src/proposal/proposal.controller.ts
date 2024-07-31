@@ -38,6 +38,21 @@ export class ProposalController {
     return this.proposalService.getAllProposalsDemo();
   }
 
+  @Get('voter/all')
+  getVoterProposals(@Req() req: any) {
+    return this.proposalService.getVoterProposals(req.user.id);
+  }
+
+  @Get('owner/all')
+  getManagedProposals(@Req() req: any) {
+    return this.proposalService.getOwnerProposals(req.user.id);
+  }
+
+  @Get('reviewer/all')
+  getReviewProposals(@Req() req: any) {
+    return this.proposalService.getReviewerProposals(req.user.id);
+  }
+
   @Get(':visibility')
   getProposalsByVisibility(
     @Req() req: any,

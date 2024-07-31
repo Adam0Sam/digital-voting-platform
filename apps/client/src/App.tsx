@@ -16,6 +16,12 @@ import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
+import VoteProposalsPage, {
+  loader as voteProposalsLoader,
+} from './pages/proposal/VoteProposalsPage';
+import ManageProposalsPage, {
+  loader as manageProposalsLoader,
+} from './pages/proposal/ManageProposalsPage';
 
 function App() {
   const router = createBrowserRouter(
@@ -30,8 +36,16 @@ function App() {
         />
         <Route path="home" element={<HomeLayout />}></Route>
         <Route path="proposals">
-          <Route path="vote" element={<div>Vote</div>} />
-          <Route path="manage" element={<div>Manage</div>} />
+          <Route
+            path="vote"
+            element={<VoteProposalsPage />}
+            loader={voteProposalsLoader}
+          />
+          <Route
+            path="manage"
+            element={<ManageProposalsPage />}
+            loader={manageProposalsLoader}
+          />
           <Route path="create" element={<ProposalCreationPage />} />
         </Route>
         <Route path="test" element={<></>} />

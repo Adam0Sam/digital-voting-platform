@@ -4,6 +4,7 @@ import {
   ProposalResolutionValue,
   ProposalStatus,
   ProposalVisibility,
+  UserRole,
 } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProposalDto } from './dto';
@@ -12,6 +13,17 @@ import { PrismaQuery } from 'src/lib/types';
 @Injectable()
 export class ProposalService {
   constructor(private prisma: PrismaService) {}
+
+  async getAllProposalsDemo(): Promise<Proposal[]> {
+    return this.prisma.proposal.findMany({
+      include: {
+        owners: true,
+        reviewers: true,
+        resolutionValues: true,
+        userVotes: true,
+      },
+    });
+  }
 
   private getRequiredRolesByVisibility(
     userId: string,
@@ -33,16 +45,6 @@ export class ProposalService {
     return requiredRolesByVisibility[visibility];
   }
 
-  async getAllProposalsDemo(): Promise<Proposal[]> {
-    return this.prisma.proposal.findMany({
-      include: {
-        owners: true,
-        reviewers: true,
-        resolutionValues: true,
-        userVotes: true,
-      },
-    });
-  }
   async getAllSpecificProposals(
     userId: string,
     proposalVisibility: ProposalVisibility,
@@ -85,6 +87,85 @@ export class ProposalService {
       include: {
         resolutionValues: true,
         userVotes: true,
+      },
+    });
+  }
+
+  // TODO: All three following methods are nearly identical, consider making a more genetic way to fetch proposals
+  async getVoterProposals(userId: string) {
+    return this.prisma.proposal.findMany({
+      where: {
+        userVotes: {
+          some: {
+            userId,
+          },
+        },
+        // MANGER_ONLY visibility is excluded here
+        /**
+         * TODO
+         * Make a more consistent way to handle visibility
+         */
+        OR: [
+          { visibility: ProposalVisibility.PUBLIC },
+          { visibility: ProposalVisibility.RESTRICTED },
+        ],
+      },
+      include: {
+        resolutionValues: true,
+        userVotes: {
+          include: {
+            user: true,
+            chosenResolutions: true,
+          },
+        },
+        owners: true,
+        reviewers: true,
+      },
+    });
+  }
+
+  async getOwnerProposals(userId: string) {
+    return this.prisma.proposal.findMany({
+      where: {
+        owners: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        resolutionValues: true,
+        userVotes: {
+          include: {
+            user: true,
+            chosenResolutions: true,
+          },
+        },
+        owners: true,
+        reviewers: true,
+      },
+    });
+  }
+
+  async getReviewerProposals(userId: string) {
+    return this.prisma.proposal.findMany({
+      where: {
+        reviewers: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        resolutionValues: true,
+        userVotes: {
+          include: {
+            user: true,
+            chosenResolutions: true,
+          },
+        },
+        owners: true,
+        reviewers: true,
       },
     });
   }
