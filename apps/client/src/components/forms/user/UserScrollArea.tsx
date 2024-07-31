@@ -10,7 +10,7 @@ const UserScrollArea = ({
   users: User[];
   handleRemove: (user: User) => void;
 }) => (
-  <ScrollArea className="max-h-48">
+  <ScrollArea className="max-h-48 overflow-auto md:h-48">
     {users.map(user => {
       return (
         <div

@@ -15,6 +15,6 @@ export function getDateDifference(
     (differenceInMilliseconds % (24 * millisecondsPerHour)) /
       millisecondsPerHour,
   );
-  console.log(differenceInMilliseconds);
+
   return { days, hours };
 }

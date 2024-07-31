@@ -33,10 +33,10 @@ export const proposalStatusValueMap: Record<string, ProposalStatus> = {
 export class ProposalController {
   constructor(private proposalService: ProposalService) {}
 
-  // @Get('all')
-  // getAllProposalsDemo() {
-  //   return this.proposalService.getAllProposalsDemo();
-  // }
+  @Get('all')
+  getAllProposalsDemo() {
+    return this.proposalService.getAllProposalsDemo();
+  }
 
   @Get(':visibility')
   getProposalsByVisibility(
@@ -44,6 +44,8 @@ export class ProposalController {
     @Param('visibility', new ParseObjectKeyPipe(proposalVisibilityValueMap))
     visibility: ProposalVisibility,
   ) {
+    console.log('Request', visibility);
+    console.log('User', req.user);
     return this.proposalService.getProposalsByVisibility(
       req.user.id,
       visibility,

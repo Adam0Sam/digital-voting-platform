@@ -52,21 +52,21 @@ export const proposalLinkCollection: LinkCollection = {
   icon: Clipboard,
   items: [
     {
-      title: 'Restricted Proposals',
-      href: 'proposals/restricted',
-      description: 'Only included voters and managers can view these proposals',
+      title: 'Vote Proposals',
+      href: 'proposals/vote',
+      description: 'These proposals are open for you to vote on',
     },
     {
-      title: 'Public Proposals',
-      href: 'proposals/public',
-      description: 'All users can view these proposals',
+      title: 'Managed Proposals',
+      href: 'proposals/manage',
+      description: 'Proposals that you have created or are managing/reviewing',
     },
-    {
-      title: 'Manager Proposals',
-      href: 'proposals/manager_only',
-      description:
-        'Proposals that are still being drafted or have been abandoned, only managers can view these proposals',
-    },
+    // {
+    //   title: 'Manager Proposals',
+    //   href: 'proposals/manager_only',
+    //   description:
+    //     'Proposals that are still being drafted or have been abandoned, only managers can view these proposals',
+    // },
     {
       title: 'Create a Proposal',
       href: 'proposals/create',
