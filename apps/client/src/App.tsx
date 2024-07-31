@@ -16,12 +16,12 @@ import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
-import VoteProposalsPage, {
+import ProposalsVoterPage, {
   loader as voteProposalsLoader,
-} from './pages/proposal/VoteProposalsPage';
-import ManageProposalsPage, {
+} from './pages/proposal/ProposalsVoterPage';
+import ProposalsManagerPage, {
   loader as manageProposalsLoader,
-} from './pages/proposal/ManageProposalsPage';
+} from './pages/proposal/ProposalsManagerPage';
 
 function App() {
   const router = createBrowserRouter(
@@ -38,12 +38,12 @@ function App() {
         <Route path="proposals">
           <Route
             path="vote"
-            element={<VoteProposalsPage />}
+            element={<ProposalsVoterPage />}
             loader={voteProposalsLoader}
           />
           <Route
             path="manage"
-            element={<ManageProposalsPage />}
+            element={<ProposalsManagerPage />}
             loader={manageProposalsLoader}
           />
           <Route path="create" element={<ProposalCreationPage />} />

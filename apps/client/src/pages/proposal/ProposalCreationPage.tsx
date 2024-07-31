@@ -9,6 +9,7 @@ import { redirect } from 'react-router-dom';
 import {
   isResolutionValueArray,
   ProposalDto,
+  ProposalStatus,
   ProposalVisibility,
   ResolutionValue,
 } from '@/lib/types/proposal.type';
@@ -337,6 +338,7 @@ export default function ProposalCreationPage() {
             reviewers: proposalReviewers,
             resolutionValues: proposalResolutionValues,
             voters: proposalVoters,
+            status: ProposalStatus.DRAFT,
             visibility: proposalVisibility ?? ProposalVisibility.RESTRICTED,
           }}
           onCancel={carouselApi.scrollPrev}
