@@ -1,5 +1,12 @@
-import { ArrayNotEmpty, IsArray, IsNotEmpty, IsString } from 'class-validator';
-
+import { Grade } from '@prisma/client';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+} from 'class-validator';
+// TODO: Is class-validator bundled with nestjs by default?
 export class UserQueryDto {
   @IsArray()
   @ArrayNotEmpty()
@@ -8,4 +15,6 @@ export class UserQueryDto {
   @IsString()
   @IsNotEmpty()
   familyName: string;
+  @IsEnum(Grade)
+  grade: Grade;
 }
