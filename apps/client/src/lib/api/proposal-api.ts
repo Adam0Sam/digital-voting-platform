@@ -1,5 +1,6 @@
 import { ProposalDto } from '@/lib/types/proposal.type';
 import { api } from '../auth/auth-fetch';
+import { isProposalAgentRole, ProposalAgentRole } from '../types';
 
 export class ProposalApi {
   private static getProposalUrl(partialUrl: string) {
@@ -34,18 +35,10 @@ export class ProposalApi {
     });
   }
 
-  static getAllProposals(url: string) {
-    return this.proposalFetch(`all/${url}`);
-  }
-  static async getVoterProposals() {
-    return await this.getAllProposals('voter');
-  }
-
-  static async getOwnerProposals() {
-    return await this.getAllProposals('owner');
-  }
-
-  static async getReviewerProposals() {
-    return await this.getAllProposals('reviewer');
+  static getProposalsByAgentRole(agentRole: ProposalAgentRole) {
+    if (!isProposalAgentRole(agentRole)) {
+      throw new Response(`Invalid agent role ${agentRole}`, { status: 400 });
+    }
+    return this.proposalFetch(`all/${agentRole}`);
   }
 }

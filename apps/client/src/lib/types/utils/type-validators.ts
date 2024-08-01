@@ -1,10 +1,8 @@
-export type WithValuesAsStrings<T> = {
-  [K in keyof T]: string;
-};
-export type ReadonlyStringLiteralObject<T extends { [key: string]: string }> = {
-  readonly [K in keyof T]: T[K];
-};
+import { ReadonlyStringLiteralObject } from './util-types';
 
+/**
+ * Is this a useful abstraction?
+ */
 export function isType<T>(
   value: unknown,
   validationFn: (value: unknown) => boolean,
@@ -12,7 +10,7 @@ export function isType<T>(
   return validationFn(value);
 }
 
-export function isKeyOfLiteralObj<T extends { [key: string]: string }>(
+export function isKeyOfStringLiteralObj<T extends { [key: string]: string }>(
   item: unknown,
   literalObj: ReadonlyStringLiteralObject<T>,
 ) {
@@ -27,6 +25,9 @@ export function isKeyOfLiteralObj<T extends { [key: string]: string }>(
 export function isTypeArray<T>(
   value: unknown,
   validationFn: (value: unknown) => value is T,
-): value is T[] {
-  return Array.isArray(value) && value.every(validationFn);
+) {
+  return isType<T[]>(
+    value,
+    value => Array.isArray(value) && value.every(validationFn),
+  );
 }

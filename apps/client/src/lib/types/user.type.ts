@@ -1,15 +1,10 @@
-import {
-  isKeyOfLiteralObj,
-  isRoleType,
-  isType,
-  isTypeArray,
-  WithValuesAsStrings,
-} from './type-utils';
-
 /**
  * The types of Grade, Role, ProposalManagerRole directly relate
  * to the the enums defined in the prisma schema file
  */
+
+import { isKeyOfStringLiteralObj, isTypeArray } from './utils/type-validators';
+import { WithValuesAsStrings } from './utils/util-types';
 
 export const Grades = {
   IA: 'IA',
@@ -37,7 +32,8 @@ export const Grades = {
 
 export type Grade = keyof typeof Grades;
 
-export const isGrade = (grade: unknown) => isKeyOfLiteralObj(grade, Grades);
+export const isGrade = (grade: unknown) =>
+  isKeyOfStringLiteralObj(grade, Grades);
 
 export const UserRoles = {
   STUDENT: 'STUDENT',
@@ -50,17 +46,19 @@ export const UserRoles = {
 
 export type UserRole = keyof typeof UserRoles;
 
-export const isUserRole = (role: unknown) => isKeyOfLiteralObj(role, UserRoles);
+export const isUserRole = (role: unknown) =>
+  isKeyOfStringLiteralObj(role, UserRoles);
 
-export const ProposalManagerRoles = {
+export const ProposalAgentRoles = {
+  VOTER: 'VOTER',
   OWNER: 'OWNER',
   REVIEWER: 'REVIEWER',
 } as const;
 
-export type ProposalManagerRole = keyof typeof ProposalManagerRoles;
+export type ProposalAgentRole = keyof typeof ProposalAgentRoles;
 
-export const isProposalManagerRole = (role: unknown) =>
-  isKeyOfLiteralObj(role, ProposalManagerRoles);
+export const isProposalAgentRole = (role: unknown) =>
+  isKeyOfStringLiteralObj(role, ProposalAgentRoles);
 
 export type User = {
   id: string;
