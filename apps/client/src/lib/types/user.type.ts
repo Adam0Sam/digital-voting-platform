@@ -3,7 +3,11 @@
  * to the the enums defined in the prisma schema file
  */
 
-import { isKeyOfStringLiteralObj, isTypeArray } from './utils/type-validators';
+import {
+  isKeyOfStringLiteralObj,
+  isKeyOfStringLiteralObjArray,
+  isTypeArray,
+} from './utils/type-validators';
 import { WithValuesAsStrings } from './utils/util-types';
 
 export const Grades = {
@@ -48,6 +52,9 @@ export type UserRole = keyof typeof UserRoles;
 
 export const isUserRole = (role: unknown) =>
   isKeyOfStringLiteralObj(role, UserRoles);
+
+export const isUserRoleArray = (items: unknown) =>
+  isKeyOfStringLiteralObjArray(items, UserRoles);
 
 export const ProposalAgentRoles = {
   VOTER: 'VOTER',

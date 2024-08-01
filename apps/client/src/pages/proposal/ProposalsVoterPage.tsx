@@ -2,6 +2,7 @@ import ProposalCard, {
   tempProposalData,
 } from '@/components/proposal/ProposalCard';
 import { ProposalApi } from '@/lib/api';
+import { ProposalAgentRoles } from '@/lib/types';
 import { useLoaderData } from 'react-router-dom';
 
 export default function ProposalsVoterPage() {
@@ -16,5 +17,7 @@ export default function ProposalsVoterPage() {
 }
 
 export async function loader() {
-  return (await ProposalApi.getVoterProposals()) as tempProposalData[];
+  return (await ProposalApi.getProposalsByAgentRole(
+    ProposalAgentRoles.VOTER,
+  )) as tempProposalData[];
 }

@@ -1,4 +1,4 @@
-import { Grade, isGrade, User } from '@/lib/types';
+import { isGrade, isUserRoleArray, User } from '@/lib/types';
 import { StringifiedUser } from '../UserColumns';
 
 const getNormalizedTableUsers: (
@@ -6,7 +6,9 @@ const getNormalizedTableUsers: (
 ) => User[] = users => {
   const normalizedUsers = users.map(user => {
     if (!user.id || !user.personalNames || !user.familyName || !user.roles) {
-      throw new Error(`Necessary info is missing are missing`);
+      throw new Error(
+        `Necessary info is missing for user: ${JSON.stringify(user)}`,
+      );
     }
 
     const personalNames =
@@ -14,10 +16,22 @@ const getNormalizedTableUsers: (
         ? user.personalNames.split(' ')
         : [user.personalNames];
     const familyName = user.familyName;
-    const roles =
+
+    const stringifiedRoles =
       user.roles.indexOf(' ') > -1 ? user.roles.split(' ') : [user.roles];
-    //TODO: What does this mean and how do I fix it
-    const grade = isGrade(user.grade) ? user.grade : Grade.NONE;
+    if (!isUserRoleArray(stringifiedRoles)) {
+      throw new Error(
+        `Invalid ${user.familyName} user roles: ${JSON.stringify(user.roles)}`,
+      );
+    }
+    const roles = stringifiedRoles;
+
+    if (!isGrade(user.grade)) {
+      throw new Error(
+        `Invalid ${user.familyName} user grade: ${JSON.stringify(user.grade)}`,
+      );
+    }
+    const grade = user.grade;
 
     return {
       id: user.id,
