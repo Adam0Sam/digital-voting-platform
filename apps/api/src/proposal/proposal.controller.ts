@@ -15,8 +15,6 @@ export class ProposalController {
     @Param('agentRole', new ParseStringLiteral(ProposalAgentRoles))
     agentRole: ProposalAgentRole,
   ) {
-    console.log(ProposalAgentRoles.includes(agentRole));
-    return agentRole;
-    // return this.proposalService.getProposalByAgent(req.user.id, agentRole);
+    return this.proposalService.getProposalByAgent(req.user.id, agentRole);
   }
 }

@@ -1,8 +1,4 @@
-import {
-  ProposalDto,
-  ProposalStatus,
-  ProposalVisibility,
-} from '@/lib/types/proposal.type';
+import { ProposalDto } from '@/lib/types/proposal.type';
 import { api } from '../auth/auth-fetch';
 
 export class ProposalApi {
@@ -38,35 +34,18 @@ export class ProposalApi {
     });
   }
 
-  static async getAllSpecificProposals(
-    visibility: ProposalVisibility,
-    status: ProposalStatus,
-  ) {
-    const proposals = await this.proposalFetch(`${visibility}/${status}/all`);
-    return proposals;
+  static getAllProposals(url: string) {
+    return this.proposalFetch(`all/${url}`);
   }
-
-  static async getProposalsByVisibility(visibility: ProposalVisibility) {
-    const categories = await this.proposalFetch(`${visibility}`);
-    return categories;
-  }
-
-  /**
-   * Similarly as with visibility,
-   * the following three methods are nearly identical
-   * so is the implementation in `proposal.controller.ts` and `proposal.service.ts`
-   *
-   * TODO: Consider refactoring to a single method
-   */
   static async getVoterProposals() {
-    return await this.proposalFetch('voter/all');
+    return await this.getAllProposals('voter');
   }
 
   static async getOwnerProposals() {
-    return await this.proposalFetch('owner/all');
+    return await this.getAllProposals('owner');
   }
 
   static async getReviewerProposals() {
-    return await this.proposalFetch('reviewer/all');
+    return await this.getAllProposals('reviewer');
   }
 }
