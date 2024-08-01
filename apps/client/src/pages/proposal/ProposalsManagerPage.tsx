@@ -2,7 +2,8 @@ import ProposalCard, {
   tempProposalData,
 } from '@/components/proposal/ProposalCard';
 import { ProposalApi } from '@/lib/api';
-import { ProposalAgentRoles } from '@/lib/types';
+import { ProposalAgentRoles } from '@/lib/types/proposal.type';
+
 import { useLoaderData } from 'react-router-dom';
 
 export default function ProposalsManagerPage() {

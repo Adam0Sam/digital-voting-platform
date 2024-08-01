@@ -11,10 +11,14 @@ import { useState } from 'react';
 
 export default function ChoiceCountPopover({
   maxChoiceCount,
+  handleSelect,
+  defaultChoiceCount,
 }: {
   maxChoiceCount: number;
+  handleSelect?: (value: number) => void;
+  defaultChoiceCount?: number;
 }) {
-  const [choiceCount, setChoiceCount] = useState(1);
+  const [choiceCount, setChoiceCount] = useState(defaultChoiceCount ?? 1);
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +31,7 @@ export default function ChoiceCountPopover({
     setError(null);
     console.log('max', maxChoiceCount);
     setChoiceCount(value);
+    handleSelect?.(value);
   };
   // TODO: Make this mobile friendly with Drawer component
   return (

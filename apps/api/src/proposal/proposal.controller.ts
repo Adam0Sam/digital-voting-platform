@@ -1,8 +1,17 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
 import { ProposalAgentRole, ProposalAgentRoles } from 'src/lib/types';
-import { ParseStringLiteral } from 'src/pipes';
+import { ParseStringLiteral, ZodValidationPipe } from 'src/pipes';
+import { ProposalDto, ProposalDtoSchema } from './dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('proposal')
@@ -16,5 +25,13 @@ export class ProposalController {
     agentRole: ProposalAgentRole,
   ) {
     return this.proposalService.getProposalByAgent(req.user.id, agentRole);
+  }
+
+  @Post('create')
+  createOne(
+    @Body('proposal', new ZodValidationPipe(ProposalDtoSchema))
+    proposal: ProposalDto,
+  ) {
+    return this.proposalService.createProposal(proposal);
   }
 }

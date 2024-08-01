@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { ExtendedFormProps } from '../interface';
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import { Button } from '../../ui/button';
@@ -6,23 +6,27 @@ import { SquareMinus, SquarePlus } from 'lucide-react';
 import FormHandleButtons from '../FormHandleButtons';
 import TitleDescriptionForm from '../TitleDescriptionForm';
 import { Separator } from '../../ui/separator';
-import { ResolutionValue } from '@/lib/types/proposal.type';
 import { ScrollArea } from '../../ui/scroll-area';
 import ChoiceCountPopover from './ChoiceCountPopover';
 
 import { cn } from '@/lib/utils';
+import { ProposalChoiceDto } from '@/lib/types/proposal.type';
 
-type FormValues = ResolutionValue[];
-export type ResolutionValueFormProps = ExtendedFormProps<FormValues>;
+type FormValues = {
+  choices: ProposalChoiceDto[];
+  choiceCount: number;
+};
+export type ProposalChoiceFormProps = ExtendedFormProps<FormValues>;
 
-const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
+const ProposalChoiceForm: FC<ProposalChoiceFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
-  const [resolutionValues, setResolutionValues] = useState<ResolutionValue[]>(
+  const [proposalChoices, setProposalChoices] = useState<ProposalChoiceDto[]>(
     [],
   );
+  const choiceCount = useRef(1);
   const [error, setError] = useState<string | null>(null);
 
   return (
@@ -45,7 +49,7 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
             </SheetTrigger>
             <ScrollArea className="h-48">
               {error && <p className="text-md text-destructive">{error}</p>}
-              {resolutionValues.map(resolution => (
+              {proposalChoices.map(resolution => (
                 <div
                   className="mb-4 flex items-center justify-between rounded-md border px-2 py-2"
                   key={resolution.value}
@@ -54,7 +58,7 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
                   <Button
                     variant="ghost"
                     onClick={() =>
-                      setResolutionValues(prev =>
+                      setProposalChoices(prev =>
                         prev.filter(res => res.value !== resolution.value),
                       )
                     }
@@ -67,8 +71,12 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
           </div>
           <ChoiceCountPopover
             maxChoiceCount={
-              resolutionValues.length !== 0 ? resolutionValues.length : 1
+              proposalChoices.length !== 0 ? proposalChoices.length : 1
             }
+            defaultChoiceCount={choiceCount.current}
+            handleSelect={value => {
+              choiceCount.current = value;
+            }}
           />
         </div>
         <SheetContent
@@ -78,7 +86,7 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
           <div className="flex h-full w-full items-center justify-center">
             <TitleDescriptionForm
               onSubmit={({ title, description }) => {
-                setResolutionValues(prevResolutions => [
+                setProposalChoices(prevResolutions => [
                   ...prevResolutions,
                   { value: title, description },
                 ]);
@@ -96,12 +104,15 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
         formSubmitLabel="Next"
         formCancelLabel="Cancel"
         handleSubmitClick={() => {
-          if (resolutionValues.length === 0) {
+          if (proposalChoices.length === 0) {
             setError('Please add at least one resolution value');
             return;
           }
           setError(null);
-          onSubmit(resolutionValues);
+          onSubmit({
+            choices: proposalChoices,
+            choiceCount: choiceCount.current,
+          });
         }}
         handleCancelClick={onCancel}
       />
@@ -109,4 +120,4 @@ const ResolutionValueForm: FC<ResolutionValueFormProps> = ({
   );
 };
 
-export default ResolutionValueForm;
+export default ProposalChoiceForm;

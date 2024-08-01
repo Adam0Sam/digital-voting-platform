@@ -5,7 +5,7 @@ import { ReadonlyStringLiteralObject } from './util-types';
  */
 export function isType<T>(
   value: unknown,
-  validationFn: (value: unknown) => value is T,
+  validationFn: (value: unknown) => boolean,
 ): value is T {
   return validationFn(value);
 }

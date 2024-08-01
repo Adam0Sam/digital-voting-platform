@@ -10,6 +10,34 @@ import {
 } from './utils/type-validators';
 import { WithValuesAsStrings } from './utils/util-types';
 
+export type User = {
+  id: string;
+  personalNames: string[];
+  familyName: string;
+  grade: Grade;
+  roles: UserRole[];
+};
+
+export type StringifiedUser = WithValuesAsStrings<User>;
+
+export function isUser(user: unknown): user is User {
+  if (typeof user === 'object' && user !== null) {
+    const { id, personalNames, familyName, grade, roles } = user as User;
+    return (
+      typeof id === 'string' &&
+      Array.isArray(personalNames) &&
+      personalNames.every(name => typeof name === 'string') &&
+      typeof familyName === 'string' &&
+      isGrade(grade) &&
+      Array.isArray(roles) &&
+      roles.every(role => typeof role === 'string')
+    );
+  }
+  return false;
+}
+
+export const isUserArray = (items: unknown) => isTypeArray<User>(items, isUser);
+
 export const Grades = {
   IA: 'IA',
   IB: 'IB',
@@ -55,42 +83,3 @@ export const isUserRole = (role: unknown) =>
 
 export const isUserRoleArray = (items: unknown) =>
   isKeyOfStringLiteralObjArray(items, UserRoles);
-
-export const ProposalAgentRoles = {
-  VOTER: 'VOTER',
-  OWNER: 'OWNER',
-  REVIEWER: 'REVIEWER',
-} as const;
-
-export type ProposalAgentRole = keyof typeof ProposalAgentRoles;
-
-export const isProposalAgentRole = (role: unknown) =>
-  isKeyOfStringLiteralObj(role, ProposalAgentRoles);
-
-export type User = {
-  id: string;
-  personalNames: string[];
-  familyName: string;
-  grade: Grade;
-  roles: UserRole[];
-};
-
-export type StringifiedUser = WithValuesAsStrings<User>;
-
-export function isUser(user: unknown): user is User {
-  if (typeof user === 'object' && user !== null) {
-    const { id, personalNames, familyName, grade, roles } = user as User;
-    return (
-      typeof id === 'string' &&
-      Array.isArray(personalNames) &&
-      personalNames.every(name => typeof name === 'string') &&
-      typeof familyName === 'string' &&
-      isGrade(grade) &&
-      Array.isArray(roles) &&
-      roles.every(role => typeof role === 'string')
-    );
-  }
-  return false;
-}
-
-export const isUserArray = (items: unknown) => isTypeArray<User>(items, isUser);

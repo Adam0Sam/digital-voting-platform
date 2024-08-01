@@ -14,17 +14,16 @@ import UserScrollArea from './UserScrollArea';
 import { cn } from '@/lib/utils';
 
 type FormValues = { owners: User[]; reviewers: User[] };
-export type ProposalManagerSelectionFormProps = ExtendedFormProps<FormValues>;
+export type ProposalOwnerReviewerFormProps = ExtendedFormProps<FormValues>;
 
 const enum SelectionType {
   Owners,
   Reviewers,
 }
 
-const ProposalManagerSelectionForm: FC<ProposalManagerSelectionFormProps> = ({
-  onSubmit,
-  onCancel,
-}) => {
+const ProposalOwnerReviewerSelectionForm: FC<
+  ProposalOwnerReviewerFormProps
+> = ({ onSubmit, onCancel }) => {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [selectionType, setSelectionType] = useState<SelectionType>(
     SelectionType.Owners,
@@ -151,4 +150,4 @@ const ProposalManagerSelectionForm: FC<ProposalManagerSelectionFormProps> = ({
   );
 };
 
-export default ProposalManagerSelectionForm;
+export default ProposalOwnerReviewerSelectionForm;

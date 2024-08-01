@@ -28,7 +28,7 @@ export const ProposalDtoSchema = z.object({
   description: z.string().optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
-  status: z.nativeEnum(ProposalStatus).default(ProposalStatus.DRAFT),
+  status: z.nativeEnum(ProposalStatus).optional().default(ProposalStatus.DRAFT),
   visibility: z
     .nativeEnum(ProposalVisibility)
     .default(ProposalVisibility.AGENT_ONLY),

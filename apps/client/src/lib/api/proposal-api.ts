@@ -1,6 +1,9 @@
-import { ProposalDto } from '@/lib/types/proposal.type';
+import {
+  isProposalAgentRole,
+  ProposalAgentRole,
+  ProposalDto,
+} from '@/lib/types/proposal.type';
 import { api } from '../auth/auth-fetch';
-import { isProposalAgentRole, ProposalAgentRole } from '../types';
 
 export class ProposalApi {
   private static getProposalUrl(partialUrl: string) {
