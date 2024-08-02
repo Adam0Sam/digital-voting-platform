@@ -53,12 +53,12 @@ export const proposalLinkCollection: LinkCollection = {
   items: [
     {
       title: 'Vote Proposals',
-      href: 'proposals/vote',
+      href: 'proposals/vote/all',
       description: 'These proposals are open for you to vote on',
     },
     {
       title: 'Managed Proposals',
-      href: 'proposals/manage',
+      href: 'proposals/manage/all',
       description: 'Proposals that you have created or are managing/reviewing',
     },
     // {

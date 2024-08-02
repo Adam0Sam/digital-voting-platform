@@ -5,6 +5,8 @@ import {
   isTypeArray,
 } from './utils/type-validators';
 
+export type Proposal = ProposalDto & { id: string };
+
 export type ProposalDto = {
   title: string;
   description?: string;
@@ -29,7 +31,7 @@ export const isProposalManagerDto = (item: unknown) =>
   isType<ProposalManagerDto>(item, item => {
     if (typeof item !== 'object') return false;
     if (item === null) return false;
-    const { role, user } = item;
+    const { role, user } = item as ProposalManagerDto;
     return isKeyOfStringLiteralObj(role, ProposalManagerRoles) && isUser(user);
   });
 
@@ -63,7 +65,7 @@ export const isProposalChoiceDto = (item: unknown) =>
     if (typeof item !== 'object') return false;
     if (item === null) return false;
     // TODO: How to fix this?
-    const { value, description } = item;
+    const { value, description } = item as ProposalChoiceDto;
     return (
       typeof value === 'string' &&
       (description === undefined || typeof description === 'string')

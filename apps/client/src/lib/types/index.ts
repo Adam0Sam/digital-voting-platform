@@ -1,2 +1,3 @@
 export * from './user.type';
-export * from './log.interface';
+export * from './proposal.type';
+export * from './vote.type';

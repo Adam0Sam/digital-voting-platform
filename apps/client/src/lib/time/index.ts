@@ -1,1 +1,1 @@
-export * from './calc-difference';
+export * from './getTimeLeft';

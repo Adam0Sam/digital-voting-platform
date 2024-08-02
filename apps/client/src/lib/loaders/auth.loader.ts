@@ -1,9 +1,10 @@
 import { redirect } from 'react-router-dom';
-import JWTController from './jwt-controller';
+import JWTController from '../auth/jwt-controller';
 import UserController from '../user-controller';
 import { api, APIError } from '../api';
+import { User } from '../types';
 
-export async function AuthLoader({ request }: { request: Request }) {
+export async function authLoader({ request }: { request: Request }) {
   const url = new URL(request.url);
   const idToken = url.searchParams.get('id_token') || JWTController.getItem();
   if (!idToken) {
@@ -31,3 +32,7 @@ export async function AuthLoader({ request }: { request: Request }) {
     }
   }
 }
+
+export const LOADER_ID = 'auth';
+
+export type ReturnType = User;

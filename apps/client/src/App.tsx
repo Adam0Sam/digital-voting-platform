@@ -9,7 +9,6 @@ import './App.css';
 import getAuthEndpoint from './lib/auth/getAuthEndpoint';
 
 import HomeLayout from './pages/HomeLayout';
-import { AuthLoader } from './lib/auth';
 import { Provider } from 'react-redux';
 import store from './store/store';
 import { ThemeProvider } from './components/theme-provider';
@@ -20,15 +19,19 @@ import ProposalsVoterPage from './pages/proposal/ProposalsVoterPage';
 import ProposalsManagerPage, {
   loader as manageProposalsLoader,
 } from './pages/proposal/ProposalsManagerPage';
-import { api } from './lib/api';
-import { ProposalAgentRoles } from './lib/types/proposal.type';
 import ProposalVotePage from './pages/proposal/ProposalVotePage';
+import {
+  authLoader,
+  voterProposalsLoader,
+  VOTER_PROPOSALS_LOADER_ID,
+} from './lib/loaders';
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<RootLayout />}>
-        <Route path="signin" loader={AuthLoader} element={<GreetingPage />} />
+        <Route path="signin" loader={authLoader} />
+        <Route path="greeting" element={<GreetingPage />} />
         <Route
           path="signup"
           loader={() => {
@@ -39,13 +42,8 @@ function App() {
         <Route path="proposals">
           <Route
             path="vote"
-            id="vote"
-            loader={async () =>
-              await Promise.all([
-                api.proposals.getProposalsByAgentRole(ProposalAgentRoles.VOTER),
-                api.proposals.getAllUserVotes(),
-              ])
-            }
+            id={VOTER_PROPOSALS_LOADER_ID}
+            loader={voterProposalsLoader}
           >
             <Route path="all" element={<ProposalsVoterPage />} />
             <Route path=":id" element={<ProposalVotePage />} />

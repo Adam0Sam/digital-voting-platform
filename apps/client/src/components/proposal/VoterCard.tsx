@@ -13,45 +13,28 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-import { api } from '@/lib/api';
-import { getDateDifference } from '@/lib/time';
-import { ProposalDto } from '@/lib/types/proposal.type';
+import { getTimeLeft } from '@/lib/time';
+import { Proposal, Vote } from '@/lib/types';
+
 import { CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// TODO: This is a temporary type solution
-export type tempProposalData = ProposalDto & { id: string };
 
 export default function VoterCard({
   proposalData,
   voteData,
 }: {
-  proposalData: tempProposalData;
-  voteData: any;
+  proposalData: Proposal;
+  voteData: Vote;
 }) {
-  let daysLeft, hoursLeft;
-  let displayedDate: Date;
-
-  const { days: daysUntilStart, hours: hoursUntilStart } = getDateDifference(
-    new Date(),
+  const { hasStarted, hasEnded, timeLeft } = getTimeLeft(
     proposalData.startDate,
-  );
-
-  const { days: daysUntilEnd, hours: hoursUntilEnd } = getDateDifference(
-    new Date(),
     proposalData.endDate,
   );
 
-  const hasStarted = daysUntilStart <= 0 && hoursUntilStart <= 0;
-  if (hasStarted) {
-    daysLeft = daysUntilEnd;
-    hoursLeft = hoursUntilEnd;
-    displayedDate = new Date(proposalData.endDate);
-  } else {
-    daysLeft = daysUntilStart;
-    hoursLeft = hoursUntilStart;
-    displayedDate = new Date(proposalData.startDate);
-  }
+  const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const hoursLeft = Math.floor(
+    (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+  );
 
   return (
     <Card>
@@ -63,23 +46,34 @@ export default function VoterCard({
         <CardContent className="flex flex-col items-center p-0 pt-6">
           <Popover>
             <div className="flex items-center gap-2">
-              {`${hasStarted ? 'Ends' : 'Starts'} in ${daysLeft}d. ${hoursLeft}h.`}
+              {hasEnded ? 'Ended' : hasStarted ? 'Active' : 'Upcoming'}
+              {` until ${daysLeft}d. ${hoursLeft}h.`}
               <PopoverTrigger asChild>
                 <Button variant="ghost">
                   <CalendarClock size={24} />
                 </Button>
               </PopoverTrigger>
             </div>
-            <PopoverContent className="w-min">
-              <Calendar
-                mode="single"
-                selected={displayedDate}
-                defaultMonth={displayedDate}
-              />
-            </PopoverContent>
+            {!hasEnded && (
+              <PopoverContent className="w-min">
+                <Calendar
+                  mode="single"
+                  selected={
+                    !hasStarted
+                      ? new Date(proposalData.startDate)
+                      : new Date(proposalData.endDate)
+                  }
+                  defaultMonth={
+                    !hasStarted
+                      ? new Date(proposalData.startDate)
+                      : new Date(proposalData.endDate)
+                  }
+                />
+              </PopoverContent>
+            )}
           </Popover>
           <Button>
-            <Link to={`../proposalData.id`}>View</Link>
+            <Link to={`../${proposalData.id}`}>View</Link>
           </Button>
         </CardContent>
       </CardHeader>

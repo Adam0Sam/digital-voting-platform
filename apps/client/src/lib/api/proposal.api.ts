@@ -1,11 +1,11 @@
 import {
   isProposalAgentRole,
+  Proposal,
   ProposalAgentRole,
   ProposalDto,
 } from '@/lib/types/proposal.type';
 import { HttpClient } from './http-client';
 import URI from '../constants/uri-constants';
-import { tempProposalData } from '@/components/proposal/VoterCard';
 
 export class ProposalApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/proposal`);
@@ -17,7 +17,7 @@ export class ProposalApi {
       headers: {
         'Content-Type': 'application/json',
       },
-    })) as tempProposalData;
+    })) as Proposal;
   }
 
   async deleteOne(id: string) {
@@ -32,7 +32,7 @@ export class ProposalApi {
     }
     return (await this.httpClient.fetchWithAuth(
       `${agentRole}/all`,
-    )) as tempProposalData[];
+    )) as Proposal[];
   }
 
   async getUserVote(id: string) {
