@@ -1,11 +1,11 @@
-import { ProposalChoiceDto } from './proposal.type';
+import { ProposalChoice } from './proposal.type';
 
-const VoteStatuses = {
+export const VoteStatusOptions = {
   PENDING: 'PENDING',
   RESOLVED: 'RESOLVED',
 } as const;
 
-export type VoteStatus = keyof typeof VoteStatuses;
+export type VoteStatus = keyof typeof VoteStatusOptions;
 
 export type Vote = {
   id: string;
@@ -13,5 +13,5 @@ export type Vote = {
 
   userId: string;
   proposalId: string;
-  choice: ProposalChoiceDto;
+  choices: ProposalChoice[];
 };

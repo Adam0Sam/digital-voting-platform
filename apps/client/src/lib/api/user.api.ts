@@ -15,7 +15,7 @@ export class UserApi {
   }
 
   async getAll() {
-    const allUsers = (await this.httpClient.fetch('all')) as User[];
+    const allUsers = (await this.httpClient.fetchWithAuth('all')) as User[];
     return allUsers;
   }
 }

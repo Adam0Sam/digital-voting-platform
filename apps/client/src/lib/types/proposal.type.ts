@@ -5,7 +5,11 @@ import {
   isTypeArray,
 } from './utils/type-validators';
 
-export type Proposal = ProposalDto & { id: string };
+export type ProposalChoice = ProposalChoiceDto & { id: string };
+
+export type Proposal = Omit<ProposalDto, 'choices'> & { id: string } & {
+  choices: ProposalChoice[];
+};
 
 export type ProposalDto = {
   title: string;

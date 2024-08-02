@@ -5,8 +5,9 @@ import { ProposalAgentRole, ProposalAgentRoles } from 'src/lib/types';
 import { ParseStringLiteral, ZodValidationPipe } from 'src/pipes';
 import { ProposalDto, ProposalDtoSchema } from './dto';
 import { VoteService } from 'src/vote/vote.service';
-import { GetUser } from 'src/auth/decorator/get-user.decorator';
-import { User } from '@prisma/client';
+
+import { ProposalChoice, User } from '@prisma/client';
+import { GetUser } from 'src/user/decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('proposal')
@@ -28,6 +29,15 @@ export class ProposalController {
     @Param('id') proposalId: string,
   ) {
     return this.voteService.getOneUserVote(userId, proposalId);
+  }
+
+  @Post('votes/:id')
+  castUserVote(
+    @GetUser('id') userId: User['id'],
+    @Param('id') proposalId: string,
+    @Body('choices') choices: ProposalChoice[],
+  ) {
+    return this.voteService.voteForProposal(userId, proposalId, choices);
   }
 
   @Get(':agentRole/all')

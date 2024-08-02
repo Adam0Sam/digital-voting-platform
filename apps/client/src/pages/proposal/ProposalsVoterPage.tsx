@@ -3,6 +3,7 @@ import {
   VOTER_PROPOSALS_LOADER_ID,
   VoterProposalsLoaderReturnType,
 } from '@/lib/loaders';
+import { Vote } from '@/lib/types';
 
 import { useRouteLoaderData } from 'react-router-dom';
 
@@ -16,7 +17,11 @@ export default function ProposalsVoterPage() {
       {proposals.map(proposal => (
         <VoterCard
           proposalData={proposal}
-          voteData={userVotes.find(vote => vote.proposalId === proposal.id)}
+          // TODO
+          // Say what you will
+          voteData={
+            userVotes.find(vote => vote.proposalId === proposal.id) as Vote
+          }
           key={proposal.id}
         />
       ))}

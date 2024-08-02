@@ -1,4 +1,5 @@
 import { api } from '../api';
+import { Vote } from '../types';
 import { Proposal, ProposalAgentRoles } from '../types/proposal.type';
 
 export async function voterProposalsLoader() {
@@ -10,4 +11,4 @@ export async function voterProposalsLoader() {
 
 export const LOADER_ID = 'vote';
 
-export type ReturnType = [Proposal[], any[]];
+export type ReturnType = [Proposal[], Vote[]];

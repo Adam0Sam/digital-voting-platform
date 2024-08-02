@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/popover';
 
 import { getTimeLeft } from '@/lib/time';
-import { Proposal, Vote } from '@/lib/types';
+import { Proposal, Vote, VoteStatusOptions } from '@/lib/types';
 
 import { CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -43,37 +43,48 @@ export default function VoterCard({
           <CardTitle className="text-xl">{proposalData.title}</CardTitle>
           <CardDescription>{proposalData.description}</CardDescription>
         </div>
-        <CardContent className="flex flex-col items-center p-0 pt-6">
-          <Popover>
-            <div className="flex items-center gap-2">
-              {hasEnded ? 'Ended' : hasStarted ? 'Active' : 'Upcoming'}
-              {` until ${daysLeft}d. ${hoursLeft}h.`}
-              <PopoverTrigger asChild>
-                <Button variant="ghost">
-                  <CalendarClock size={24} />
-                </Button>
-              </PopoverTrigger>
-            </div>
-            {!hasEnded && (
-              <PopoverContent className="w-min">
-                <Calendar
-                  mode="single"
-                  selected={
-                    !hasStarted
-                      ? new Date(proposalData.startDate)
-                      : new Date(proposalData.endDate)
-                  }
-                  defaultMonth={
-                    !hasStarted
-                      ? new Date(proposalData.startDate)
-                      : new Date(proposalData.endDate)
-                  }
-                />
-              </PopoverContent>
-            )}
-          </Popover>
-          <Button>
-            <Link to={`../${proposalData.id}`}>View</Link>
+        <CardContent className="flex flex-col items-center gap-12 p-0 pt-6">
+          <div className="flex flex-col items-center gap-1">
+            <Popover>
+              <div className="flex items-center gap-2">
+                <p>
+                  {hasEnded ? 'Ended' : hasStarted ? 'Active' : 'Upcoming'}
+                  {` until ${daysLeft}d. ${hoursLeft}h.`}
+                </p>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost">
+                    <CalendarClock size={24} />
+                  </Button>
+                </PopoverTrigger>
+              </div>
+              {!hasEnded && (
+                <PopoverContent className="w-min">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      !hasStarted
+                        ? new Date(proposalData.startDate)
+                        : new Date(proposalData.endDate)
+                    }
+                    defaultMonth={
+                      !hasStarted
+                        ? new Date(proposalData.startDate)
+                        : new Date(proposalData.endDate)
+                    }
+                  />
+                </PopoverContent>
+              )}
+            </Popover>
+            <p>
+              {voteData.status === VoteStatusOptions.PENDING
+                ? 'submit a vote'
+                : 'review your vote'}
+            </p>
+          </div>
+          <Button className="w-full">
+            <Link className="w-full" to={`../${proposalData.id}`}>
+              View
+            </Link>
           </Button>
         </CardContent>
       </CardHeader>

@@ -2,6 +2,7 @@ import {
   isProposalAgentRole,
   Proposal,
   ProposalAgentRole,
+  ProposalChoice,
   ProposalDto,
 } from '@/lib/types/proposal.type';
 import { HttpClient } from './http-client';
@@ -41,5 +42,15 @@ export class ProposalApi {
 
   async getAllUserVotes() {
     return await this.httpClient.fetchWithAuth('votes/all');
+  }
+
+  async castUserVote(id: string, choices: ProposalChoice[]) {
+    return (await this.httpClient.fetchWithAuth(`votes/${id}`, {
+      method: 'POST',
+      body: JSON.stringify({ choices }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })) as Proposal;
   }
 }

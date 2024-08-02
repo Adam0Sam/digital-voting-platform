@@ -30,8 +30,7 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<RootLayout />}>
-        <Route path="signin" loader={authLoader} />
-        <Route path="greeting" element={<GreetingPage />} />
+        <Route path="signin" loader={authLoader} element={<GreetingPage />} />
         <Route
           path="signup"
           loader={() => {

@@ -1,11 +1,39 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserQueryDto } from './dto';
+import { JwtDto } from 'src/auth/jwt/dto';
+import { mapUserRoles } from './utils';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  getAllUsers() {
-    return this.prisma.user.findMany();
+  async findUser(query: UserQueryDto) {
+    return await this.prisma.user.findUnique({
+      where: {
+        personalNames_familyName_grade: {
+          personalNames: query.personalNames,
+          familyName: query.familyName,
+          grade: query.grade,
+        },
+      },
+    });
+  }
+
+  async createUser(userPayload: JwtDto & UserQueryDto) {
+    const user: Omit<User, 'id'> = {
+      personalNames: userPayload.personalNames,
+      familyName: userPayload.familyName,
+      grade: userPayload.grade,
+      roles: mapUserRoles(userPayload.roles),
+    };
+    return await this.prisma.user.create({
+      data: user,
+    });
+  }
+
+  async getAllUsers() {
+    return await this.prisma.user.findMany();
   }
 }
