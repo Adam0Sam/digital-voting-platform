@@ -1,8 +1,7 @@
 import { redirect } from 'react-router-dom';
 import JWTController from './jwt-controller';
-import { UserApi } from '../api';
 import UserController from '../user-controller';
-import { APIError } from './auth-fetch';
+import { api, APIError } from '../api';
 
 export async function AuthLoader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -13,7 +12,7 @@ export async function AuthLoader({ request }: { request: Request }) {
   }
 
   try {
-    const user = await UserApi.getOne(idToken);
+    const user = await api.users.getOne(idToken);
     window.history.replaceState({}, '', `${url.origin}${url.pathname}`);
     JWTController.setItem(idToken);
     UserController.setItem(user);

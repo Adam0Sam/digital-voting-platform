@@ -7,9 +7,7 @@ import { FC, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { redirect } from 'react-router-dom';
 import {
-  isProposalChoiceDto,
   isProposalChoiceDtoArray,
-  isProposalManagerDto,
   isProposalManagerDtoArray,
   ProposalChoiceDto,
   ProposalDto,
@@ -19,7 +17,7 @@ import {
   ProposalVisibility,
   ProposalVisibilityOptions,
 } from '@/lib/types/proposal.type';
-import { ProposalApi } from '@/lib/api';
+import { api, APIError } from '@/lib/api';
 import {
   Card,
   CardContent,
@@ -33,20 +31,20 @@ import { isUserArray, User } from '@/lib/types';
 
 import ProposalOwnerReviewerSelectionForm from '@/components/forms/user/ProposalOwnerReviewerSelectionForm';
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
-import { APIError } from '@/lib/auth/auth-fetch';
+
 import Combobox from '@/components/Combobox';
 import ProposalChoiceForm from '@/components/forms/choice-selection/ProposalChoiceForm';
 
 const createProposal = async (data: ProposalDto) => {
   try {
-    const createdProposal = await ProposalApi.createOne(data);
+    const createdProposal = await api.proposals.createOne(data);
     const { id } = createdProposal;
     // TODO: Undo proposal creation via scheduled worker request disruption
     toast(`Proposal ${data.title} has been created`, {
       description: new Date().toLocaleTimeString(),
       action: {
         label: 'Undo',
-        onClick: () => ProposalApi.deleteOne(id),
+        onClick: () => api.proposals.deleteOne(id),
       },
     });
   } catch (error) {

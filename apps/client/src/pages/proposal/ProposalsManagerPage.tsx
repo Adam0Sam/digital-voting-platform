@@ -1,7 +1,7 @@
 import ProposalCard, {
   tempProposalData,
 } from '@/components/proposal/ProposalCard';
-import { ProposalApi } from '@/lib/api';
+import { api } from '@/lib/api';
 import { ProposalAgentRoles } from '@/lib/types/proposal.type';
 
 import { useLoaderData } from 'react-router-dom';
@@ -30,7 +30,7 @@ export default function ProposalsManagerPage() {
 
 export async function loader() {
   return await Promise.all([
-    ProposalApi.getProposalsByAgentRole(ProposalAgentRoles.OWNER),
-    ProposalApi.getProposalsByAgentRole(ProposalAgentRoles.REVIEWER),
+    api.proposals.getProposalsByAgentRole(ProposalAgentRoles.OWNER),
+    api.proposals.getProposalsByAgentRole(ProposalAgentRoles.REVIEWER),
   ]);
 }

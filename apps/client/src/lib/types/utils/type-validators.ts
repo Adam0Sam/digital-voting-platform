@@ -1,8 +1,5 @@
 import { ReadonlyStringLiteralObject } from './util-types';
 
-/**
- * Is this a useful abstraction?
- */
 export function isType<T>(
   value: unknown,
   validationFn: (value: unknown) => boolean,

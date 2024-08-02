@@ -90,7 +90,7 @@ model ProposalChoice {
     value       String
     description String?
 
-    proposal   Proposal @relation(fields: [proposalId], references: [id])
+    proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
 
     votes Vote[]
@@ -107,9 +107,9 @@ model ProposalManager {
     id   String              @id @default(uuid())
     role ProposalManagerRole
 
-    proposal   Proposal @relation(fields: [proposalId], references: [id])
+    proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
-    user       User     @relation(fields: [userId], references: [id])
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId     String
 }
 
@@ -122,9 +122,9 @@ model Vote {
     id     String     @id @default(uuid())
     status VoteStatus @default(PENDING)
 
-    user       User             @relation(fields: [userId], references: [id])
+    user       User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId     String
-    proposal   Proposal         @relation(fields: [proposalId], references: [id])
+    proposal   Proposal         @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
     choices    ProposalChoice[]
 }
