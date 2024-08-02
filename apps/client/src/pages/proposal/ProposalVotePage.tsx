@@ -69,7 +69,7 @@ export default function ProposalVotePage() {
               ? `Votes left: ${proposal.current!.choiceCount - selectedChoices.length}`
               : 'Your submitted votes'}
           </h4>
-          <div className="grid w-full auto-rows-max grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-14">
+          <div className="grid w-full auto-rows-max grid-cols-[repeat(auto-fit,minmax(10rem,15rem))] gap-14">
             {proposal.current!.choices.map(choice => (
               <ChoiceCard
                 choiceData={choice}
@@ -138,7 +138,8 @@ export default function ProposalVotePage() {
                         proposal.current!.id,
                         selectedChoices,
                       );
-                      navigate('../all', {
+                      console.log('selectedChoices ', selectedChoices);
+                      navigate('/vote', {
                         replace: true,
                       });
                     }}

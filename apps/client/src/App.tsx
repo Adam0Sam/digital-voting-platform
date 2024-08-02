@@ -9,8 +9,7 @@ import './App.css';
 import getAuthEndpoint from './lib/auth/getAuthEndpoint';
 
 import HomeLayout from './pages/HomeLayout';
-import { Provider } from 'react-redux';
-import store from './store/store';
+
 import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
@@ -39,6 +38,7 @@ function App() {
         />
         <Route path="home" element={<HomeLayout />}></Route>
         <Route path="proposals">
+          {/* TODO: Make generic function which returns reroute response */}
           <Route
             path="vote"
             id={VOTER_PROPOSALS_LOADER_ID}
@@ -63,9 +63,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }
