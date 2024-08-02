@@ -17,7 +17,12 @@ import {
 import { ProposalChoice } from '@/lib/types';
 import { DialogDescription } from '@radix-ui/react-dialog';
 import { useRef, useState } from 'react';
-import { Link, useParams, useRouteLoaderData } from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useRouteLoaderData,
+} from 'react-router-dom';
 
 export default function ProposalVotePage() {
   const { id: proposalId } = useParams();
@@ -32,11 +37,11 @@ export default function ProposalVotePage() {
     userVotes.find(vote => vote.proposalId === proposalId),
   );
 
+  const navigate = useNavigate();
+
   const [selectedChoices, setSelectedChoices] = useState<ProposalChoice[]>(
     () => {
       if (userVote.current) {
-        console.log('USER CHOICES ', userVote.current.choices);
-        console.log('AVAILABLE CHOICES ', proposal.current?.choices);
         return userVote.current.choices;
       }
       return [];
@@ -46,6 +51,8 @@ export default function ProposalVotePage() {
   if (!proposal.current || !userVote.current) {
     throw new Response('Proposal not found', { status: 404 });
   }
+
+  const canVote = userVote.current!.status === 'PENDING';
 
   return (
     <div className="mt-12 flex justify-center">
@@ -58,9 +65,11 @@ export default function ProposalVotePage() {
         </div>
         <div className="flex w-full flex-col items-center gap-8">
           <h4 className="text-2xl">
-            Votes left: {proposal.current!.choiceCount - selectedChoices.length}
+            {canVote
+              ? `Votes left: ${proposal.current!.choiceCount - selectedChoices.length}`
+              : 'Your submitted votes'}
           </h4>
-          <div className="grid w-full auto-rows-max grid-cols-[repeat(auto-fit,minmax(10rem,15rem))] gap-14">
+          <div className="grid w-full auto-rows-max grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-14">
             {proposal.current!.choices.map(choice => (
               <ChoiceCard
                 choiceData={choice}
@@ -68,6 +77,9 @@ export default function ProposalVotePage() {
                   selectedChoice => selectedChoice.value === choice.value,
                 )}
                 handleClick={() => {
+                  if (!canVote) {
+                    return;
+                  }
                   setSelectedChoices(prevChoices => {
                     if (
                       prevChoices.some(
@@ -89,54 +101,59 @@ export default function ProposalVotePage() {
             ))}
           </div>
         </div>
-        <div className="flex w-full max-w-screen-sm justify-between">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                className="max-w-60 flex-1"
-                disabled={selectedChoices.length <= 0}
-              >
-                Submit
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  Are you sure you want to submit your vote?
-                </DialogTitle>
-              </DialogHeader>
-              <div className="mt-8 flex flex-col items-center">
-                <DialogDescription>
-                  {selectedChoices.length === proposal.current!.choiceCount
-                    ? 'You have exhausted all your votes.'
-                    : `You have selected ${selectedChoices.length} choices out of ${proposal.current!.choiceCount}.`}
-                </DialogDescription>
-                <DialogDescription>
-                  Selected:{' '}
-                  {selectedChoices
-                    .map(selectedChoice => selectedChoice.value)
-                    .join(', ')}
-                </DialogDescription>
-              </div>
-              <DialogFooter className="mt-10 sm:justify-around">
+        <div className="flex w-full flex-col justify-center gap-8 sm:flex-row sm:gap-12">
+          {canVote && (
+            <Dialog>
+              <DialogTrigger asChild>
                 <Button
-                  onClick={() =>
-                    api.proposals.castUserVote(
-                      proposal.current!.id,
-                      selectedChoices,
-                    )
-                  }
+                  className="flex-1 py-2 sm:max-w-60"
+                  disabled={selectedChoices.length <= 0}
                 >
                   Submit
                 </Button>
-                <DialogClose asChild>
-                  <Button variant="secondary">Cancel</Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Button variant="secondary" className="max-w-60 flex-1">
-            <Link to={'../all'} className="w-full">
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    Are you sure you want to submit your vote?
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="mt-8 flex flex-col items-center">
+                  <DialogDescription>
+                    {selectedChoices.length === proposal.current!.choiceCount
+                      ? 'You have exhausted all your votes.'
+                      : `You have selected ${selectedChoices.length} choices out of ${proposal.current!.choiceCount}.`}
+                  </DialogDescription>
+                  <DialogDescription>
+                    Selected:{' '}
+                    {selectedChoices
+                      .map(selectedChoice => selectedChoice.value)
+                      .join(', ')}
+                  </DialogDescription>
+                </div>
+                <DialogFooter className="mt-10 sm:justify-around">
+                  <Button
+                    onClick={() => {
+                      api.proposals.castUserVote(
+                        proposal.current!.id,
+                        selectedChoices,
+                      );
+                      navigate('../all', {
+                        replace: true,
+                      });
+                    }}
+                  >
+                    Submit
+                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="secondary">Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+          <Button variant="secondary" className="flex-1 p-0 sm:max-w-60">
+            <Link to={'../all'} className="w-full py-2">
               Go Back
             </Link>
           </Button>

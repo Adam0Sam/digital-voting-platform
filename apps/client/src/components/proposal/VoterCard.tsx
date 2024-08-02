@@ -81,8 +81,11 @@ export default function VoterCard({
                 : 'review your vote'}
             </p>
           </div>
-          <Button className="w-full">
-            <Link className="w-full" to={`../${proposalData.id}`}>
+          <Button className="w-full p-0">
+            <Link
+              className="flex h-full w-full items-center justify-center"
+              to={`../${proposalData.id}`}
+            >
               View
             </Link>
           </Button>
