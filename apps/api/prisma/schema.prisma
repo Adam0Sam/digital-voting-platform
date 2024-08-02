@@ -127,6 +127,8 @@ model Vote {
     proposal   Proposal         @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
     choices    ProposalChoice[]
+
+    @@unique([userId, proposalId])
 }
 
 model UserActionLog {

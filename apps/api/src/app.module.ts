@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AppService } from './app.service';
 import { ProposalModule } from './proposal/proposal.module';
+
+import { VoteModule } from './vote/vote.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -23,6 +25,7 @@ import appConfig from './config/app.config';
     AuthModule,
     UserModule,
     ProposalModule,
+    VoteModule,
   ],
   providers: [
     AppService,

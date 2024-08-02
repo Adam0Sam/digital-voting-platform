@@ -1,23 +1,21 @@
-import ProposalCard, {
-  tempProposalData,
-} from '@/components/proposal/ProposalCard';
-import { api } from '@/lib/api';
-import { ProposalAgentRoles } from '@/lib/types/proposal.type';
+import VoterCard, { tempProposalData } from '@/components/proposal/VoterCard';
 
-import { useLoaderData } from 'react-router-dom';
+import { useRouteLoaderData } from 'react-router-dom';
 
 export default function ProposalsVoterPage() {
-  const proposals = useLoaderData() as tempProposalData[];
-  console.log(proposals);
+  const [proposals, userVotes] = useRouteLoaderData('vote') as [
+    tempProposalData[],
+  ];
+
   return (
-    <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(10rem,25rem))] gap-16 px-16">
+    <div className="mx-8 mt-10 grid grid-cols-[repeat(auto-fit,minmax(10rem,20rem))] gap-16 md:mx-12">
       {proposals.map(proposal => (
-        <ProposalCard proposalData={proposal} key={proposal.id} />
+        <VoterCard
+          proposalData={proposal}
+          voteData={userVotes.find(vote => vote.proposalId === proposal.id)}
+          key={proposal.id}
+        />
       ))}
     </div>
   );
-}
-
-export async function loader() {
-  return await api.proposals.getProposalsByAgentRole(ProposalAgentRoles.VOTER);
 }

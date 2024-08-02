@@ -29,9 +29,25 @@ export class ProposalService {
     return { managers: { some: { userId: agentId, role: agentRole } } };
   }
 
+  private getIncludeClauseByAgent(
+    agentRole: ProposalAgentRole,
+  ): Prisma.ProposalInclude {
+    if (agentRole === 'VOTER') {
+      return {
+        choices: true,
+      };
+    }
+    return {
+      votes: true,
+      managers: true,
+      choices: true,
+    };
+  }
+
   async getProposalByAgent(agentId: string, agentRole: ProposalAgentRole) {
     return this.prisma.proposal.findMany({
       where: this.getWhereClauseByAgent(agentId, agentRole),
+      include: this.getIncludeClauseByAgent(agentRole),
     });
   }
 
@@ -65,6 +81,12 @@ export class ProposalService {
           create: managers,
         },
       },
+    });
+  }
+
+  async getOne(id: string) {
+    return this.prisma.proposal.findUnique({
+      where: { id },
     });
   }
 

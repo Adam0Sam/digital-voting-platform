@@ -5,7 +5,7 @@ import {
 } from '@/lib/types/proposal.type';
 import { HttpClient } from './http-client';
 import URI from '../constants/uri-constants';
-import { tempProposalData } from '@/components/proposal/ProposalCard';
+import { tempProposalData } from '@/components/proposal/VoterCard';
 
 export class ProposalApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/proposal`);
@@ -31,7 +31,15 @@ export class ProposalApi {
       throw new Response(`Invalid agent role ${agentRole}`, { status: 400 });
     }
     return (await this.httpClient.fetchWithAuth(
-      `all/${agentRole}`,
+      `${agentRole}/all`,
     )) as tempProposalData[];
+  }
+
+  async getUserVote(id: string) {
+    return await this.httpClient.fetchWithAuth(`votes/${id}`);
+  }
+
+  async getAllUserVotes() {
+    return await this.httpClient.fetchWithAuth('votes/all');
   }
 }

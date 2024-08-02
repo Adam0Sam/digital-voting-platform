@@ -12,17 +12,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+
+import { api } from '@/lib/api';
 import { getDateDifference } from '@/lib/time';
 import { ProposalDto } from '@/lib/types/proposal.type';
 import { CalendarClock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // TODO: This is a temporary type solution
 export type tempProposalData = ProposalDto & { id: string };
 
-export default function ProposalCard({
+export default function VoterCard({
   proposalData,
+  voteData,
 }: {
   proposalData: tempProposalData;
+  voteData: any;
 }) {
   let daysLeft, hoursLeft;
   let displayedDate: Date;
@@ -53,9 +58,7 @@ export default function ProposalCard({
       <CardHeader>
         <div className="flex flex-col items-center">
           <CardTitle className="text-xl">{proposalData.title}</CardTitle>
-          <CardDescription>
-            {proposalData.description ?? 'Empty description'}
-          </CardDescription>
+          <CardDescription>{proposalData.description}</CardDescription>
         </div>
         <CardContent className="flex flex-col items-center p-0 pt-6">
           <Popover>
@@ -75,6 +78,9 @@ export default function ProposalCard({
               />
             </PopoverContent>
           </Popover>
+          <Button>
+            <Link to={`../proposalData.id`}>View</Link>
+          </Button>
         </CardContent>
       </CardHeader>
     </Card>

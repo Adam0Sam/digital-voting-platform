@@ -16,12 +16,13 @@ import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
-import ProposalsVoterPage, {
-  loader as voteProposalsLoader,
-} from './pages/proposal/ProposalsVoterPage';
+import ProposalsVoterPage from './pages/proposal/ProposalsVoterPage';
 import ProposalsManagerPage, {
   loader as manageProposalsLoader,
 } from './pages/proposal/ProposalsManagerPage';
+import { api } from './lib/api';
+import { ProposalAgentRoles } from './lib/types/proposal.type';
+import ProposalVotePage from './pages/proposal/ProposalVotePage';
 
 function App() {
   const router = createBrowserRouter(
@@ -38,14 +39,23 @@ function App() {
         <Route path="proposals">
           <Route
             path="vote"
-            element={<ProposalsVoterPage />}
-            loader={voteProposalsLoader}
-          />
+            id="vote"
+            loader={async () =>
+              await Promise.all([
+                api.proposals.getProposalsByAgentRole(ProposalAgentRoles.VOTER),
+                api.proposals.getAllUserVotes(),
+              ])
+            }
+          >
+            <Route path="all" element={<ProposalsVoterPage />} />
+            <Route path=":id" element={<ProposalVotePage />} />
+          </Route>
+
           <Route
             path="manage"
             element={<ProposalsManagerPage />}
             loader={manageProposalsLoader}
-          />
+          ></Route>
           <Route path="create" element={<ProposalCreationPage />} />
         </Route>
         <Route path="test" element={<></>} />
