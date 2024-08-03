@@ -1,117 +1,140 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
-  STUDENT
-  TEACHER
-  PARENT
-  ADMIN
-  SUPER_ADMIN
-  GUEST
-}
-
-enum ProposalStatus {
-  PENDING
-  RESOLVED
-  ABORTED
-}
-
-enum UserVoteStatus {
-  PENDING
-  RESOLVED
+    STUDENT
+    TEACHER
+    PARENT
+    ADMIN
+    SUPER_ADMIN
+    GUEST
 }
 
 enum Grade {
-  IA
-  IB
-  IC
-  ID
-  IE
-  IIA
-  IIB
-  IIC
-  IID
-  IIE
-  IIIA
-  IIIB
-  IIIC
-  IIID
-  TB1
-  IVA
-  IVB
-  IVC
-  IVD
-  TB2
-  NONE
+    IA
+    IB
+    IC
+    ID
+    IE
+    IIA
+    IIB
+    IIC
+    IID
+    IIE
+    IIIA
+    IIIB
+    IIIC
+    IIID
+    TB1
+    IVA
+    IVB
+    IVC
+    IVD
+    TB2
+    NONE
 }
 
 model User {
-  id            String     @id @default(uuid())
-  personalNames String[]
-  familyName    String
-  grade         Grade?
-  roles         UserRole[] @default([GUEST])
+    id            String     @id @default(uuid())
+    personalNames String[]
+    familyName    String
+    grade         Grade
+    roles         UserRole[]
 
-  logs     Log[]
-  userVote UserVote[]
+    actionLogs       UserActionLog[]
+    votes            Vote[]
+    managedProposals ProposalManager[]
 
-  proposalsOwnedBy    Proposal[] @relation("Owners")
-  proposalsReviewedBy Proposal[] @relation("Reviewers")
-
-  @@unique([personalNames, familyName])
-  @@index([personalNames, familyName, grade])
+    @@unique([personalNames, familyName, grade])
+    @@index([personalNames, familyName, grade])
 }
 
-model UserVote {
-  id                        String                  @id @default(uuid())
-  status                    UserVoteStatus          @default(PENDING)
-  user                      User                    @relation(fields: [userId], references: [id])
-  userId                    String
-  proposal                  Proposal                @relation(fields: [proposalId], references: [id])
-  proposalId                String
-  chosenResolution          ProposalResolutionValue @relation(fields: [proposalResolutionValueId], references: [id])
-  proposalResolutionValueId String
+enum ProposalStatus {
+    DRAFT
+    ACTIVE
+    RESOLVED
+    ABORTED
 }
 
-model Log {
-  id        String   @id @default(uuid())
-  action    String
-  timestamp DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
+enum ProposalVisibility {
+    PUBLIC
+    AGENT_ONLY
+    MANAGER_ONLY
 }
 
 model Proposal {
-  id               String                    @id @default(uuid())
-  title            String
-  description      String?
-  startDate        DateTime
-  endDate          DateTime
-  status           ProposalStatus            @default(PENDING)
-  userVote         UserVote[]
-  resolutionValues ProposalResolutionValue[]
-  owners           User[]                    @relation("Owners")
-  reviewers        User[]                    @relation("Reviewers")
+    id          String             @id @default(uuid())
+    title       String
+    description String
+    startDate   DateTime
+    endDate     DateTime
+    status      ProposalStatus
+    visibility  ProposalVisibility @default(AGENT_ONLY)
+
+    votes    Vote[]
+    managers ProposalManager[]
+
+    choices     ProposalChoice[]
+    choiceCount Int
 }
 
-model ProposalResolutionValue {
-  id          String     @id @default(uuid())
-  value       String
-  description String?
-  proposal    Proposal   @relation(fields: [proposalId], references: [id])
-  proposalId  String
-  userVote    UserVote[]
+model ProposalChoice {
+    id          String  @id @default(uuid())
+    value       String
+    description String?
+
+    proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposalId String
+
+    votes Vote[]
+
+    @@unique([value, proposalId])
+}
+
+enum ProposalManagerRole {
+    OWNER
+    REVIEWER
+}
+
+model ProposalManager {
+    id   String              @id @default(uuid())
+    role ProposalManagerRole
+
+    proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposalId String
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId     String
+}
+
+enum VoteStatus {
+    PENDING
+    RESOLVED
+}
+
+model Vote {
+    id     String     @id @default(uuid())
+    status VoteStatus @default(PENDING)
+
+    user       User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId     String
+    proposal   Proposal         @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposalId String
+    choices    ProposalChoice[]
+
+    @@unique([userId, proposalId])
+}
+
+model UserActionLog {
+    id      String   @id @default(uuid())
+    message String?
+    time    DateTime @default(now())
+    user    User     @relation(fields: [userId], references: [id])
+    userId  String
 }

@@ -12,7 +12,7 @@ const CardCarousel = forwardRef<
 >(function CardCarousel({ children }, ref) {
   return (
     <Carousel
-      className="min-w-0 max-w-screen-lg flex-1 px-2 md:px-10"
+      className="min-w-0 max-w-screen-md flex-1 px-2 md:px-10"
       opts={{ watchDrag: false }}
       ref={ref}
     >

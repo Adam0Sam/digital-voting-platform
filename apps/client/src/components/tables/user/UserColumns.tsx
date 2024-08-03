@@ -12,14 +12,21 @@ import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
 import { UserSelectionColumn } from './common/column.enum';
 import useFilterColumn from './context/FilterColumnContext';
 import { Checkbox } from '@/components/ui/checkbox';
+import { User } from '@/lib/types';
 
-export type StringifiedUser = {
-  id: string;
-  personalNames: string;
-  familyName: string;
-  roles: string;
-  grade: string;
+export type WithValuesAsStrings<T> = {
+  [K in keyof T]: string;
 };
+
+// export type StringifiedUser = {
+//   id: string;
+//   personalNames: string;
+//   familyName: string;
+//   roles: string;
+//   grade: string;
+// };
+
+export type StringifiedUser = WithValuesAsStrings<User>;
 
 const PersonalNamesHeader = ({
   column,

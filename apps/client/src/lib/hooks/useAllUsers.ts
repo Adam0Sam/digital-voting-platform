@@ -1,21 +1,18 @@
-import { User } from '@/types';
+import { User } from '@/lib/types';
 import { useEffect, useState } from 'react';
-import { UserApi } from '../api';
-
-const fetchAllUsers = async () => {
-  const res = await UserApi.getAll();
-  const users = await res.json();
-  return users as User[];
-};
+import { api } from '../api';
 
 export default function useAllUsers() {
-  const [allUSers, setAllUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    fetchAllUsers().then(users => {
-      setAllUsers(users);
-    });
+    api.users
+      .getAll()
+      .then(users => {
+        setAllUsers(users);
+      })
+      .catch(error => console.error(error));
   }, []);
 
-  return allUSers;
+  return allUsers;
 }

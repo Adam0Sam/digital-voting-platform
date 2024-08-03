@@ -1,18 +1,20 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { User, UserRole } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
 import { RolesGuard } from 'src/auth/rbac/guard';
 import { UserService } from './user.service';
+import { GetUser } from './decorator';
 
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get('')
-  getProfile(@Req() req: any) {
-    return req.user;
+  getProfile(@GetUser() user: User) {
+    console.log(user);
+    return user;
   }
 
   @Get('all')
@@ -20,7 +22,7 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get('admin')
   getAdmin() {

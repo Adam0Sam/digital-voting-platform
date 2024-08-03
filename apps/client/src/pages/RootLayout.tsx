@@ -6,8 +6,8 @@ import { Outlet } from 'react-router-dom';
 export default function RootLayout() {
   return (
     <SignedInUserContextProvider>
-      <div className="flex h-[100%] flex-col">
-        <div className="ml-5 mt-6 w-[100%] md:ml-0 md:justify-center">
+      <div className="flex h-full flex-col">
+        <div className="my-10 ml-5 md:ml-0 md:justify-center">
           <DesktopNav className="hidden md:flex" />
           <MobileNav className="md:hidden" />
         </div>

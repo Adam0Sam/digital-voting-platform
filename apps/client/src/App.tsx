@@ -9,19 +9,27 @@ import './App.css';
 import getAuthEndpoint from './lib/auth/getAuthEndpoint';
 
 import HomeLayout from './pages/HomeLayout';
-import { AuthLoader } from './lib/auth';
-import { Provider } from 'react-redux';
-import store from './store/store';
+
 import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
-import ProposalCreationPage from './pages/ProposalCreationPage';
+import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
+import VoterLandingPage from './pages/proposal/VoterLandingPage';
+import ManagerLandingPage, {
+  loader as manageProposalsLoader,
+} from './pages/proposal/ManagerLandingPage';
+import ProposalVotePage from './pages/proposal/ProposalVotePage';
+import {
+  authLoader,
+  voterProposalsLoader,
+  VOTER_PROPOSALS_LOADER_ID,
+} from './lib/loaders';
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<RootLayout />}>
-        <Route path="signin" loader={AuthLoader} element={<GreetingPage />} />
+        <Route path="signin" loader={authLoader} element={<GreetingPage />} />
         <Route
           path="signup"
           loader={() => {
@@ -30,9 +38,23 @@ function App() {
         />
         <Route path="home" element={<HomeLayout />}></Route>
         <Route path="proposals">
+          <Route
+            path="vote"
+            id={VOTER_PROPOSALS_LOADER_ID}
+            loader={voterProposalsLoader}
+          >
+            <Route path="all" element={<VoterLandingPage />} />
+            <Route path=":id" element={<ProposalVotePage />} />
+          </Route>
+
+          <Route
+            path="manage"
+            element={<ManagerLandingPage />}
+            loader={manageProposalsLoader}
+          ></Route>
           <Route path="create" element={<ProposalCreationPage />} />
         </Route>
-
+        <Route path="test" element={<></>} />
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),
@@ -40,9 +62,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }

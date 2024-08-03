@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { Grades, User } from '@/lib/types';
 import { DataTable } from './DataTable';
 import { columns, StringifiedUser } from './UserColumns';
 import { FilterColumnContextProvider } from './context/FilterColumnContext';
@@ -11,7 +11,7 @@ const stringifyUserTable = (users: User[]) => {
       personalNames: user.personalNames.join(' '),
       familyName: user.familyName,
       roles: user.roles.join(', '),
-      grade: user.grade || 'N/A',
+      grade: user.grade || Grades.NONE,
     };
   });
 };

@@ -3,15 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { User } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthService } from 'src/auth/auth.service';
 import { AppConfig } from 'src/config/interfaces';
 import { JwtDto } from '../dto';
+import { UserService } from 'src/user/user.service';
+import { mapGrade, splitFirstNames } from 'src/user/utils';
 
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private config: ConfigService<AppConfig>,
-    private authService: AuthService,
+    private userService: UserService,
   ) {
     super({
       // available options: https://github.com/mikenicholson/passport-jwt#configure-strategy
@@ -21,31 +22,27 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
       issuer: config.get('auth.jwt.issuer'),
     });
   }
-  // single responsibility principle: probably a different service should be responsible for splitting
-  // this method is necessary because, OAuth2 may return different first_name prop depending on whether Tamo or MSTeams was used for authentication
-  private splitNames(name: string) {
-    if (name.includes(' ')) {
-      return name.split(' ');
-    } else {
-      return name.match(/[A-Z][a-z]*/g);
-    }
-  }
+
   // passport calls this method even if the token is invalid, why?
   async validate(payload: JwtDto) {
-    const personalNames = this.splitNames(payload.first_name);
-    const user: User | null = await this.authService.findUser({
+    const personalNames = splitFirstNames(payload.first_name);
+    const user: User | null = await this.userService.findUser({
       personalNames,
       familyName: payload.last_name,
+      grade: mapGrade(payload.grade),
     });
 
     if (!user) {
-      const newUser = await this.authService.createUser({
+      console.log('User not found, creating new user');
+      const newUser = await this.userService.createUser({
         ...payload,
         personalNames,
         familyName: payload.last_name,
+        grade: mapGrade(payload.grade),
       });
       return newUser;
     }
+    console.log('User found');
     return user;
   }
 }
