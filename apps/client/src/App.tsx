@@ -14,10 +14,10 @@ import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
-import ProposalsVoterPage from './pages/proposal/ProposalsVoterPage';
-import ProposalsManagerPage, {
+import VoterLandingPage from './pages/proposal/VoterLandingPage';
+import ManagerLandingPage, {
   loader as manageProposalsLoader,
-} from './pages/proposal/ProposalsManagerPage';
+} from './pages/proposal/ManagerLandingPage';
 import ProposalVotePage from './pages/proposal/ProposalVotePage';
 import {
   authLoader,
@@ -41,16 +41,15 @@ function App() {
           <Route
             path="vote"
             id={VOTER_PROPOSALS_LOADER_ID}
-            // loader={withRedirect<string>(voterProposalsLoader, 'all')}
             loader={voterProposalsLoader}
           >
-            <Route path="all" element={<ProposalsVoterPage />} />
+            <Route path="all" element={<VoterLandingPage />} />
             <Route path=":id" element={<ProposalVotePage />} />
           </Route>
 
           <Route
             path="manage"
-            element={<ProposalsManagerPage />}
+            element={<ManagerLandingPage />}
             loader={manageProposalsLoader}
           ></Route>
           <Route path="create" element={<ProposalCreationPage />} />

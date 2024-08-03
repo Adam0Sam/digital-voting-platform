@@ -7,7 +7,7 @@ import { Vote } from '@/lib/types';
 
 import { useRouteLoaderData } from 'react-router-dom';
 
-export default function ProposalsVoterPage() {
+export default function VoterLandingPage() {
   const [proposals, userVotes] = useRouteLoaderData(
     VOTER_PROPOSALS_LOADER_ID,
   ) as VoterProposalsLoaderReturnType;

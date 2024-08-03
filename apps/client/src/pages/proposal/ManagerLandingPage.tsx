@@ -3,7 +3,7 @@ import { Proposal, ProposalAgentRoles } from '@/lib/types/proposal.type';
 
 import { useLoaderData } from 'react-router-dom';
 
-export default function ProposalsManagerPage() {
+export default function ManagerLandingPage() {
   const [ownerProposals, reviewerProposals] = useLoaderData() as [
     Proposal[],
     Proposal[],
