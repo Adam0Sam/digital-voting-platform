@@ -21,6 +21,7 @@ import {
   Link,
   useNavigate,
   useParams,
+  useRevalidator,
   useRouteLoaderData,
 } from 'react-router-dom';
 
@@ -37,6 +38,7 @@ export default function ProposalVotePage() {
     userVotes.find(vote => vote.proposalId === proposalId),
   );
 
+  const revalidator = useRevalidator();
   const navigate = useNavigate();
 
   const [selectedChoices, setSelectedChoices] = useState<ProposalChoice[]>(
@@ -133,15 +135,13 @@ export default function ProposalVotePage() {
                 </div>
                 <DialogFooter className="mt-10 sm:justify-around">
                   <Button
-                    onClick={() => {
-                      api.proposals.castUserVote(
+                    onClick={async () => {
+                      await api.proposals.castUserVote(
                         proposal.current!.id,
                         selectedChoices,
                       );
-                      console.log('selectedChoices ', selectedChoices);
-                      navigate('/vote', {
-                        replace: true,
-                      });
+                      revalidator.revalidate();
+                      navigate('../all');
                     }}
                   >
                     Submit

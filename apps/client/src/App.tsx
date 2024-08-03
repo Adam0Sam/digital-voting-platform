@@ -38,10 +38,10 @@ function App() {
         />
         <Route path="home" element={<HomeLayout />}></Route>
         <Route path="proposals">
-          {/* TODO: Make generic function which returns reroute response */}
           <Route
             path="vote"
             id={VOTER_PROPOSALS_LOADER_ID}
+            // loader={withRedirect<string>(voterProposalsLoader, 'all')}
             loader={voterProposalsLoader}
           >
             <Route path="all" element={<ProposalsVoterPage />} />

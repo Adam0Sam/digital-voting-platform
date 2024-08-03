@@ -7,6 +7,7 @@ import {
 } from '@/lib/types/proposal.type';
 import { HttpClient } from './http-client';
 import URI from '../constants/uri-constants';
+import { Vote } from '../types';
 
 export class ProposalApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/proposal`);
@@ -41,7 +42,7 @@ export class ProposalApi {
   }
 
   async getAllUserVotes() {
-    return await this.httpClient.fetchWithAuth('votes/all');
+    return (await this.httpClient.fetchWithAuth('votes/all')) as Vote[];
   }
 
   async castUserVote(id: string, choices: ProposalChoice[]) {
