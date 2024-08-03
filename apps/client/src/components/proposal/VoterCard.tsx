@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -15,6 +16,7 @@ import {
 
 import { getTimeLeft } from '@/lib/time';
 import { Proposal, Vote, VoteStatusOptions } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 import { CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -22,9 +24,11 @@ import { Link } from 'react-router-dom';
 export default function VoterCard({
   proposalData,
   voteData,
+  className,
 }: {
   proposalData: Proposal;
   voteData: Vote;
+  className?: string;
 }) {
   const { hasStarted, hasEnded, timeLeft } = getTimeLeft(
     proposalData.startDate,
@@ -37,13 +41,14 @@ export default function VoterCard({
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col items-center">
+    <Card className={cn('flex flex-col justify-between', className)}>
+      <div>
+        <CardHeader className="flex flex-col items-center">
           <CardTitle className="text-xl">{proposalData.title}</CardTitle>
           <CardDescription>{proposalData.description}</CardDescription>
-        </div>
-        <CardContent className="flex flex-col items-center gap-12 p-0 pt-6">
+        </CardHeader>
+
+        <CardContent className="flex flex-col items-center gap-12 p-0">
           <div className="flex flex-col items-center gap-1">
             <Popover>
               <div className="flex items-center gap-2">
@@ -81,16 +86,18 @@ export default function VoterCard({
                 : 'review your vote'}
             </p>
           </div>
-          <Button className="w-full p-0">
-            <Link
-              className="flex h-full w-full items-center justify-center"
-              to={`../${proposalData.id}`}
-            >
-              View
-            </Link>
-          </Button>
         </CardContent>
-      </CardHeader>
+      </div>
+      <CardFooter>
+        <Button className="w-full p-0">
+          <Link
+            className="flex h-full w-full items-center justify-center"
+            to={`../${proposalData.id}`}
+          >
+            View
+          </Link>
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

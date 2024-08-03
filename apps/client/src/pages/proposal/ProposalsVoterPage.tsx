@@ -13,15 +13,14 @@ export default function ProposalsVoterPage() {
   ) as VoterProposalsLoaderReturnType;
 
   return (
-    <div className="mx-8 mt-10 grid grid-cols-[repeat(auto-fit,minmax(10rem,20rem))] gap-16 md:mx-12">
+    <div className="mx-8 mt-10 flex flex-wrap justify-center gap-12 md:mx-12">
       {proposals.map(proposal => (
         <VoterCard
           proposalData={proposal}
-          // TODO
-          // Say what you will
           voteData={
             userVotes.find(vote => vote.proposalId === proposal.id) as Vote
           }
+          className="max-w-70 h-80 flex-1 basis-60"
           key={proposal.id}
         />
       ))}

@@ -71,13 +71,14 @@ export default function ProposalVotePage() {
               ? `Votes left: ${proposal.current!.choiceCount - selectedChoices.length}`
               : 'Your submitted votes'}
           </h4>
-          <div className="grid w-full auto-rows-max grid-cols-[repeat(auto-fit,minmax(10rem,15rem))] gap-14">
+          <div className="flex w-full flex-wrap justify-center gap-14">
             {proposal.current!.choices.map(choice => (
               <ChoiceCard
                 choiceData={choice}
                 isSelected={selectedChoices.some(
                   selectedChoice => selectedChoice.value === choice.value,
                 )}
+                className="basis-50 max-w-sm flex-1"
                 handleClick={() => {
                   if (!canVote) {
                     return;

@@ -6,10 +6,12 @@ export default function ChoiceCard({
   choiceData,
   handleClick,
   isSelected,
+  className,
 }: {
   choiceData: ProposalChoiceDto;
   handleClick: () => void;
   isSelected: boolean;
+  className?: string;
 }) {
   return (
     <Card
@@ -19,6 +21,7 @@ export default function ChoiceCard({
           'bg-secondary': isSelected,
           'border-primary': isSelected,
         },
+        className,
       )}
       onClick={handleClick}
     >
