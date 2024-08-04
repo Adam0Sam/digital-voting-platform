@@ -23,6 +23,12 @@ export class ProposalController {
     return this.voteService.getAllUserVotes(userId);
   }
 
+  @Get('managed/all')
+  getAllManaged(@GetUser('id') userId: User['id']) {
+    console.log('Getting All Managed Proposals', userId);
+    return this.proposalService.getAllManaged(userId);
+  }
+
   @Get('votes/:id')
   getUserVote(
     @GetUser('id') userId: User['id'],
@@ -46,7 +52,6 @@ export class ProposalController {
     @Param('agentRole', new ParseStringLiteral(ProposalAgentRoles))
     agentRole: ProposalAgentRole,
   ) {
-    console.log('Getting Proposals by Agent Role');
     return this.proposalService.getProposalByAgent(userId, agentRole);
   }
 

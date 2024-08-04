@@ -9,3 +9,9 @@ export {
   type ReturnType as VoterProposalsLoaderReturnType,
   LOADER_ID as VOTER_PROPOSALS_LOADER_ID,
 } from './voter-proposals.loader';
+
+export {
+  managerProposalsLoader,
+  type ReturnType as ManagerProposalsLoaderReturnType,
+  LOADER_ID as MANAGER_PROPOSALS_LOADER_ID,
+} from './manager-proposals.loader';

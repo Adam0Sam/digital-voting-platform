@@ -1,20 +1,13 @@
-import { api } from '@/lib/api';
-import { Proposal, ProposalAgentRoles } from '@/lib/types/proposal.type';
-
-import { useLoaderData } from 'react-router-dom';
+import {
+  MANAGER_PROPOSALS_LOADER_ID,
+  ManagerProposalsLoaderReturnType,
+} from '@/lib/loaders';
+import { useRouteLoaderData } from 'react-router-dom';
 
 export default function ManagerLandingPage() {
-  const [ownerProposals, reviewerProposals] = useLoaderData() as [
-    Proposal[],
-    Proposal[],
-  ];
-
+  const proposals = useRouteLoaderData(
+    MANAGER_PROPOSALS_LOADER_ID,
+  ) as ManagerProposalsLoaderReturnType;
+  console.log(proposals);
   return <div></div>;
-}
-
-export async function loader() {
-  return await Promise.all([
-    api.proposals.getProposalsByAgentRole(ProposalAgentRoles.OWNER),
-    api.proposals.getProposalsByAgentRole(ProposalAgentRoles.REVIEWER),
-  ]);
 }

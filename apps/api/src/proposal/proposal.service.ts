@@ -90,6 +90,23 @@ export class ProposalService {
     });
   }
 
+  async getAllManaged(userId: string) {
+    return this.prisma.proposal.findMany({
+      where: {
+        managers: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        votes: true,
+        choices: true,
+        managers: true,
+      },
+    });
+  }
+
   /**
    * TODO: Might be useful l8r but currently completely deprecated
    */

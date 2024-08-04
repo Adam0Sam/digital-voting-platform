@@ -15,14 +15,14 @@ import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/VoterLandingPage';
-import ManagerLandingPage, {
-  loader as manageProposalsLoader,
-} from './pages/proposal/ManagerLandingPage';
+import ManagerLandingPage from './pages/proposal/ManagerLandingPage';
 import ProposalVotePage from './pages/proposal/ProposalVotePage';
 import {
   authLoader,
   voterProposalsLoader,
   VOTER_PROPOSALS_LOADER_ID,
+  managerProposalsLoader,
+  MANAGER_PROPOSALS_LOADER_ID,
 } from './lib/loaders';
 
 function App() {
@@ -49,9 +49,12 @@ function App() {
 
           <Route
             path="manage"
-            element={<ManagerLandingPage />}
-            loader={manageProposalsLoader}
-          ></Route>
+            id={MANAGER_PROPOSALS_LOADER_ID}
+            loader={managerProposalsLoader}
+          >
+            <Route path="all" element={<ManagerLandingPage />} />
+            <Route path=":id" element={<div>labas</div>} />
+          </Route>
           <Route path="create" element={<ProposalCreationPage />} />
         </Route>
         <Route path="test" element={<></>} />

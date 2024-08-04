@@ -37,6 +37,10 @@ export class ProposalApi {
     )) as Proposal[];
   }
 
+  async getAllManaged() {
+    return (await this.httpClient.fetchWithAuth('managed/all')) as Proposal[];
+  }
+
   async getUserVote(id: string) {
     return await this.httpClient.fetchWithAuth(`votes/${id}`);
   }
