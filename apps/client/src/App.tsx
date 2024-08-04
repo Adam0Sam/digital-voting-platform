@@ -24,7 +24,7 @@ import {
   managerProposalsLoader,
   MANAGER_PROPOSALS_LOADER_ID,
 } from './lib/loaders';
-import { SingularLabeledBarChart } from './components/bar-chart/BarChart';
+import { SingularLabeledBarChart } from './components/bar-chart/SingularLabeledChart';
 
 function App() {
   const router = createBrowserRouter(

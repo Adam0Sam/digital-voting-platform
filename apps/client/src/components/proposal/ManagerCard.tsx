@@ -14,7 +14,7 @@ import { BarChartBigIcon, CalendarClock } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { getTimeLeft } from '@/lib/time';
 import { Proposal, VoteStatusOptions } from '@/lib/types';
-import { SingularLabeledBarChart } from '../bar-chart/BarChart';
+import { SingularLabeledBarChart } from '../bar-chart/SingularLabeledChart';
 
 type choiceChartItem = {
   choiceValue: string;
@@ -39,6 +39,7 @@ export default function ManagerCard({
   );
 
   const choiceChartDataMap = new Map<string, choiceChartItem>();
+  let resolvedVoteCount = 0;
 
   for (const availableChoice of proposalData.choices) {
     choiceChartDataMap.set(availableChoice.id, {
@@ -49,6 +50,7 @@ export default function ManagerCard({
 
   for (const vote of proposalData.votes) {
     if (vote.status !== VoteStatusOptions.RESOLVED) return;
+    resolvedVoteCount++;
     for (const voteChoice of vote.choices) {
       if (!choiceChartDataMap.has(voteChoice.id)) continue;
       choiceChartDataMap.set(voteChoice.id, {
@@ -59,7 +61,7 @@ export default function ManagerCard({
   }
 
   const choiceChartData = Array.from(choiceChartDataMap.values());
-  console.log(choiceChartData);
+  console.log('data', choiceChartData);
 
   return (
     <Card className={cn('flex flex-col justify-between', className)}>
@@ -101,19 +103,20 @@ export default function ManagerCard({
             </Popover>
             <Popover>
               <div className="flex w-full items-center justify-between gap-2">
-                Resolved votes: {0}/{proposalData.votes.length}
+                Resolved votes: {resolvedVoteCount}/{proposalData.votes.length}
                 <PopoverTrigger asChild>
                   <Button variant="ghost">
                     <BarChartBigIcon size={24} />
                   </Button>
                 </PopoverTrigger>
               </div>
-              <PopoverContent className="w-96">
+              <PopoverContent className="w-max">
                 <SingularLabeledBarChart
                   chartData={choiceChartData}
                   dataLabelKey="choiceValue"
                   dataValueKey="choiceVotes"
-                  label="Votes"
+                  chartTitle="Votes"
+                  chartDescription={`Max choice count per vote: ${proposalData.choiceCount}`}
                 />
               </PopoverContent>
             </Popover>

@@ -21,14 +21,14 @@ export function SingularLabeledBarChart<
   chartData,
   dataLabelKey,
   dataValueKey,
-  label,
-  description,
+  chartTitle: chartLabel,
+  chartDescription,
 }: {
   chartData: T[];
   dataLabelKey: K;
   dataValueKey: K;
-  label?: string;
-  descrption?: string;
+  chartTitle?: string;
+  chartDescription?: string;
 }) {
   const chartConfig = {
     [dataValueKey]: {
@@ -40,8 +40,8 @@ export function SingularLabeledBarChart<
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{label ?? 'Bar Chart'}</CardTitle>
-        <CardDescription>{description ?? ''}</CardDescription>
+        <CardTitle>{chartLabel ?? 'Bar Chart'}</CardTitle>
+        <CardDescription>{chartDescription ?? ''}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -49,7 +49,7 @@ export function SingularLabeledBarChart<
             accessibilityLayer
             data={chartData}
             margin={{
-              top: 20,
+              top: 30,
             }}
           >
             <CartesianGrid vertical={false} />
