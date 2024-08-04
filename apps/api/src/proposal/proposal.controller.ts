@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
 import { ProposalAgentRole, ProposalAgentRoles } from 'src/lib/types';
@@ -67,6 +75,16 @@ export class ProposalController {
   async getChoiceCount(@Param('id') proposalId: string) {
     const { choiceCount } = await this.proposalService.getOne(proposalId);
     return { choiceCount };
+  }
+
+  @Put('update/:id')
+  async updateOne(
+    @Param('id') proposalId: string,
+    @Body('proposal')
+    proposal: ProposalDto,
+  ) {
+    console.log('Updating Proposal', proposal);
+    // return this.proposalService.updateProposal(proposalId, proposal);
   }
 
   // @Post(':id/vote')

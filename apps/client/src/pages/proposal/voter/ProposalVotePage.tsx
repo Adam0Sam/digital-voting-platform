@@ -56,23 +56,28 @@ export default function ProposalVotePage() {
 
   const canVote = userVote.current!.status === 'PENDING';
 
+  /**
+   * @Question
+   * Why is proposal.current possibly undefined
+   * in functions defined within the render?
+   */
   return (
     <div className="mt-12 flex justify-center">
       <div className="flex max-w-screen-lg flex-1 flex-col items-center gap-36">
         <div className="flex flex-col gap-6 text-center">
           <h3 className="text-6xl">{proposal.current!.title}</h3>
           <p className="text-2xl text-muted-foreground">
-            {proposal.current!.description || 'Empty'}
+            {proposal.current.description || 'Empty'}
           </p>
         </div>
         <div className="flex w-full flex-col items-center gap-8">
           <h4 className="text-2xl">
             {canVote
-              ? `Votes left: ${proposal.current!.choiceCount - selectedChoices.length}`
+              ? `Votes left: ${proposal.current.choiceCount - selectedChoices.length}`
               : 'Your submitted votes'}
           </h4>
           <div className="flex w-full flex-wrap justify-center gap-14">
-            {proposal.current!.choices.map(choice => (
+            {proposal.current.choices.map(choice => (
               <ChoiceCard
                 choiceData={choice}
                 isSelected={selectedChoices.some(
@@ -123,9 +128,9 @@ export default function ProposalVotePage() {
                 </DialogHeader>
                 <div className="mt-8 flex flex-col items-center">
                   <DialogDescription>
-                    {selectedChoices.length === proposal.current!.choiceCount
+                    {selectedChoices.length === proposal.current.choiceCount
                       ? 'You have exhausted all your votes.'
-                      : `You have selected ${selectedChoices.length} choices out of ${proposal.current!.choiceCount}.`}
+                      : `You have selected ${selectedChoices.length} choices out of ${proposal.current.choiceCount}.`}
                   </DialogDescription>
                   <DialogDescription>
                     Selected:{' '}

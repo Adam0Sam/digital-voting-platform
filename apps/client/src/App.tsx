@@ -14,9 +14,9 @@ import { ThemeProvider } from './components/theme-provider';
 import GreetingPage from './pages/GreetingPage';
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
-import VoterLandingPage from './pages/proposal/VoterLandingPage';
-import ManagerLandingPage from './pages/proposal/ManagerLandingPage';
-import ProposalVotePage from './pages/proposal/ProposalVotePage';
+import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
+import ManagerLandingPage from './pages/proposal/manager/ManagerLandingPage';
+import ProposalVotePage from './pages/proposal/voter/ProposalVotePage';
 import {
   authLoader,
   voterProposalsLoader,
@@ -25,6 +25,7 @@ import {
   MANAGER_PROPOSALS_LOADER_ID,
 } from './lib/loaders';
 import { SingularLabeledBarChart } from './components/bar-chart/SingularLabeledChart';
+import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 
 function App() {
   const router = createBrowserRouter(
@@ -54,7 +55,7 @@ function App() {
             loader={managerProposalsLoader}
           >
             <Route path="all" element={<ManagerLandingPage />} />
-            <Route path=":id" element={<div>labas</div>} />
+            <Route path=":id" element={<ProposalManagePage />} />
           </Route>
           <Route path="create" element={<ProposalCreationPage />} />
         </Route>

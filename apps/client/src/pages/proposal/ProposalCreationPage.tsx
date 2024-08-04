@@ -180,6 +180,7 @@ const DateCard: FC<{
       defaultEndDate={
         defaultValues.endDate ? new Date(defaultValues.endDate) : undefined
       }
+      submitButtonLabel="Next"
     />
   </CardWrapper>
 );

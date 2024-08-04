@@ -87,17 +87,11 @@ export default function ManagerCard({
               </div>
               <PopoverContent className="w-min">
                 <Calendar
-                  mode="single"
-                  selected={
-                    !hasStarted
-                      ? new Date(proposalData.startDate)
-                      : new Date(proposalData.endDate)
-                  }
-                  defaultMonth={
-                    !hasStarted
-                      ? new Date(proposalData.startDate)
-                      : new Date(proposalData.endDate)
-                  }
+                  mode="range"
+                  selected={{
+                    from: new Date(proposalData.startDate),
+                    to: new Date(proposalData.endDate),
+                  }}
                 />
               </PopoverContent>
             </Popover>
@@ -110,7 +104,10 @@ export default function ManagerCard({
                   </Button>
                 </PopoverTrigger>
               </div>
-              <PopoverContent className="w-max">
+              {/*
+               * TODO: Make this value dynamic
+               */}
+              <PopoverContent className="w-96">
                 <SingularLabeledBarChart
                   chartData={choiceChartData}
                   dataLabelKey="choiceValue"

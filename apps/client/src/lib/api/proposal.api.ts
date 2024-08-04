@@ -22,6 +22,16 @@ export class ProposalApi {
     })) as Proposal;
   }
 
+  async updateOne(id: string, data: Partial<ProposalDto>) {
+    return (await this.httpClient.fetchWithAuth(`update/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ proposal: data }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })) as Proposal;
+  }
+
   async deleteOne(id: string) {
     return await this.httpClient.fetchWithAuth(`delete/${id}`, {
       method: 'DELETE',
