@@ -100,7 +100,11 @@ export class ProposalService {
         },
       },
       include: {
-        votes: true,
+        votes: {
+          include: {
+            choices: true,
+          },
+        },
         choices: true,
         managers: true,
       },

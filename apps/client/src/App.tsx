@@ -24,6 +24,7 @@ import {
   managerProposalsLoader,
   MANAGER_PROPOSALS_LOADER_ID,
 } from './lib/loaders';
+import { SingularLabeledBarChart } from './components/bar-chart/BarChart';
 
 function App() {
   const router = createBrowserRouter(
@@ -57,7 +58,23 @@ function App() {
           </Route>
           <Route path="create" element={<ProposalCreationPage />} />
         </Route>
-        <Route path="test" element={<></>} />
+        <Route
+          path="test"
+          element={
+            <SingularLabeledBarChart
+              chartData={[
+                { month: 'January', desktop: 186 },
+                { month: 'February', desktop: 305 },
+                { month: 'March', desktop: 237 },
+                { month: 'April', desktop: 73 },
+                { month: 'May', desktop: 209 },
+                { month: 'June', desktop: 214 },
+              ]}
+              dataLabelKey="month"
+              dataValueKey="desktop"
+            />
+          }
+        />
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),

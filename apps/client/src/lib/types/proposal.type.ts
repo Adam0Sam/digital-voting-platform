@@ -4,11 +4,15 @@ import {
   isType,
   isTypeArray,
 } from './utils/type-validators';
+import { Vote } from './vote.type';
 
 export type ProposalChoice = ProposalChoiceDto & { id: string };
 
-export type Proposal = Omit<ProposalDto, 'choices'> & { id: string } & {
+export type Proposal = Omit<ProposalDto, 'choices' | 'voters'> & {
+  id: string;
+} & {
   choices: ProposalChoice[];
+  votes: Vote[];
 };
 
 export type ProposalDto = {
