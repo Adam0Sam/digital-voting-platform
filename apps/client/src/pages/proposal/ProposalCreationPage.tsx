@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { redirect } from 'react-router-dom';
 import {
   isProposalChoiceDtoArray,
-  isProposalManagerDtoArray,
   ProposalChoiceDto,
   ProposalDto,
   ProposalManagerRole,
@@ -70,12 +69,12 @@ function ProposalSummary({
 }) {
   const managerNameMap = new Map<ProposalManagerRole, string[]>();
 
-  data.managers.forEach(({ role, user }) => {
-    managerNameMap.set(role, [
-      ...(managerNameMap.get(role) ?? []),
-      `${user.personalNames.join(' ')} ${user.familyName}`,
-    ]);
-  });
+  // data.managers.forEach(({ role, user }) => {
+  //   managerNameMap.set(role, [
+  //     ...(managerNameMap.get(role) ?? []),
+  //     `${user.personalNames.join(' ')} ${user.familyName}`,
+  //   ]);
+  // });
 
   return (
     <Card>
@@ -101,8 +100,6 @@ function ProposalSummary({
                 .join(', ');
             } else if (isProposalChoiceDtoArray(value)) {
               outputString = value.map(choice => choice.value).join(', ');
-            } else if (isProposalManagerDtoArray(value)) {
-              return null;
             } else {
               outputString = String(value);
             }
@@ -376,12 +373,13 @@ export default function ProposalCreationPage() {
             visibility:
               proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
             voters: proposalVoters,
-            managers: proposalManagers.flatMap(({ type, users }) => {
-              return users.map(user => ({
-                role: type,
-                user,
-              }));
-            }),
+            // managers: proposalManagers.flatMap(({ type, users }) => {
+            //   return users.map(user => ({
+            //     role: type,
+            //     user,
+            //   }));
+            // }),
+            managers: [],
             choices: proposalChoices,
             choiceCount: proposalChoiceCount,
           }}

@@ -1,41 +1,37 @@
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-
 import { cn } from '@/lib/utils';
-import { Armchair } from 'lucide-react';
-import React from 'react';
+import { FC } from 'react';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LinkComponentProps } from './interfaces';
-import { proposalLinkCollection, testLinkCollection } from './link-collections';
+import { type LinkCollection } from './link-collections';
+import { CircleUserRound } from 'lucide-react';
 
-interface MobileLinkItemProps extends LinkComponentProps {
-  onOpenChange?: (open: boolean) => void;
-}
-
-const LinkItem = ({
-  to,
-  onOpenChange,
-  className,
-  children,
-  ...props
-}: MobileLinkItemProps) => {
+const LinkCollection: FC<{
+  collection: LinkCollection;
+  handleOpen: () => void;
+}> = ({ collection, handleOpen }) => {
   return (
-    <NavLink
-      to={to}
-      onClick={() => {
-        onOpenChange?.(false);
-      }}
-      className={cn(className)}
-      {...props}
-    >
-      {children}
-    </NavLink>
+    <div>
+      <NavLink to={collection.basePath} className="text-lg font-bold">
+        <div className="flex">
+          {collection.name}
+          {collection.icon && <collection.icon className="h-6 w-6" />}
+        </div>
+      </NavLink>
+      <div className="flex flex-col">
+        {collection.items.map(
+          item =>
+            item.href && (
+              <NavLink to={item.href} key={item.href} onClick={handleOpen}>
+                {item.title}
+              </NavLink>
+            ),
+        )}
+      </div>
+    </div>
   );
 };
-
-LinkItem.displayName = 'LinkItem';
 
 function MobileBurgerSvg() {
   return (
@@ -89,54 +85,9 @@ export function MobileNav({ className }: { className?: string }) {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
-        <LinkItem to="/" className="flex items-center" onOpenChange={setOpen}>
-          {proposalLinkCollection.icon && (
-            <proposalLinkCollection.icon className="mr-2 h-4 w-4" />
-          )}
-          <span className="font-bold">{proposalLinkCollection.name}</span>
-        </LinkItem>
-        <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
-          <div className="flex flex-col space-y-3">
-            {proposalLinkCollection.items.map(
-              item =>
-                item.href && (
-                  <LinkItem
-                    key={item.href}
-                    to={item.href}
-                    onOpenChange={setOpen}
-                  >
-                    {item.title}
-                  </LinkItem>
-                ),
-            )}
-          </div>
-          <div className="flex flex-col space-y-2">
-            <div className="flex flex-col space-y-3 pt-6">
-              <h4 className="font-medium">{testLinkCollection.name}</h4>
-              {testLinkCollection.items.map((item, index) => (
-                <React.Fragment key={item.href}>
-                  {true &&
-                    (item.href ? (
-                      <LinkItem
-                        to={item.href}
-                        onOpenChange={setOpen}
-                        className="text-muted-foreground"
-                      >
-                        {item.title}
-                        {true && (
-                          <span className="ml-2 rounded-md bg-[#adfa1d] px-1.5 py-0.5 text-xs leading-none text-[#000000] no-underline group-hover:no-underline">
-                            {`Item ${index}`}
-                          </span>
-                        )}
-                      </LinkItem>
-                    ) : (
-                      item.title
-                    ))}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </ScrollArea>
+        <NavLink to="/me" end className="my-20">
+          <CircleUserRound />
+        </NavLink>
       </SheetContent>
     </Sheet>
   );

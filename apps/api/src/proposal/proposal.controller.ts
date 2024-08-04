@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
-import { ProposalAgentRole, ProposalAgentRoles } from 'src/lib/types';
+
 import { ParseStringLiteral, ZodValidationPipe } from 'src/pipes';
 import { ProposalDto, ProposalDtoSchema } from './dto';
 import { VoteService } from 'src/vote/vote.service';
@@ -54,22 +54,22 @@ export class ProposalController {
     return this.voteService.voteForProposal(userId, proposalId, choices);
   }
 
-  @Get(':agentRole/all')
-  getProposalsByAgentRole(
-    @GetUser('id') userId: User['id'],
-    @Param('agentRole', new ParseStringLiteral(ProposalAgentRoles))
-    agentRole: ProposalAgentRole,
-  ) {
-    return this.proposalService.getProposalByAgent(userId, agentRole);
-  }
+  // @Get(':agentRole/all')
+  // getProposalsByAgentRole(
+  //   @GetUser('id') userId: User['id'],
+  //   @Param('agentRole', new ParseStringLiteral(ProposalAgentRoles))
+  //   agentRole: ProposalAgentRole,
+  // ) {
+  //   return this.proposalService.getProposalByAgent(userId, agentRole);
+  // }
 
-  @Post('create')
-  createOne(
-    @Body('proposal', new ZodValidationPipe(ProposalDtoSchema))
-    proposal: ProposalDto,
-  ) {
-    return this.proposalService.createProposal(proposal);
-  }
+  // @Post('create')
+  // createOne(
+  //   @Body('proposal', new ZodValidationPipe(ProposalDtoSchema))
+  //   proposal: ProposalDto,
+  // ) {
+  //   return this.proposalService.createProposal(proposal);
+  // }
 
   @Get(':id/choice-count')
   async getChoiceCount(@Param('id') proposalId: string) {

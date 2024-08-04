@@ -1,8 +1,4 @@
-import {
-  ProposalManagerRole,
-  ProposalStatus,
-  ProposalVisibility,
-} from '@prisma/client';
+import { ProposalStatus, ProposalVisibility } from '@prisma/client';
 import { UserSchema } from 'src/user/schema/user.schema';
 import { z } from 'zod';
 
@@ -14,7 +10,7 @@ export const ProposalResolutionSchema = z.object({
 export type ProposalResolution = z.infer<typeof ProposalResolutionSchema>;
 
 export const ProposalManagerDtoSchema = z.object({
-  role: z.nativeEnum(ProposalManagerRole),
+  // role: z.nativeEnum(ProposalManagerRole),
   user: UserSchema,
 });
 

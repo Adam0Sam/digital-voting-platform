@@ -24,8 +24,8 @@ import {
   managerProposalsLoader,
   MANAGER_PROPOSALS_LOADER_ID,
 } from './lib/loaders';
-import { SingularLabeledBarChart } from './components/bar-chart/SingularLabeledChart';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
+import { GENERIC_PATHS, PROPOSAL_PATHS } from './components/nav';
 
 function App() {
   const router = createBrowserRouter(
@@ -39,43 +39,30 @@ function App() {
           }}
         />
         <Route path="home" element={<HomeLayout />}></Route>
-        <Route path="proposals">
+        <Route path={PROPOSAL_PATHS.BASE}>
           <Route
-            path="vote"
+            path={PROPOSAL_PATHS.VOTE}
             id={VOTER_PROPOSALS_LOADER_ID}
             loader={voterProposalsLoader}
           >
-            <Route path="all" element={<VoterLandingPage />} />
-            <Route path=":id" element={<ProposalVotePage />} />
+            <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
+            <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
           </Route>
 
           <Route
-            path="manage"
+            path={PROPOSAL_PATHS.MANAGE}
             id={MANAGER_PROPOSALS_LOADER_ID}
             loader={managerProposalsLoader}
           >
-            <Route path="all" element={<ManagerLandingPage />} />
-            <Route path=":id" element={<ProposalManagePage />} />
+            <Route path={GENERIC_PATHS.ALL} element={<ManagerLandingPage />} />
+            <Route path={GENERIC_PATHS.ONE} element={<ProposalManagePage />} />
           </Route>
-          <Route path="create" element={<ProposalCreationPage />} />
+          <Route
+            path={PROPOSAL_PATHS.CREATE}
+            element={<ProposalCreationPage />}
+          />
         </Route>
-        <Route
-          path="test"
-          element={
-            <SingularLabeledBarChart
-              chartData={[
-                { month: 'January', desktop: 186 },
-                { month: 'February', desktop: 305 },
-                { month: 'March', desktop: 237 },
-                { month: 'April', desktop: 73 },
-                { month: 'May', desktop: 209 },
-                { month: 'June', desktop: 214 },
-              ]}
-              dataLabelKey="month"
-              dataValueKey="desktop"
-            />
-          }
-        />
+        <Route path="me" element={<div>labas</div>}></Route>
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),

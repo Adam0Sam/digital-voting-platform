@@ -9,9 +9,9 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 
-import { CircleUserRound, Clipboard } from 'lucide-react';
-import { LinkComponentProps } from './interfaces';
-import { proposalLinkCollection, testLinkCollection } from './link-collections';
+import { CircleUserRound } from 'lucide-react';
+import { proposalLinkCollection } from './link-collections';
+import { NavLinkProps } from 'react-router-dom';
 
 type getStyles = (isActive: boolean) => string;
 // why do i get error when I pass arrow fn directly?
@@ -29,6 +29,11 @@ const getStandaloneLinkStyles: getStyles = isActive =>
     'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-6 py-4 xs:text-sm sm:text-md md:text-lg font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50',
     { 'bg-accent/50': isActive },
   );
+
+export type LinkComponentProps = NavLinkProps & {
+  children: React.ReactNode;
+  className?: string;
+};
 
 const LinkItem = ({
   to,
@@ -95,28 +100,10 @@ export default function DesktopNav({ className }: { className?: string }) {
               </ul>
             </NavigationMenuContent>
           </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger>
-              {testLinkCollection.name}
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                {testLinkCollection.items.map(component => (
-                  <LinkItem
-                    key={component.title}
-                    title={component.title}
-                    to={component.href}
-                  >
-                    {component.description}
-                  </LinkItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
       <NavigationMenuItem className="ml-auto mr-10 flex max-w-max items-center">
-        <NavLink to="/profile" end className={'self-end'}>
+        <NavLink to="/me" end className={'self-end'}>
           <CircleUserRound />
         </NavLink>
       </NavigationMenuItem>
