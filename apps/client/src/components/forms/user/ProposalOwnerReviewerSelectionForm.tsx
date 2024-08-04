@@ -10,7 +10,7 @@ import { StringifiedUser } from '../../tables/user/UserColumns';
 import { Separator } from '../../ui/separator';
 import useSignedInUser from '@/context/userContext';
 import getNormalizedTableUsers from '../../tables/user/utils/normalize-users';
-import UserScrollArea from './UserScrollArea';
+import UserScrollArea from '../../UserScrollArea';
 import { cn } from '@/lib/utils';
 
 type FormValues = { owners: User[]; reviewers: User[] };

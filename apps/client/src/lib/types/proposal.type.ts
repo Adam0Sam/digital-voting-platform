@@ -1,3 +1,4 @@
+import { ProposalManagerDto } from './proposal-manager.type';
 import { isUser, User } from './user.type';
 import {
   isKeyOfStringLiteralObj,
@@ -29,22 +30,6 @@ export type ProposalDto = {
   choices: ProposalChoiceDto[];
   choiceCount: number;
 };
-
-export type ProposalManagerDto = {
-  role: ProposalManagerRole;
-  user: User;
-};
-
-export const isProposalManagerDto = (item: unknown) =>
-  isType<ProposalManagerDto>(item, item => {
-    if (typeof item !== 'object') return false;
-    if (item === null) return false;
-    const { role, user } = item as ProposalManagerDto;
-    return isKeyOfStringLiteralObj(role, ProposalManagerRoles) && isUser(user);
-  });
-
-export const isProposalManagerDtoArray = (item: unknown) =>
-  isTypeArray(item, isProposalManagerDto);
 
 export const ProposalManagerRoles = {
   OWNER: 'OWNER',

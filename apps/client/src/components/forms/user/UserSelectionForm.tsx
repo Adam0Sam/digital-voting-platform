@@ -9,7 +9,7 @@ import { UserPlus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import FormHandleButtons from '../FormHandleButtons';
-import UserScrollArea from './UserScrollArea';
+import UserScrollArea from '../../UserScrollArea';
 
 type FormValues = User[];
 export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
