@@ -1,24 +1,6 @@
-import { FC } from 'react';
 import { Clipboard } from 'lucide-react';
-
-export type LinkItem = {
-  title: string;
-  href: string;
-  description: string;
-};
-
-export type LinkCollection = {
-  name: string;
-  description?: string;
-  basePath: string;
-  icon?: FC<{ className?: string }>;
-  items: LinkItem[];
-};
-
-export const GENERIC_PATHS = {
-  ALL: 'all',
-  ONE: ':id',
-};
+import { LinkCollection } from './link.type';
+import { GENERIC_PATHS } from './util.links';
 
 export const PROPOSAL_PATHS = {
   BASE: 'proposals',
@@ -35,7 +17,7 @@ export const PROPOSAL_HREFS = {
   CREATE: `${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.CREATE}`,
 } as const;
 
-export const proposalLinkCollection: LinkCollection = {
+export const PROPOSAL_LINK_COLLECTION = {
   name: 'Proposals',
   description:
     'Proposals are a way to suggest changes to a project, to elect a representative and more. Here you can view, vote, comment on proposals and even create your own!.',
@@ -58,4 +40,4 @@ export const proposalLinkCollection: LinkCollection = {
       description: 'Create a new proposal',
     },
   ],
-};
+} satisfies LinkCollection;

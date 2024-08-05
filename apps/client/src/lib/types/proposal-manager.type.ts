@@ -10,14 +10,18 @@ export type ProposalManagerRoleDto = {
   permissions: ManagerPermissionsDto;
 };
 
+export const ManagerPermissionsList = [
+  'canEditTitle',
+  'canEditDescription',
+  'canEditDates',
+  'canEditStatus',
+  'canEditVisibility',
+  'canEditVotes',
+  'canEditManagers',
+  'canEditChoices',
+  'canEditChoiceCount',
+] as const;
+
 export type ManagerPermissionsDto = {
-  canEditTitle: boolean;
-  canEditDescription: boolean;
-  canEditDates: boolean;
-  canEditStatus: boolean;
-  canEditVisibility: boolean;
-  canEditVotes: boolean;
-  canEditManagers: boolean;
-  canEditChoices: boolean;
-  canEditChoiceCount: boolean;
+  [key in (typeof ManagerPermissionsList)[number]]: boolean;
 };

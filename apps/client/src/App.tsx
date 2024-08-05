@@ -6,12 +6,12 @@ import {
   redirect,
 } from 'react-router-dom';
 import './App.css';
-import getAuthEndpoint from './lib/auth/getAuthEndpoint';
+import getOAuth2Endpoint from './lib/auth/getAuthEndpoint';
 
 import HomeLayout from './pages/HomeLayout';
 
 import { ThemeProvider } from './components/theme-provider';
-import GreetingPage from './pages/GreetingPage';
+
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
@@ -23,46 +23,88 @@ import {
   VOTER_PROPOSALS_LOADER_ID,
   managerProposalsLoader,
   MANAGER_PROPOSALS_LOADER_ID,
+  USER_LOADER_ID,
+  AUTH_LOADER_ID,
+  userLoader,
 } from './lib/loaders';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
-import { GENERIC_PATHS, PROPOSAL_PATHS } from './components/nav';
+import ProfileSettingsPage from './pages/ProfileSettingsPage';
+import {
+  AUTH_PATHS,
+  GENERIC_PATHS,
+  PROPOSAL_PATHS,
+  USER_PROFILE_PATHS,
+} from './lib/constants/href';
+import RootErrorBoundary from './components/RootErrorBoundary';
+import ProposalsLayout from './pages/ProposalsLayout';
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route path="/" element={<RootLayout />}>
-        <Route path="signin" loader={authLoader} element={<GreetingPage />} />
+      <Route
+        path="/"
+        element={<RootLayout />}
+        errorElement={<RootErrorBoundary />}
+      >
         <Route
-          path="signup"
-          loader={() => {
-            return redirect(getAuthEndpoint());
-          }}
+          path={AUTH_PATHS.SIGNIN}
+          id={USER_LOADER_ID}
+          loader={userLoader}
         />
-        <Route path="home" element={<HomeLayout />}></Route>
-        <Route path={PROPOSAL_PATHS.BASE}>
+        <Route
+          path={AUTH_PATHS.SIGNUP}
+          id={AUTH_LOADER_ID}
+          loader={authLoader}
+        />
+        <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
           <Route
             path={PROPOSAL_PATHS.VOTE}
             id={VOTER_PROPOSALS_LOADER_ID}
-            loader={voterProposalsLoader}
+            // loader={voterProposalsLoader}
           >
-            <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
-            <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
+            <Route
+              path={GENERIC_PATHS.ALL}
+              // element={<VoterLandingPage />}
+            />
+            <Route
+              path={GENERIC_PATHS.ONE}
+              // element={<ProposalVotePage />}
+            />
           </Route>
 
           <Route
             path={PROPOSAL_PATHS.MANAGE}
             id={MANAGER_PROPOSALS_LOADER_ID}
-            loader={managerProposalsLoader}
+            // loader={managerProposalsLoader}
           >
-            <Route path={GENERIC_PATHS.ALL} element={<ManagerLandingPage />} />
-            <Route path={GENERIC_PATHS.ONE} element={<ProposalManagePage />} />
+            <Route
+              path={GENERIC_PATHS.ALL}
+              // element={<ManagerLandingPage />}
+            />
+            <Route
+              path={GENERIC_PATHS.ONE}
+              // element={<ProposalManagePage />}
+            />
           </Route>
           <Route
             path={PROPOSAL_PATHS.CREATE}
-            element={<ProposalCreationPage />}
+            // element={<ProposalCreationPage />}
           />
         </Route>
-        <Route path="me" element={<div>labas</div>}></Route>
+        <Route path={USER_PROFILE_PATHS.BASE} element={<ProfileSettingsPage />}>
+          <Route
+            path={USER_PROFILE_PATHS.PROFILE}
+            element={<div>Profile</div>}
+          />
+          <Route
+            path={USER_PROFILE_PATHS.HISTORY}
+            element={<div>History</div>}
+          />
+          <Route
+            path={USER_PROFILE_PATHS.TEMPLATES}
+            element={<div>Templates</div>}
+          />
+        </Route>
         <Route path="*" element={<div>404</div>} />
       </Route>,
     ),

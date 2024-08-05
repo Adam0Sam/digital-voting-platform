@@ -5,7 +5,6 @@ import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { redirect } from 'react-router-dom';
 import {
   isProposalChoiceDtoArray,
   ProposalChoiceDto,
@@ -16,7 +15,7 @@ import {
   ProposalVisibility,
   ProposalVisibilityOptions,
 } from '@/lib/types/proposal.type';
-import { api, APIError } from '@/lib/api';
+import { api } from '@/lib/api';
 import {
   Card,
   CardContent,
@@ -35,29 +34,16 @@ import Combobox from '@/components/Combobox';
 import ProposalChoiceForm from '@/components/forms/choice-selection/ProposalChoiceForm';
 
 const createProposal = async (data: ProposalDto) => {
-  try {
-    const createdProposal = await api.proposals.createOne(data);
-    const { id } = createdProposal;
-    // TODO: Undo proposal creation via scheduled worker request disruption
-    toast(`Proposal ${data.title} has been created`, {
-      description: new Date().toLocaleTimeString(),
-      action: {
-        label: 'Undo',
-        onClick: () => api.proposals.deleteOne(id),
-      },
-    });
-  } catch (error) {
-    if (error instanceof APIError) {
-      if (error.status === 401) {
-        console.error('Unauthorized Request');
-        return redirect('/signin');
-      } else {
-        console.error(`API Error: ${error.message}, ${error.status}`);
-      }
-    } else {
-      console.error('Failed to create proposal ', error);
-    }
-  }
+  const createdProposal = await api.proposals.createOne(data);
+  const { id } = createdProposal;
+  // TODO: Undo proposal creation via scheduled worker request disruption
+  toast(`Proposal ${data.title} has been created`, {
+    description: new Date().toLocaleTimeString(),
+    action: {
+      label: 'Undo',
+      onClick: () => api.proposals.deleteOne(id),
+    },
+  });
 };
 // TODO: Make a prettier proposal summary component
 function ProposalSummary({

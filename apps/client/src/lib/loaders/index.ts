@@ -1,8 +1,8 @@
 export {
-  authLoader,
-  type ReturnType as AuthLoaderReturnType,
-  LOADER_ID as AUTH_LOADER_ID,
-} from './auth.loader';
+  userLoader,
+  type ReturnType as UserLoaderReturnType,
+  LOADER_ID as USER_LOADER_ID,
+} from './user.loader';
 
 export {
   voterProposalsLoader,
@@ -15,3 +15,9 @@ export {
   type ReturnType as ManagerProposalsLoaderReturnType,
   LOADER_ID as MANAGER_PROPOSALS_LOADER_ID,
 } from './manager-proposals.loader';
+
+export {
+  authLoader,
+  type ReturnType as AuthLoaderReturnType,
+  LOADER_ID as AUTH_LOADER_ID,
+} from './auth.loader';

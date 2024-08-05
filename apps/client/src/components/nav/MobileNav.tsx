@@ -4,9 +4,12 @@ import { cn } from '@/lib/utils';
 import { FC } from 'react';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { type LinkCollection } from './link-collections';
 import { CircleUserRound } from 'lucide-react';
-
+import {
+  PROPOSAL_LINK_COLLECTION,
+  USER_PROFILE_PATHS,
+  type LinkCollection,
+} from '@/lib/constants/href';
 const LinkCollection: FC<{
   collection: LinkCollection;
   handleOpen: () => void;
@@ -84,8 +87,12 @@ export function MobileNav({ className }: { className?: string }) {
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="pr-0">
-        <NavLink to="/me" end className="my-20">
+      <SheetContent side="left" className="flex flex-col gap-8 pr-0">
+        <LinkCollection
+          collection={PROPOSAL_LINK_COLLECTION}
+          handleOpen={() => setOpen(false)}
+        />
+        <NavLink to={`/${USER_PROFILE_PATHS.BASE}`} end>
           <CircleUserRound />
         </NavLink>
       </SheetContent>
