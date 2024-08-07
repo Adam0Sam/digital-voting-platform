@@ -28,15 +28,18 @@ import {
   userLoader,
 } from './lib/loaders';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
-import ProfileSettingsPage from './pages/ProfileSettingsPage';
-import {
-  AUTH_PATHS,
-  GENERIC_PATHS,
-  PROPOSAL_PATHS,
-  USER_PROFILE_PATHS,
-} from './lib/constants/href';
+import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
 import RootErrorBoundary from './components/RootErrorBoundary';
 import ProposalsLayout from './pages/ProposalsLayout';
+import ProfileTemplatesPage from './pages/profile/profile-templates/ProfileTemplatesPage';
+import {
+  AUTH_PATHS,
+  PROPOSAL_PATHS,
+  USER_PROFILE_PATHS,
+  USER_TEMPLATES_PATHS,
+} from './lib/routes';
+import { GENERIC_PATHS } from './lib/routes/util.routes';
+import ManagerRoleTemplates from './pages/profile/profile-templates/ManagerRoleTemplates';
 
 function App() {
   const router = createBrowserRouter(
@@ -101,9 +104,14 @@ function App() {
             element={<div>History</div>}
           />
           <Route
-            path={USER_PROFILE_PATHS.TEMPLATES}
-            element={<div>Templates</div>}
-          />
+            path={USER_TEMPLATES_PATHS.BASE}
+            element={<ProfileTemplatesPage />}
+          >
+            <Route
+              path={USER_TEMPLATES_PATHS.MANAGER}
+              element={<ManagerRoleTemplates />}
+            />
+          </Route>
         </Route>
         <Route path="*" element={<div>404</div>} />
       </Route>,

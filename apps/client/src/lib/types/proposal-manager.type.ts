@@ -5,8 +5,13 @@ export type ProposalManagerDto = {
   role: ProposalManagerRoleDto;
 };
 
+export type ProposalManagerRole = ProposalManagerRoleDto & {
+  id: string;
+};
+
 export type ProposalManagerRoleDto = {
   roleName: string;
+  description?: string;
   permissions: ManagerPermissionsDto;
 };
 

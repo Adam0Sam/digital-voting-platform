@@ -7,9 +7,9 @@ import { NavLink } from 'react-router-dom';
 import { CircleUserRound } from 'lucide-react';
 import {
   PROPOSAL_LINK_COLLECTION,
-  USER_PROFILE_PATHS,
   type LinkCollection,
 } from '@/lib/constants/href';
+import { USER_PROFILE_HREFS } from '@/lib/routes';
 const LinkCollection: FC<{
   collection: LinkCollection;
   handleOpen: () => void;
@@ -92,7 +92,7 @@ export function MobileNav({ className }: { className?: string }) {
           collection={PROPOSAL_LINK_COLLECTION}
           handleOpen={() => setOpen(false)}
         />
-        <NavLink to={`/${USER_PROFILE_PATHS.BASE}`} end>
+        <NavLink to={USER_PROFILE_HREFS.BASE} end>
           <CircleUserRound />
         </NavLink>
       </SheetContent>

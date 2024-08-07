@@ -1,28 +1,13 @@
 import { Clipboard } from 'lucide-react';
 import { LinkCollection } from './link.type';
-import { GENERIC_PATHS } from './util.links';
-
-export const PROPOSAL_PATHS = {
-  BASE: 'proposals',
-  VOTE: 'vote',
-  MANAGE: 'manage',
-  CREATE: 'create',
-};
-
-export const PROPOSAL_HREFS = {
-  VOTE_ALL: `${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.VOTE}/${GENERIC_PATHS.ALL}`,
-  VOTE_ONE: `${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.VOTE}/${GENERIC_PATHS.ONE}`,
-  MANAGE_ALL: `${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.MANAGE}/${GENERIC_PATHS.ALL}`,
-  MANAGE_ONE: `${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.MANAGE}/${GENERIC_PATHS.ONE}`,
-  CREATE: `${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.CREATE}`,
-} as const;
+import { PROPOSAL_HREFS } from '@/lib/routes';
 
 export const PROPOSAL_LINK_COLLECTION = {
   name: 'Proposals',
   description:
     'Proposals are a way to suggest changes to a project, to elect a representative and more. Here you can view, vote, comment on proposals and even create your own!.',
   icon: Clipboard,
-  basePath: PROPOSAL_PATHS.BASE,
+  basePath: PROPOSAL_HREFS.BASE,
   items: [
     {
       href: PROPOSAL_HREFS.VOTE_ALL,

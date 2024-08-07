@@ -1,6 +1,4 @@
 import { StandaloneNavLink } from '@/components/nav/NavLinkItem';
-import { Button } from '@/components/ui/button';
-
 import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
@@ -16,7 +14,7 @@ export default function ProfileSettingsPage() {
   const user = useSignedInUser();
 
   return (
-    <div className="flex flex-col px-10 py-20 sm:px-20">
+    <div className="flex flex-1 flex-col px-10 pt-20 sm:px-20">
       <div className="flex flex-col gap-8">
         <div>
           <h2 className="text-3xl sm:text-4xl">Settings</h2>
@@ -26,22 +24,23 @@ export default function ProfileSettingsPage() {
         </div>
         <Separator />
       </div>
-      <div className="flex flex-col gap-8 sm:flex-row">
+      <div className="flex flex-1 flex-col gap-8 sm:flex-row">
         {/*
          * TODO:
          * Make this more responsive on very narrow screens
          */}
-        <ul className="my-4 flex flex-1 list-none flex-row gap-4 sm:my-10 sm:flex-col">
+        <ul className="my-4 flex list-none flex-row justify-start gap-4 sm:my-10 sm:flex-1 sm:flex-col">
           {USER_PROFILE_LINK_COLLECTION.items.map(link => (
             <TooltipProvider key={link.title + link.href}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <li className="flex flex-1">
+                  <li className="h-min">
                     <StandaloneNavLink
                       title={link.title}
                       to={link.href}
                       className="w-full"
                       titleAlign="start"
+                      end={!link.hasChildren}
                     />
                   </li>
                 </TooltipTrigger>
@@ -51,7 +50,7 @@ export default function ProfileSettingsPage() {
           ))}
         </ul>
         <Separator orientation="vertical" className="hidden h-full sm:block" />
-        <div className="flex-[3]">
+        <div className="flex-[3] sm:p-10">
           <Outlet />
         </div>
       </div>

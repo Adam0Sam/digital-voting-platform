@@ -12,8 +12,8 @@ import {
 import { CircleUserRound } from 'lucide-react';
 import { PROPOSAL_LINK_COLLECTION } from '../../lib/constants/href/proposal.links';
 
-import { USER_PROFILE_PATHS } from '@/lib/constants/href';
 import { NavLinkItem, StandaloneNavLink } from './NavLinkItem';
+import { USER_PROFILE_HREFS } from '@/lib/routes';
 
 export default function DesktopNav({ className }: { className?: string }) {
   return (
@@ -59,7 +59,7 @@ export default function DesktopNav({ className }: { className?: string }) {
         </NavigationMenuList>
       </NavigationMenu>
       <NavigationMenuItem className="ml-auto mr-10 flex max-w-max items-center">
-        <NavLink to={`/${USER_PROFILE_PATHS.BASE}`} end className={'self-end'}>
+        <NavLink to={USER_PROFILE_HREFS.BASE} end className={'self-end'}>
           <CircleUserRound />
         </NavLink>
       </NavigationMenuItem>

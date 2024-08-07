@@ -1,7 +1,5 @@
 import {
-  isProposalAgentRole,
   Proposal,
-  ProposalAgentRole,
   ProposalChoice,
   ProposalDto,
 } from '@/lib/types/proposal.type';
@@ -38,14 +36,14 @@ export class ProposalApi {
     });
   }
 
-  async getProposalsByAgentRole(agentRole: ProposalAgentRole) {
-    if (!isProposalAgentRole(agentRole)) {
-      throw new Response(`Invalid agent role ${agentRole}`, { status: 400 });
-    }
-    return (await this.httpClient.fetchWithAuth(
-      `${agentRole}/all`,
-    )) as Proposal[];
-  }
+  // async getProposalsByAgentRole(agentRole: ProposalAgentRole) {
+  //   if (!isProposalAgentRole(agentRole)) {
+  //     throw new Response(`Invalid agent role ${agentRole}`, { status: 400 });
+  //   }
+  //   return (await this.httpClient.fetchWithAuth(
+  //     `${agentRole}/all`,
+  //   )) as Proposal[];
+  // }
 
   async getAllManaged() {
     return (await this.httpClient.fetchWithAuth('managed/all')) as Proposal[];

@@ -15,7 +15,7 @@ export const getLinkItemStyles: getStyles = isActive =>
 
 export const getStandaloneLinkStyles: getStyles = isActive =>
   cn(
-    'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background  xs:text-sm sm:text-md md:text-lg font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50',
+    `group inline-flex h-10 w-max items-center justify-center rounded-md bg-background  xs:text-sm sm:text-md md:text-lg font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50`,
     { 'bg-accent/50': isActive },
   );
 
@@ -36,6 +36,7 @@ export type LinkComponentProps = NavLinkProps & {
   children?: React.ReactNode;
   className?: string;
   titleAlign?: VariantProps<typeof titleVariants>['align'];
+  textClassName?: string;
 };
 
 export const StandaloneNavLink = ({
@@ -43,7 +44,9 @@ export const StandaloneNavLink = ({
   title,
   children,
   className,
+  textClassName,
   titleAlign,
+  end = true,
   ...props
 }: LinkComponentProps) => (
   <NavLink
@@ -51,11 +54,16 @@ export const StandaloneNavLink = ({
       cn(getStandaloneLinkStyles(isActive), 'flex flex-col px-3', className)
     }
     to={to}
-    end
+    end={end}
     {...props}
   >
     <div className={cn(titleVariants({ align: titleAlign }))}>{title}</div>
-    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+    <p
+      className={cn(
+        'line-clamp-2 text-sm leading-snug text-muted-foreground',
+        textClassName,
+      )}
+    >
       {children}
     </p>
   </NavLink>

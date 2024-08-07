@@ -1,9 +1,8 @@
 import { Toaster } from '@/components/ui/sonner';
 import JWTController from '@/lib/auth/jwt-controller';
-import { AUTH_PATHS } from '@/lib/constants/href';
-import useNavigationInterception from '@/lib/hooks/useNavigationInterception';
 
 import { USER_LOADER_ID, UserLoaderReturnType } from '@/lib/loaders';
+import { AUTH_PATHS } from '@/lib/routes';
 import { Grades, isUser, User } from '@/lib/types';
 import UserController from '@/lib/user-controller';
 

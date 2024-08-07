@@ -1,26 +1,14 @@
+import { USER_PROFILE_HREFS, USER_TEMPLATES_HREFS } from '@/lib/routes';
 import { LinkCollection } from './link.type';
-
-export const USER_PROFILE_PATHS = {
-  BASE: 'profile',
-  PROFILE: '',
-  HISTORY: 'history',
-  TEMPLATES: 'templates',
-};
-
-export const USER_PROFILE_HREFS = {
-  USER_PROFILE: `/${USER_PROFILE_PATHS.BASE}`,
-  HISTORY: `/${USER_PROFILE_PATHS.BASE}/${USER_PROFILE_PATHS.HISTORY}`,
-  TEMPLATES: `/${USER_PROFILE_PATHS.BASE}/${USER_PROFILE_PATHS.TEMPLATES}`,
-};
 
 export const USER_PROFILE_LINK_COLLECTION = {
   name: 'User Profile',
   description:
     'Manage your profile settings, view your history and manage your templates',
-  basePath: USER_PROFILE_PATHS.BASE,
+  basePath: USER_PROFILE_HREFS.BASE,
   items: [
     {
-      href: USER_PROFILE_HREFS.USER_PROFILE,
+      href: USER_PROFILE_HREFS.BASE,
       title: 'Profile',
       description: 'Manage your profile settings',
     },
@@ -30,9 +18,10 @@ export const USER_PROFILE_LINK_COLLECTION = {
       description: 'View your history',
     },
     {
-      href: USER_PROFILE_HREFS.TEMPLATES,
+      href: USER_TEMPLATES_HREFS.BASE,
       title: 'Templates',
       description: 'Manage your templates',
+      hasChildren: true,
     },
   ],
 } satisfies LinkCollection;
