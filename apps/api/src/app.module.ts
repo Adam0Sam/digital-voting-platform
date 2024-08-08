@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { ProposalModule } from './proposal/proposal.module';
 
 import { VoteModule } from './vote/vote.module';
+import { ManagerRoleModule } from './manager-role/manager-role.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -26,6 +27,7 @@ import appConfig from './config/app.config';
     UserModule,
     ProposalModule,
     VoteModule,
+    ManagerRoleModule,
   ],
   providers: [
     AppService,

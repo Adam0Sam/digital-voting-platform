@@ -26,6 +26,8 @@ import {
   USER_LOADER_ID,
   AUTH_LOADER_ID,
   userLoader,
+  managerRolesLoader,
+  MANAGER_ROLES_LOADER_ID,
 } from './lib/loaders';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
@@ -109,6 +111,8 @@ function App() {
           >
             <Route
               path={USER_TEMPLATES_PATHS.MANAGER}
+              loader={managerRolesLoader}
+              id={MANAGER_ROLES_LOADER_ID}
               element={<ManagerRoleTemplates />}
             />
           </Route>

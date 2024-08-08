@@ -21,3 +21,9 @@ export {
   type ReturnType as AuthLoaderReturnType,
   LOADER_ID as AUTH_LOADER_ID,
 } from './auth.loader';
+
+export {
+  managerRolesLoader,
+  type ReturnType as ManagerRolesLoaderReturnType,
+  LOADER_ID as MANAGER_ROLES_LOADER_ID,
+} from './manager-roles.loader';

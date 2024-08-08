@@ -1,69 +1,25 @@
 import ManagerRoleForm from '@/components/forms/ManagerRoleForm';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { api } from '@/lib/api';
 import useWindowSize from '@/lib/hooks/useWindowSize';
-import { ProposalManagerRole } from '@/lib/types/proposal-manager.type';
-import { ListPlus, Settings2, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { ManagerRolesLoaderReturnType } from '@/lib/loaders';
+import {
+  ProposalManagerRole,
+  ProposalManagerRoleDto,
+} from '@/lib/types/proposal-manager.type';
 
-const mockTemplates = [
-  {
-    id: '1',
-    roleName: 'Manager',
-    description: 'This role has full permissions',
-    permissions: {
-      canEditTitle: true,
-      canEditDescription: true,
-      canEditDates: true,
-      canEditStatus: true,
-      canEditVisibility: true,
-      canEditVotes: true,
-      canEditManagers: true,
-      canEditChoices: true,
-      canEditChoiceCount: true,
-    },
-  },
-  {
-    id: '2',
-    roleName: 'Voter',
-    description: 'This role has limited permissions',
-    permissions: {
-      canEditTitle: false,
-      canEditDescription: false,
-      canEditDates: false,
-      canEditStatus: false,
-      canEditVisibility: false,
-      canEditVotes: true,
-      canEditManagers: false,
-      canEditChoices: false,
-      canEditChoiceCount: false,
-    },
-  },
-  {
-    id: '3',
-    roleName: 'Admin',
-    description: 'This role has all permissions',
-    permissions: {
-      canEditTitle: true,
-      canEditDescription: true,
-      canEditDates: true,
-      canEditStatus: true,
-      canEditVisibility: true,
-      canEditVotes: false,
-      canEditManagers: true,
-      canEditChoices: true,
-      canEditChoiceCount: true,
-    },
-  },
-] satisfies ProposalManagerRole[];
+import { ListPlus, Settings2, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useLoaderData, useRevalidator } from 'react-router-dom';
+
+/**
+ * TODO
+ * Rethink how mobile form is displayed
+ */
 
 function ManagertRoleItem({
   template,
@@ -93,25 +49,72 @@ function ManagertRoleItem({
 }
 
 export default function ManagerRoleTemplates() {
-  const [templates, setTemplates] = useState(mockTemplates);
+  const authoredRoles = useLoaderData() as ManagerRolesLoaderReturnType;
+  const revalidator = useRevalidator();
+
+  const [templates, setTemplates] = useState(authoredRoles);
   const [openedTemplate, setOpenedTemplates] =
     useState<ProposalManagerRole | null>(null);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
+
+  useEffect(() => {
+    setTemplates(authoredRoles);
+  }, [authoredRoles]);
+
   const { width: windowWidth } = useWindowSize();
 
   const handleOpenedTemplate = (template: ProposalManagerRole | null) => {
     setOpenedTemplates(template);
-    if (windowWidth < 768) setSheetIsOpen(true);
+    /**
+     * TODO:
+     * Bug with Sheet not auto closing as window stretches from mobile
+     */
+    if (windowWidth < 768) {
+      setSheetIsOpen(true);
+    } else {
+      setSheetIsOpen(false);
+    }
   };
 
-  const deleteSelectedTemplates = () => {
+  const createTemplate = async (roleTemplateDto: ProposalManagerRoleDto) => {
+    await api.managerRole.createRole(roleTemplateDto);
+    revalidator.revalidate();
+  };
+
+  const editTemplate = async (roleTemplate: ProposalManagerRole) => {
     setTemplates(prevTemplates =>
-      prevTemplates.filter(
-        template => !selectedTemplateIds.includes(template.id),
+      prevTemplates.map(template =>
+        template.id === roleTemplate.id ? roleTemplate : template,
       ),
     );
+    await api.managerRole.updateRole(roleTemplate);
   };
+
+  const deleteTemplate = async (roleTemplate: ProposalManagerRole) => {
+    setTemplates(prevTemplates =>
+      prevTemplates.filter(template => template.id !== roleTemplate.id),
+    );
+    await api.managerRole.deleteOneRole(roleTemplate.id);
+  };
+
+  const deleteManyTemplates = async (roleTemplateIds: string[]) => {
+    setTemplates(prevTemplates =>
+      prevTemplates.filter(template => !roleTemplateIds.includes(template.id)),
+    );
+    await api.managerRole.deleteManyRoles(roleTemplateIds);
+  };
+
+  const ManagerRoleCard = (
+    <Card className="p-4">
+      <ManagerRoleForm
+        defaultRoleTemplate={openedTemplate ? openedTemplate : undefined}
+        handleCreateSubmit={createTemplate}
+        handleEditSubmit={editTemplate}
+        handleCancel={deleteTemplate}
+      />
+    </Card>
+  );
   /**
    * TODO:
    * How to make ScrollArea fill out the rest of the viewport
@@ -123,12 +126,12 @@ export default function ManagerRoleTemplates() {
           <div className="flex justify-between">
             <Button onClick={() => handleOpenedTemplate(null)}>
               <div className="flex items-center gap-4">
-                Add Template <ListPlus />˝
+                Add Template <ListPlus />
               </div>
             </Button>
             <Button
               variant="ghost"
-              onClick={deleteSelectedTemplates}
+              onClick={() => deleteManyTemplates(selectedTemplateIds)}
               disabled={selectedTemplateIds.length === 0}
             >
               <Trash2 />
@@ -162,25 +165,9 @@ export default function ManagerRoleTemplates() {
           side="right"
           className="block w-full max-w-full sm:w-3/4 sm:max-w-screen-xl md:hidden"
         >
-          <Card>
-            <ManagerRoleForm
-              defaultRoleTemplate={openedTemplate ? openedTemplate : undefined}
-              onSubmit={data => {
-                console.log(data);
-              }}
-            />
-          </Card>
+          {ManagerRoleCard}
         </SheetContent>
-        <div className="hidden flex-1 md:block">
-          <Card>
-            <ManagerRoleForm
-              defaultRoleTemplate={openedTemplate ? openedTemplate : undefined}
-              onSubmit={data => {
-                console.log(data);
-              }}
-            />
-          </Card>
-        </div>
+        <div className="hidden flex-1 md:block">{ManagerRoleCard}</div>
       </div>
     </Sheet>
   );

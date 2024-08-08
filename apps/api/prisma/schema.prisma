@@ -102,29 +102,30 @@ model ProposalChoice {
 }
 
 model ProposalManagerRole {
-    id       String @id @default(uuid())
-    roleName String
+    id          String  @id @default(uuid())
+    roleName    String
+    description String?
 
     managers ProposalManager[]
 
     permissionsId String
-    permissions   ManagerPermissions @relation(fields: [permissionsId], references: [id])
+    permissions   ManagerPermissions @relation(fields: [permissionsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model ManagerPermissions {
-    id                  String                @id @default(uuid())
-    ProposalManagerRole ProposalManagerRole[]
-    author              User                  @relation(fields: [authorId], references: [id])
-    authorId            String
-    canEditTitle        Boolean               @default(false)
-    canEditDescription  Boolean               @default(false)
-    canEditDates        Boolean               @default(false)
-    canEditStatus       Boolean               @default(false)
-    canEditVisibility   Boolean               @default(false)
-    canEditVotes        Boolean               @default(false)
-    canEditManagers     Boolean               @default(false)
-    canEditChoices      Boolean               @default(false)
-    canEditChoiceCount  Boolean               @default(false)
+    id                 String                @id @default(uuid())
+    managerRoles       ProposalManagerRole[]
+    author             User                  @relation(fields: [authorId], references: [id])
+    authorId           String
+    canEditTitle       Boolean               @default(false)
+    canEditDescription Boolean               @default(false)
+    canEditDates       Boolean               @default(false)
+    canEditStatus      Boolean               @default(false)
+    canEditVisibility  Boolean               @default(false)
+    canEditVotes       Boolean               @default(false)
+    canEditManagers    Boolean               @default(false)
+    canEditChoices     Boolean               @default(false)
+    canEditChoiceCount Boolean               @default(false)
 }
 
 model ProposalManager {

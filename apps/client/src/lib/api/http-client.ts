@@ -11,25 +11,56 @@ export class HttpClient {
     }
   }
 
-  async fetchWithAuth(path: string, options?: RequestInit, id_token?: string) {
-    const response = await fetch(this.getUrl(path), {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Authorization: `Bearer ${id_token ?? JWTController.getItem()}`,
-      },
-    });
-    if (!response.ok) {
-      throw new APIError(response.statusText, response.status);
-    }
-    return await response.json();
-  }
-
   async fetch(path: string, options?: RequestInit) {
     const response = await fetch(this.getUrl(path), options);
     if (!response.ok) {
       throw new APIError(response.statusText);
     }
     return await response.json();
+  }
+
+  async fetchWithAuth(path: string, options?: RequestInit, id_token?: string) {
+    return await this.fetch(path, {
+      ...options,
+      headers: {
+        ...options?.headers,
+        Authorization: `Bearer ${id_token ?? JWTController.getItem()}`,
+      },
+    });
+  }
+
+  async get(path: string, options?: RequestInit) {
+    return await this.fetchWithAuth(path, options);
+  }
+
+  async post<T>(path: string, data: T, options?: RequestInit) {
+    console.log('path', this.getUrl(path));
+
+    return await this.fetchWithAuth(path, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
+  async put<T>(path: string, data: T, options?: RequestInit) {
+    return await this.fetchWithAuth(path, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
+  async delete(path: string, options?: RequestInit) {
+    return await this.fetchWithAuth(path, {
+      ...options,
+      method: 'DELETE',
+    });
   }
 }
