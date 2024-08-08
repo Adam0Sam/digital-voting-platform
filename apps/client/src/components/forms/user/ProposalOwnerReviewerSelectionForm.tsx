@@ -8,10 +8,10 @@ import FormHandleButtons from '../FormHandleButtons';
 import { UserPlus } from 'lucide-react';
 import { StringifiedUser } from '../../tables/user/UserColumns';
 import { Separator } from '../../ui/separator';
-import useSignedInUser from '@/context/userContext';
 import getNormalizedTableUsers from '../../tables/user/utils/normalize-users';
 import UserScrollArea from '../../UserScrollArea';
 import { cn } from '@/lib/utils';
+import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 
 type FormValues = { owners: User[]; reviewers: User[] };
 export type ProposalOwnerReviewerFormProps = ExtendedFormProps<FormValues>;
@@ -29,7 +29,7 @@ const ProposalOwnerReviewerSelectionForm: FC<
     SelectionType.Owners,
   );
 
-  const { user: signedInUser } = useSignedInUser();
+  const signedInUser = useSignedInUser();
 
   const [selectedOwners, setSelectedOwners] = useState<User[]>(
     signedInUser ? [signedInUser] : [],

@@ -65,10 +65,7 @@ const DateForm: FC<DateFormProps> = ({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex max-w-sm flex-1 flex-col gap-4"
-      >
+      <form className="flex max-w-sm flex-1 flex-col gap-4">
         <FormField
           control={form.control}
           name="date"
@@ -115,6 +112,7 @@ const DateForm: FC<DateFormProps> = ({
         />
         <FormHandleButtons
           formSubmitLabel={submitButtonLabel}
+          handleSubmitClick={form.handleSubmit(onSubmit)}
           handleCancelClick={onCancel}
         />
       </form>

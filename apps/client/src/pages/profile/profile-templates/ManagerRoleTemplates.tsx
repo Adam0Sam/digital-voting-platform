@@ -6,7 +6,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { api } from '@/lib/api';
 import useWindowSize from '@/lib/hooks/useWindowSize';
-import { ManagerRolesLoaderReturnType } from '@/lib/loaders';
+import {
+  MANAGER_ROLES_LOADER_ID,
+  ManagerRolesLoaderReturnType,
+} from '@/lib/loaders';
 import {
   ProposalManagerRole,
   ProposalManagerRoleDto,
@@ -14,7 +17,7 @@ import {
 
 import { ListPlus, Settings2, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useLoaderData, useRevalidator } from 'react-router-dom';
+import { useRevalidator, useRouteLoaderData } from 'react-router-dom';
 
 /**
  * TODO
@@ -49,7 +52,9 @@ function ManagertRoleItem({
 }
 
 export default function ManagerRoleTemplates() {
-  const authoredRoles = useLoaderData() as ManagerRolesLoaderReturnType;
+  const authoredRoles = useRouteLoaderData(
+    MANAGER_ROLES_LOADER_ID,
+  ) as ManagerRolesLoaderReturnType;
   const revalidator = useRevalidator();
 
   const [templates, setTemplates] = useState(authoredRoles);

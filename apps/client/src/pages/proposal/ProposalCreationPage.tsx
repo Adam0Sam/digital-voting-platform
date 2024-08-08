@@ -9,8 +9,6 @@ import {
   isProposalChoiceDtoArray,
   ProposalChoiceDto,
   ProposalDto,
-  ProposalManagerRole,
-  ProposalManagerRoles,
   ProposalStatusOptions,
   ProposalVisibility,
   ProposalVisibilityOptions,
@@ -27,7 +25,6 @@ import { Button } from '@/components/ui/button';
 
 import { isUserArray, User } from '@/lib/types';
 
-import ProposalOwnerReviewerSelectionForm from '@/components/forms/user/ProposalOwnerReviewerSelectionForm';
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 
 import Combobox from '@/components/Combobox';
@@ -53,15 +50,6 @@ function ProposalSummary({
   data: ProposalDto;
   onCancel: () => void;
 }) {
-  const managerNameMap = new Map<ProposalManagerRole, string[]>();
-
-  // data.managers.forEach(({ role, user }) => {
-  //   managerNameMap.set(role, [
-  //     ...(managerNameMap.get(role) ?? []),
-  //     `${user.personalNames.join(' ')} ${user.familyName}`,
-  //   ]);
-  // });
-
   return (
     <Card>
       <form
@@ -96,12 +84,6 @@ function ProposalSummary({
               </div>
             );
           })}
-          {Array.from(managerNameMap).map(([role, name]) => (
-            <div key={role}>
-              <span className="italic">{role}:</span>{' '}
-              {name.map(n => n).join(', ')}
-            </div>
-          ))}
         </CardContent>
         <CardFooter>
           <div className="flex gap-10">
@@ -194,25 +176,25 @@ const ResolutionValueCard: FC<{
   );
 };
 
-const ManagerSelectionCard: FC<{
-  carouselApi: CarouselScrollHandles;
-  handleSubmit: (owners: User[], reviewers: User[]) => void;
-}> = ({ carouselApi, handleSubmit }) => {
-  return (
-    <CardWrapper
-      cardTitle="Select Managers"
-      cardDescription="Select the users who will be the owners and reviewers of this proposal"
-    >
-      <ProposalOwnerReviewerSelectionForm
-        onSubmit={values => {
-          handleSubmit(values.owners, values.reviewers);
-          carouselApi.scrollNext();
-        }}
-        onCancel={carouselApi.scrollPrev}
-      />
-    </CardWrapper>
-  );
-};
+// const ManagerSelectionCard: FC<{
+//   carouselApi: CarouselScrollHandles;
+//   handleSubmit: (owners: User[], reviewers: User[]) => void;
+// }> = ({ carouselApi, handleSubmit }) => {
+//   return (
+//     <CardWrapper
+//       cardTitle="Select Managers"
+//       cardDescription="Select the users who will be the owners and reviewers of this proposal"
+//     >
+//       <ProposalOwnerReviewerSelectionForm
+//         onSubmit={values => {
+//           handleSubmit(values.owners, values.reviewers);
+//           carouselApi.scrollNext();
+//         }}
+//         onCancel={carouselApi.scrollPrev}
+//       />
+//     </CardWrapper>
+//   );
+// };
 
 const proposalVisibilityChoices = [
   {
@@ -272,12 +254,12 @@ export default function ProposalCreationPage() {
   const [proposalVisibility, setProposalVisibility] =
     useState<ProposalVisibility>();
 
-  const [proposalManagers, setProposalManagers] = useState<
-    {
-      type: ProposalManagerRole;
-      users: User[];
-    }[]
-  >([]);
+  // const [proposalManagers, setProposalManagers] = useState<
+  //   {
+  //     type: ProposalManagerRole;
+  //     users: User[];
+  //   }[]
+  // >([]);
 
   const [proposalVoters, setProposalVoters] = useState<User[]>([]);
 
@@ -340,15 +322,7 @@ export default function ProposalCreationPage() {
             setProposalVisibility(proposalVisibility);
           }}
         />
-        <ManagerSelectionCard
-          carouselApi={carouselApi}
-          handleSubmit={(owners, reviewers) => {
-            setProposalManagers([
-              { type: ProposalManagerRoles.OWNER, users: owners },
-              { type: ProposalManagerRoles.REVIEWER, users: reviewers },
-            ]);
-          }}
-        />
+
         <ProposalSummary
           data={{
             title: proposalTitle,
@@ -359,12 +333,6 @@ export default function ProposalCreationPage() {
             visibility:
               proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
             voters: proposalVoters,
-            // managers: proposalManagers.flatMap(({ type, users }) => {
-            //   return users.map(user => ({
-            //     role: type,
-            //     user,
-            //   }));
-            // }),
             managers: [],
             choices: proposalChoices,
             choiceCount: proposalChoiceCount,

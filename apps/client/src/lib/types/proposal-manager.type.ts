@@ -2,7 +2,7 @@ import { User } from './user.type';
 
 export type ProposalManagerDto = {
   user: User;
-  role: ProposalManagerRoleDto;
+  role: ProposalManagerRole;
 };
 
 export type ProposalManagerRole = ProposalManagerRoleDto & {

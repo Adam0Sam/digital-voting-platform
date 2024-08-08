@@ -2,14 +2,11 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { User } from '@/lib/types';
 import { UserMinus } from 'lucide-react';
+import { FC, PropsWithChildren } from 'react';
 
-const UserScrollArea = ({
-  users,
-  handleRemove,
-}: {
-  users: User[];
-  handleRemove: (user: User) => void;
-}) => (
+const UserScrollArea: FC<
+  PropsWithChildren<{ users: User[]; handleRemove: (user: User) => void }>
+> = ({ users, handleRemove, children }) => (
   <ScrollArea className="max-h-48 overflow-auto md:h-48">
     {users.map(user => {
       return (
@@ -20,9 +17,12 @@ const UserScrollArea = ({
           <p>
             {user.personalNames.join(' ')}, {user.familyName}
           </p>
-          <Button variant="ghost" onClick={() => handleRemove(user)}>
-            <UserMinus size={22} />
-          </Button>
+          <div className="flex items-center gap-2">
+            {children}
+            <Button variant="ghost" onClick={() => handleRemove(user)}>
+              <UserMinus size={22} />
+            </Button>
+          </div>
         </div>
       );
     })}

@@ -42,6 +42,7 @@ import {
 } from './lib/routes';
 import { GENERIC_PATHS } from './lib/routes/util.routes';
 import ManagerRoleTemplates from './pages/profile/profile-templates/ManagerRoleTemplates';
+import ManagerSelectionForm from './components/forms/user/ManagerSelectionForm';
 
 function App() {
   const router = createBrowserRouter(
@@ -61,63 +62,67 @@ function App() {
           id={AUTH_LOADER_ID}
           loader={authLoader}
         />
-        <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
-          <Route
-            path={PROPOSAL_PATHS.VOTE}
-            id={VOTER_PROPOSALS_LOADER_ID}
-            // loader={voterProposalsLoader}
-          >
+        <Route loader={managerRolesLoader} id={MANAGER_ROLES_LOADER_ID}>
+          <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
             <Route
-              path={GENERIC_PATHS.ALL}
-              // element={<VoterLandingPage />}
-            />
-            <Route
-              path={GENERIC_PATHS.ONE}
-              // element={<ProposalVotePage />}
-            />
-          </Route>
+              path={PROPOSAL_PATHS.VOTE}
+              id={VOTER_PROPOSALS_LOADER_ID}
+              // loader={voterProposalsLoader}
+            >
+              <Route
+                path={GENERIC_PATHS.ALL}
+                // element={<VoterLandingPage />}
+              />
+              <Route
+                path={GENERIC_PATHS.ONE}
+                // element={<ProposalVotePage />}
+              />
+            </Route>
 
-          <Route
-            path={PROPOSAL_PATHS.MANAGE}
-            id={MANAGER_PROPOSALS_LOADER_ID}
-            // loader={managerProposalsLoader}
-          >
             <Route
-              path={GENERIC_PATHS.ALL}
-              // element={<ManagerLandingPage />}
-            />
+              path={PROPOSAL_PATHS.MANAGE}
+              id={MANAGER_PROPOSALS_LOADER_ID}
+              // loader={managerProposalsLoader}
+            >
+              <Route
+                path={GENERIC_PATHS.ALL}
+                // element={<ManagerLandingPage />}
+              />
+              <Route
+                path={GENERIC_PATHS.ONE}
+                // element={<ProposalManagePage />}
+              />
+            </Route>
             <Route
-              path={GENERIC_PATHS.ONE}
-              // element={<ProposalManagePage />}
-            />
-          </Route>
-          <Route
-            path={PROPOSAL_PATHS.CREATE}
-            // element={<ProposalCreationPage />}
-          />
-        </Route>
-        <Route path={USER_PROFILE_PATHS.BASE} element={<ProfileSettingsPage />}>
-          <Route
-            path={USER_PROFILE_PATHS.PROFILE}
-            element={<div>Profile</div>}
-          />
-          <Route
-            path={USER_PROFILE_PATHS.HISTORY}
-            element={<div>History</div>}
-          />
-          <Route
-            path={USER_TEMPLATES_PATHS.BASE}
-            element={<ProfileTemplatesPage />}
-          >
-            <Route
-              path={USER_TEMPLATES_PATHS.MANAGER}
-              loader={managerRolesLoader}
-              id={MANAGER_ROLES_LOADER_ID}
-              element={<ManagerRoleTemplates />}
+              path={PROPOSAL_PATHS.CREATE}
+              element={<ProposalCreationPage />}
             />
           </Route>
+          <Route
+            path={USER_PROFILE_PATHS.BASE}
+            element={<ProfileSettingsPage />}
+          >
+            <Route
+              path={USER_PROFILE_PATHS.PROFILE}
+              element={<div>Profile</div>}
+            />
+            <Route
+              path={USER_PROFILE_PATHS.HISTORY}
+              element={<div>History</div>}
+            />
+            <Route
+              path={USER_TEMPLATES_PATHS.BASE}
+              element={<ProfileTemplatesPage />}
+            >
+              <Route
+                path={USER_TEMPLATES_PATHS.MANAGER}
+                element={<ManagerRoleTemplates />}
+              />
+            </Route>
+          </Route>
+          <Route path="test" element={<ManagerSelectionForm />} />
+          <Route path="*" element={<div>404</div>} />
         </Route>
-        <Route path="*" element={<div>404</div>} />
       </Route>,
     ),
   );
