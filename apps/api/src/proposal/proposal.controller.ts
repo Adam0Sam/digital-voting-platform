@@ -63,13 +63,13 @@ export class ProposalController {
   //   return this.proposalService.getProposalByAgent(userId, agentRole);
   // }
 
-  // @Post('create')
-  // createOne(
-  //   @Body('proposal', new ZodValidationPipe(ProposalDtoSchema))
-  //   proposal: ProposalDto,
-  // ) {
-  //   return this.proposalService.createProposal(proposal);
-  // }
+  @Post('')
+  createOne(
+    @Body('proposal', new ZodValidationPipe(ProposalDtoSchema))
+    proposal: ProposalDto,
+  ) {
+    return this.proposalService.createOne(proposal);
+  }
 
   @Get(':id/choice-count')
   async getChoiceCount(@Param('id') proposalId: string) {

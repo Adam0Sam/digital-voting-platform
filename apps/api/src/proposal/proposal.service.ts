@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, ProposalVisibility } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ProposalDto, ProposalManagerListDtoSchema } from './dto';
+import { z } from 'zod';
 
 @Injectable()
 export class ProposalService {
@@ -49,38 +51,54 @@ export class ProposalService {
   //   });
   // }
 
-  // async createProposal(proposal: ProposalDto) {
-  //   const managers = proposal.managers.map((manager) => ({
-  //     userId: manager.user.id,
-  //     role: manager.role,
-  //   }));
-  //   const voterIds = proposal.voters?.map((voter) => voter.id) ?? [];
-  //   const choices = proposal.choices.map((choice) => ({
-  //     value: choice.value,
-  //     description: choice.description,
-  //   }));
+  private getCreateManagersInput(
+    managerLists: z.infer<typeof ProposalManagerListDtoSchema>[],
+  ): Prisma.ProposalManagerUncheckedCreateNestedManyWithoutProposalInput {
+    const createManagersInput: Prisma.ProposalManagerCreateManyProposalInput[] =
+      [];
 
-  //   return this.prisma.proposal.create({
-  //     data: {
-  //       title: proposal.title,
-  //       description: proposal.description,
-  //       startDate: proposal.startDate,
-  //       endDate: proposal.endDate,
-  //       status: proposal.status,
-  //       visibility: proposal.visibility,
-  //       choices: {
-  //         create: choices,
-  //       },
-  //       choiceCount: proposal.choiceCount,
-  //       votes: {
-  //         create: voterIds.map((id) => ({ userId: id })),
-  //       },
-  //       managers: {
-  //         create: managers,
-  //       },
-  //     },
-  //   });
-  // }
+    for (const managerList of managerLists) {
+      const roleId = managerList.role.id;
+      for (const user of managerList.users) {
+        createManagersInput.push({
+          userId: user.id,
+          proposalManagerRoleId: roleId,
+        });
+      }
+    }
+
+    return {
+      createMany: { data: createManagersInput },
+    };
+  }
+
+  async createOne(proposal: ProposalDto) {
+    const voteUserIds =
+      proposal.voters?.map((voter) => ({ userId: voter.id })) ?? [];
+    const choices = proposal.choices.map((choice) => ({
+      value: choice.value,
+      description: choice.description,
+    }));
+
+    return this.prisma.proposal.create({
+      data: {
+        title: proposal.title,
+        description: proposal.description,
+        startDate: proposal.startDate,
+        endDate: proposal.endDate,
+        status: proposal.status,
+        visibility: proposal.visibility,
+        choices: {
+          create: choices,
+        },
+        choiceCount: proposal.choiceCount,
+        votes: {
+          create: voteUserIds,
+        },
+        managers: this.getCreateManagersInput(proposal.managers),
+      },
+    });
+  }
 
   async getOne(id: string) {
     return this.prisma.proposal.findUnique({

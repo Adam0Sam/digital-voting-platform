@@ -14,6 +14,7 @@ import UserScrollArea from '../../UserScrollArea';
 type FormValues = User[];
 export type UserSelectionFormProps = ExtendedFormProps<FormValues> & {
   onSelectionEnd?: (selectedUsers: User[]) => void;
+  onUserRemove?: (user: User) => void;
   initiallySelectedUsers?: User[];
   UserItemUtilComponent?: ReactNode;
   className?: string;
@@ -25,6 +26,7 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
   children,
   initiallySelectedUsers = [],
   onSelectionEnd,
+  onUserRemove,
   UserItemUtilComponent,
   disableSubmit,
   disableCancel,
@@ -42,6 +44,7 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
 
   const handleSelectionEnd = (selectedUsers: Partial<StringifiedUser>[]) => {
     const normalizedUsers = getNormalizedTableUsers(selectedUsers);
+    console.log('normalizedUsers', normalizedUsers);
     setSelectedUsers(normalizedUsers);
     setSheetIsOpen(false);
     onSelectionEnd?.(normalizedUsers);
@@ -49,7 +52,8 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
 
   useEffect(() => {
     setSelectedUsers(initiallySelectedUsers);
-  }, [initiallySelectedUsers]);
+    console.log('initiallySelectedUsers', initiallySelectedUsers);
+  }, [...initiallySelectedUsers]);
 
   return (
     <div className={cn('flex max-w-lg flex-1 flex-col gap-8', className)}>
@@ -74,7 +78,13 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
               </div>
             </SheetTrigger>
             {error && <p className="text-md text-destructive">{error}</p>}
-            <UserScrollArea users={selectedUsers} handleRemove={removeUser}>
+            <UserScrollArea
+              users={selectedUsers}
+              handleRemove={user => {
+                removeUser(user);
+                onUserRemove?.(user);
+              }}
+            >
               {UserItemUtilComponent}
             </UserScrollArea>
           </div>

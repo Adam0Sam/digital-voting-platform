@@ -129,14 +129,16 @@ model ManagerPermissions {
 }
 
 model ProposalManager {
-    id   String              @id @default(uuid())
-    role ProposalManagerRole @relation(fields: [proposalManagerRoleId], references: [id])
+    id String @id @default(uuid())
 
-    proposal              Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    proposalId            String
-    user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId                String
+    role                  ProposalManagerRole @relation(fields: [proposalManagerRoleId], references: [id])
     proposalManagerRoleId String
+
+    proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposalId String
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId String
 }
 
 enum VoteStatus {

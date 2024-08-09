@@ -1,51 +1,46 @@
-import { Grades, User, UserRoles } from '@/lib/types';
+import { User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
-import { FC, PropsWithChildren, useState } from 'react';
+import { FC, useState } from 'react';
 import { useRouteLoaderData } from 'react-router-dom';
 import {
   MANAGER_ROLES_LOADER_ID,
   ManagerRolesLoaderReturnType,
 } from '@/lib/loaders';
 import {
-  ProposalManagerDto,
+  ProposalManagerListDto,
   ProposalManagerRole,
 } from '@/lib/types/proposal-manager.type';
 import UserSelectionForm from './UserSelectionForm';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { SquarePlay, SquarePlus, UserPlus } from 'lucide-react';
+
+import { SquarePlus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import UserScrollArea from '@/components/UserScrollArea';
+
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { TooltipContent } from '@radix-ui/react-tooltip';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
 
-type FormValues = User[];
+import { ScrollArea } from '@/components/ui/scroll-area';
+import FormHandleButtons from '../FormHandleButtons';
+
+type FormValues = ProposalManagerListDto[];
 export type ManagerSelectionFormProps = ExtendedFormProps<FormValues>;
 
-const NO_ROLE = 'NO_ROLE_ID' as const;
-
-const getCardStyles = () => 'flex flex-col items-center gap-4 overflow-hidden';
+const getCardStyles = () =>
+  'flex flex-col items-center gap-4 overflow-hidden  max-w-sm';
 
 /**
  * Algorithms in this component can be significantly improved.
  * Maybe could use these as example flowcharts for part B docs
  */
-const ManagerSelectionForm: FC<
-  PropsWithChildren<ManagerSelectionFormProps>
-> = ({ onSubmit, onCancel, children }) => {
+const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
+  onSubmit,
+  onCancel,
+}) => {
   const authoredManagerRoles = useRouteLoaderData(
     MANAGER_ROLES_LOADER_ID,
   ) as ManagerRolesLoaderReturnType;
@@ -53,27 +48,34 @@ const ManagerSelectionForm: FC<
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
 
   const [mappedManagers, setMappedManagers] = useState<
-    {
-      role: ProposalManagerRole;
-      users: User[];
-    }[]
+    ProposalManagerListDto[]
   >([]);
 
   const handleUserRemove = (targetUser: User) => {
     setMappedManagers(prevManagers =>
-      prevManagers.map(manager => {
-        const userIsFound = !!manager.users.find(
-          user => user.id === targetUser.id,
-        );
-        if (userIsFound) {
-          return {
-            ...manager,
-            users: manager.users.filter(user => user.id !== targetUser.id),
-          };
-        } else {
-          return manager;
-        }
-      }),
+      prevManagers
+        .map(manager => {
+          const userIsFound = !!manager.users.find(
+            user => user.id === targetUser.id,
+          );
+          if (userIsFound) {
+            const filteredUsers = manager.users.filter(
+              user => user.id !== targetUser.id,
+            );
+
+            if (filteredUsers.length === 0) {
+              return null;
+            }
+
+            return {
+              ...manager,
+              users: filteredUsers,
+            };
+          } else {
+            return manager;
+          }
+        })
+        .filter(manager => manager !== null),
     );
   };
 
@@ -127,7 +129,7 @@ const ManagerSelectionForm: FC<
           <Separator className="mb-5 mt-2" />
         </div>
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(10rem,24rem))] gap-10 [grid-auto-rows:20rem]">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-10 [grid-auto-rows:20rem]">
           {mappedManagers.map(({ role, users }) => {
             return (
               <Card key={role.id} className={getCardStyles()}>
@@ -140,6 +142,7 @@ const ManagerSelectionForm: FC<
                   onSelectionEnd={selectedUsers =>
                     handleUserSelectionEnd(selectedUsers, role)
                   }
+                  onUserRemove={handleUserRemove}
                   disableSubmit={true}
                   className="w-full px-4"
                 />
@@ -148,53 +151,53 @@ const ManagerSelectionForm: FC<
           })}
           <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
             <SheetTrigger asChild>
-              <Card className="flex cursor-pointer items-center justify-center hover:bg-muted">
+              <Card className="flex max-w-sm cursor-pointer items-center justify-center hover:bg-muted">
                 <SquarePlus size={36} />
               </Card>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-full max-w-full sm:w-1/2 sm:max-w-screen-md"
+              className="w-full max-w-full py-20 sm:w-1/2 sm:max-w-screen-md"
             >
-              <div className="flex flex-col gap-8">
-                <TooltipProvider>
-                  {authoredManagerRoles?.map(role => {
-                    const isSelected = !!mappedManagers.find(
-                      manager => manager.role.id === role.id,
-                    );
+              <ScrollArea className="h-full">
+                {authoredManagerRoles?.map(role => {
+                  const isSelected = !!mappedManagers.find(
+                    manager => manager.role.id === role.id,
+                  );
 
-                    return (
-                      <Tooltip key={role.id}>
-                        <TooltipTrigger>
-                          <div
-                            className={cn(
-                              'flex h-20 w-full cursor-pointer items-center justify-center border-secondary hover:bg-primary-foreground',
-                              {
-                                'bg-secondary': isSelected,
-                                'border-primary': isSelected,
-                              },
-                            )}
-                            onClick={() => {
-                              if (isSelected) {
-                                handleRoleRemoval(role);
-                              } else {
-                                handleRoleAddition(role);
-                              }
-                            }}
-                          >
-                            <p className="text-xl">{role.roleName}</p>
-                            <p>{role.description}</p>
-                          </div>
-                        </TooltipTrigger>
-                      </Tooltip>
-                    );
-                  })}
-                </TooltipProvider>
-              </div>
+                  return (
+                    <div
+                      className={cn(
+                        'mb-4 flex h-20 w-full cursor-pointer items-center justify-center border-2 border-secondary hover:bg-primary-foreground',
+                        {
+                          'bg-secondary': isSelected,
+                          'border-primary': isSelected,
+                        },
+                      )}
+                      key={role.id}
+                      onClick={() => {
+                        if (isSelected) {
+                          handleRoleRemoval(role);
+                        } else {
+                          handleRoleAddition(role);
+                        }
+                        setSheetIsOpen(false);
+                      }}
+                    >
+                      <p className="text-xl">{role.roleName}</p>
+                      <p>{role.description}</p>
+                    </div>
+                  );
+                })}
+              </ScrollArea>
             </SheetContent>
           </Sheet>
         </div>
       </div>
+      <FormHandleButtons
+        handleCancelClick={onCancel}
+        handleSubmitClick={() => onSubmit?.(mappedManagers)}
+      />
     </div>
   );
 };

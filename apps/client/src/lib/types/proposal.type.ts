@@ -1,4 +1,4 @@
-import { ProposalManagerDto } from './proposal-manager.type';
+import { ProposalManagerListDto } from './proposal-manager.type';
 import { User } from './user.type';
 import {
   isKeyOfStringLiteralObj,
@@ -24,7 +24,7 @@ export type ProposalDto = {
   status: ProposalStatus;
   visibility: ProposalVisibility;
 
-  managers: ProposalManagerDto[];
+  managers: ProposalManagerListDto[];
   voters: User[];
 
   choices: ProposalChoiceDto[];

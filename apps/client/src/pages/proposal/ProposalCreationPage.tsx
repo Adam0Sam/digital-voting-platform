@@ -29,6 +29,8 @@ import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 
 import Combobox from '@/components/Combobox';
 import ProposalChoiceForm from '@/components/forms/choice-selection/ProposalChoiceForm';
+import { ProposalManagerListDto } from '@/lib/types/proposal-manager.type';
+import ManagerSelectionForm from '@/components/forms/user/ManagerSelectionForm';
 
 const createProposal = async (data: ProposalDto) => {
   const createdProposal = await api.proposals.createOne(data);
@@ -56,6 +58,7 @@ function ProposalSummary({
         method="post"
         onSubmit={e => {
           e.preventDefault();
+          console.log(data);
           createProposal(data);
         }}
       >
@@ -196,6 +199,26 @@ const ResolutionValueCard: FC<{
 //   );
 // };
 
+const ManagerSelectionCard: FC<{
+  carouselApi: CarouselScrollHandles;
+  handleSubmit: (managers: ProposalManagerListDto[]) => void;
+}> = ({ carouselApi, handleSubmit }) => {
+  return (
+    <CardWrapper
+      cardTitle="Select Managers"
+      cardDescription="Select the users who will be able to manage this proposal. Assign your own permissions"
+    >
+      <ManagerSelectionForm
+        onSubmit={values => {
+          handleSubmit(values);
+          carouselApi.scrollNext();
+        }}
+        onCancel={carouselApi.scrollPrev}
+      />
+    </CardWrapper>
+  );
+};
+
 const proposalVisibilityChoices = [
   {
     value: ProposalVisibilityOptions.PUBLIC,
@@ -254,12 +277,9 @@ export default function ProposalCreationPage() {
   const [proposalVisibility, setProposalVisibility] =
     useState<ProposalVisibility>();
 
-  // const [proposalManagers, setProposalManagers] = useState<
-  //   {
-  //     type: ProposalManagerRole;
-  //     users: User[];
-  //   }[]
-  // >([]);
+  const [proposalManagers, setProposalManagers] = useState<
+    ProposalManagerListDto[]
+  >([]);
 
   const [proposalVoters, setProposalVoters] = useState<User[]>([]);
 
@@ -315,6 +335,12 @@ export default function ProposalCreationPage() {
             endDate: proposalEndDate,
           }}
         />
+        <ManagerSelectionCard
+          carouselApi={carouselApi}
+          handleSubmit={managers => {
+            setProposalManagers(managers);
+          }}
+        />
         <VoterSelectionCard
           carouselApi={carouselApi}
           handleSubmit={(users, proposalVisibility) => {
@@ -333,7 +359,7 @@ export default function ProposalCreationPage() {
             visibility:
               proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
             voters: proposalVoters,
-            managers: [],
+            managers: proposalManagers,
             choices: proposalChoices,
             choiceCount: proposalChoiceCount,
           }}

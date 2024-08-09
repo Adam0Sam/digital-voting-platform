@@ -1,7 +1,7 @@
 import { User } from './user.type';
 
-export type ProposalManagerDto = {
-  user: User;
+export type ProposalManagerListDto = {
+  users: User[];
   role: ProposalManagerRole;
 };
 

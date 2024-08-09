@@ -34,8 +34,6 @@ export class HttpClient {
   }
 
   async post<T>(path: string, data: T, options?: RequestInit) {
-    console.log('path', this.getUrl(path));
-
     return await this.fetchWithAuth(path, {
       ...options,
       method: 'POST',

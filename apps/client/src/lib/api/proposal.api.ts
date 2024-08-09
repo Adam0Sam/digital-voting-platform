@@ -11,13 +11,7 @@ export class ProposalApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/proposal`);
 
   async createOne(data: ProposalDto) {
-    return (await this.httpClient.fetchWithAuth('create', {
-      method: 'POST',
-      body: JSON.stringify({ proposal: data }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })) as Proposal;
+    return (await this.httpClient.post('', { proposal: data })) as Proposal;
   }
 
   async updateOne(id: string, data: Partial<ProposalDto>) {
