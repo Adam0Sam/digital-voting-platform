@@ -1,14 +1,19 @@
-import { isUser, User } from './user.type';
+import { ProposalManagerListDto } from './proposal-manager.type';
+import { User } from './user.type';
 import {
   isKeyOfStringLiteralObj,
   isType,
   isTypeArray,
 } from './utils/type-validators';
+import { Vote } from './vote.type';
 
 export type ProposalChoice = ProposalChoiceDto & { id: string };
 
-export type Proposal = Omit<ProposalDto, 'choices'> & { id: string } & {
+export type Proposal = Omit<ProposalDto, 'choices' | 'voters'> & {
+  id: string;
+} & {
   choices: ProposalChoice[];
+  votes: Vote[];
 };
 
 export type ProposalDto = {
@@ -19,45 +24,12 @@ export type ProposalDto = {
   status: ProposalStatus;
   visibility: ProposalVisibility;
 
-  managers: ProposalManagerDto[];
+  managers: ProposalManagerListDto[];
   voters: User[];
 
   choices: ProposalChoiceDto[];
   choiceCount: number;
 };
-
-export type ProposalManagerDto = {
-  role: ProposalManagerRole;
-  user: User;
-};
-
-export const isProposalManagerDto = (item: unknown) =>
-  isType<ProposalManagerDto>(item, item => {
-    if (typeof item !== 'object') return false;
-    if (item === null) return false;
-    const { role, user } = item as ProposalManagerDto;
-    return isKeyOfStringLiteralObj(role, ProposalManagerRoles) && isUser(user);
-  });
-
-export const isProposalManagerDtoArray = (item: unknown) =>
-  isTypeArray(item, isProposalManagerDto);
-
-export const ProposalManagerRoles = {
-  OWNER: 'OWNER',
-  REVIEWER: 'REVIEWER',
-} as const;
-
-export type ProposalManagerRole = keyof typeof ProposalManagerRoles;
-
-export const ProposalAgentRoles = {
-  VOTER: 'VOTER',
-  ...ProposalManagerRoles,
-} as const;
-
-export type ProposalAgentRole = keyof typeof ProposalAgentRoles;
-
-export const isProposalAgentRole = (item: unknown) =>
-  isKeyOfStringLiteralObj(item, ProposalAgentRoles);
 
 export type ProposalChoiceDto = {
   value: string;

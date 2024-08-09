@@ -1,62 +1,80 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, ProposalVisibility } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ProposalDto } from './dto';
-import { ProposalAgentRole } from 'src/lib/types';
+import { ProposalDto, ProposalManagerListDtoSchema } from './dto';
+import { z } from 'zod';
 
 @Injectable()
 export class ProposalService {
   constructor(private prisma: PrismaService) {}
 
-  private getWhereClauseByAgent(
-    agentId: string,
-    agentRole: ProposalAgentRole,
-  ): Prisma.ProposalWhereInput {
-    if (agentRole === 'VOTER') {
-      return {
-        votes: { some: { userId: agentId } },
-        OR: [
-          {
-            visibility: ProposalVisibility.PUBLIC,
-          },
-          {
-            visibility: ProposalVisibility.AGENT_ONLY,
-          },
-        ],
-      };
-    }
-    return { managers: { some: { userId: agentId, role: agentRole } } };
-  }
+  // private getWhereClauseByAgent(
+  //   agentId: string,
+  //   agentRole: ProposalAgentRole,
+  // ): Prisma.ProposalWhereInput {
+  //   if (agentRole === 'VOTER') {
+  //     return {
+  //       votes: { some: { userId: agentId } },
+  //       OR: [
+  //         {
+  //           visibility: ProposalVisibility.PUBLIC,
+  //         },
+  //         {
+  //           visibility: ProposalVisibility.AGENT_ONLY,
+  //         },
+  //       ],
+  //     };
+  //   }
+  //   return { managers: { some: { userId: agentId, role: agentRole } } };
+  // }
 
-  private getIncludeClauseByAgent(
-    agentRole: ProposalAgentRole,
-  ): Prisma.ProposalInclude {
-    if (agentRole === 'VOTER') {
-      return {
-        choices: true,
-      };
+  // private getIncludeClauseByAgent(
+  //   agentRole: ProposalAgentRole,
+  // ): Prisma.ProposalInclude {
+  //   if (agentRole === 'VOTER') {
+  //     return {
+  //       choices: true,
+  //     };
+  //   }
+  //   return {
+  //     votes: true,
+  //     managers: true,
+  //     choices: true,
+  //   };
+  // }
+
+  // async getProposalByAgent(agentId: string, agentRole: ProposalAgentRole) {
+  //   return this.prisma.proposal.findMany({
+  //     where: this.getWhereClauseByAgent(agentId, agentRole),
+  //     include: this.getIncludeClauseByAgent(agentRole),
+  //   });
+  // }
+
+  private getCreateManagersInput(
+    managerLists: z.infer<typeof ProposalManagerListDtoSchema>[],
+  ): Prisma.ProposalManagerUncheckedCreateNestedManyWithoutProposalInput {
+    const createManagersInput: Prisma.ProposalManagerCreateManyProposalInput[] =
+      [];
+
+    for (const managerList of managerLists) {
+      const roleId = managerList.role.id;
+      for (const user of managerList.users) {
+        createManagersInput.push({
+          userId: user.id,
+          proposalManagerRoleId: roleId,
+        });
+      }
     }
+
     return {
-      votes: true,
-      managers: true,
-      choices: true,
+      createMany: { data: createManagersInput },
     };
   }
 
-  async getProposalByAgent(agentId: string, agentRole: ProposalAgentRole) {
-    return this.prisma.proposal.findMany({
-      where: this.getWhereClauseByAgent(agentId, agentRole),
-      include: this.getIncludeClauseByAgent(agentRole),
-    });
-  }
-
-  async createProposal(proposal: ProposalDto) {
-    const managers = proposal.managers.map((manager) => ({
-      userId: manager.user.id,
-      role: manager.role,
-    }));
-    const voterIds = proposal.voters?.map((voter) => voter.id) ?? [];
+  async createOne(proposal: ProposalDto) {
+    const voteUserIds =
+      proposal.voters?.map((voter) => ({ userId: voter.id })) ?? [];
     const choices = proposal.choices.map((choice) => ({
       value: choice.value,
       description: choice.description,
@@ -75,11 +93,9 @@ export class ProposalService {
         },
         choiceCount: proposal.choiceCount,
         votes: {
-          create: voterIds.map((id) => ({ userId: id })),
+          create: voteUserIds,
         },
-        managers: {
-          create: managers,
-        },
+        managers: this.getCreateManagersInput(proposal.managers),
       },
     });
   }
@@ -87,6 +103,27 @@ export class ProposalService {
   async getOne(id: string) {
     return this.prisma.proposal.findUnique({
       where: { id },
+    });
+  }
+
+  async getAllManaged(userId: string) {
+    return this.prisma.proposal.findMany({
+      where: {
+        managers: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        votes: {
+          include: {
+            choices: true,
+          },
+        },
+        choices: true,
+        managers: true,
+      },
     });
   }
 

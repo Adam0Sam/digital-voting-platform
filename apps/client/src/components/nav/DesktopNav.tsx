@@ -9,50 +9,11 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 
-import { CircleUserRound, Clipboard } from 'lucide-react';
-import { LinkComponentProps } from './interfaces';
-import { proposalLinkCollection, testLinkCollection } from './link-collections';
+import { CircleUserRound } from 'lucide-react';
+import { PROPOSAL_LINK_COLLECTION } from '../../lib/constants/href/proposal.links';
 
-type getStyles = (isActive: boolean) => string;
-// why do i get error when I pass arrow fn directly?
-const getLinkItemStyles: getStyles = isActive =>
-  cn(
-    'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
-    {
-      'bg-accent/50': isActive,
-      'text-accent-foreground': isActive,
-    },
-  );
-
-const getStandaloneLinkStyles: getStyles = isActive =>
-  cn(
-    'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-6 py-4 xs:text-sm sm:text-md md:text-lg font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50',
-    { 'bg-accent/50': isActive },
-  );
-
-const LinkItem = ({
-  to,
-  title,
-  children,
-  className,
-  ...props
-}: LinkComponentProps) => (
-  <li>
-    <NavLink
-      className={({ isActive }) => cn(getLinkItemStyles(isActive), className)}
-      to={to}
-      end
-      {...props}
-    >
-      <div className="text-sm font-medium leading-none">{title}</div>
-      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-        {children}
-      </p>
-    </NavLink>
-  </li>
-);
-
-LinkItem.displayName = 'LinkItem';
+import { NavLinkItem, StandaloneNavLink } from './NavLinkItem';
+import { USER_PROFILE_HREFS } from '@/lib/routes';
 
 export default function DesktopNav({ className }: { className?: string }) {
   return (
@@ -61,7 +22,7 @@ export default function DesktopNav({ className }: { className?: string }) {
         <NavigationMenuList className="gap-3">
           <NavigationMenuItem>
             <NavigationMenuTrigger>
-              {proposalLinkCollection.name}
+              {PROPOSAL_LINK_COLLECTION.name}
             </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
@@ -71,44 +32,26 @@ export default function DesktopNav({ className }: { className?: string }) {
                     to="/proposals"
                   >
                     <div className="mb-2 mt-4 flex items-center gap-2">
-                      {proposalLinkCollection.icon && (
-                        <proposalLinkCollection.icon />
+                      {PROPOSAL_LINK_COLLECTION.icon && (
+                        <PROPOSAL_LINK_COLLECTION.icon />
                       )}
                       <p className="text-lg font-medium">
-                        {proposalLinkCollection.name}
+                        {PROPOSAL_LINK_COLLECTION.name}
                       </p>
                     </div>
                     <p className="text-sm leading-tight text-muted-foreground">
-                      {proposalLinkCollection.description}
+                      {PROPOSAL_LINK_COLLECTION.description}
                     </p>
                   </NavLink>
                 </li>
-                {proposalLinkCollection.items.map(proposal => (
-                  <LinkItem
+                {PROPOSAL_LINK_COLLECTION.items.map(proposal => (
+                  <NavLinkItem
                     key={proposal.title}
                     title={proposal.title}
                     to={proposal.href}
                   >
                     {proposal.description}
-                  </LinkItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger>
-              {testLinkCollection.name}
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                {testLinkCollection.items.map(component => (
-                  <LinkItem
-                    key={component.title}
-                    title={component.title}
-                    to={component.href}
-                  >
-                    {component.description}
-                  </LinkItem>
+                  </NavLinkItem>
                 ))}
               </ul>
             </NavigationMenuContent>
@@ -116,7 +59,7 @@ export default function DesktopNav({ className }: { className?: string }) {
         </NavigationMenuList>
       </NavigationMenu>
       <NavigationMenuItem className="ml-auto mr-10 flex max-w-max items-center">
-        <NavLink to="/profile" end className={'self-end'}>
+        <NavLink to={USER_PROFILE_HREFS.BASE} end className={'self-end'}>
           <CircleUserRound />
         </NavLink>
       </NavigationMenuItem>

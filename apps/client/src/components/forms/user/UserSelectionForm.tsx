@@ -1,6 +1,6 @@
 import { StringifiedUser, User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
-import { FC, ReactNode, useState } from 'react';
+import { FC, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import getNormalizedTableUsers from '@/components/tables/user/utils/normalize-users';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -9,16 +9,33 @@ import { UserPlus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import FormHandleButtons from '../FormHandleButtons';
-import UserScrollArea from './UserScrollArea';
+import UserScrollArea from '../../UserScrollArea';
 
 type FormValues = User[];
-export type UserSelectionFormProps = ExtendedFormProps<FormValues>;
+export type UserSelectionFormProps = ExtendedFormProps<FormValues> & {
+  onSelectionEnd?: (selectedUsers: User[]) => void;
+  onUserRemove?: (user: User) => void;
+  initiallySelectedUsers?: User[];
+  UserItemUtilComponent?: ReactNode;
+  className?: string;
+};
 
-const UserSelectionForm: FC<
-  UserSelectionFormProps & { children?: ReactNode }
-> = ({ onSubmit, onCancel, children }) => {
+const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
+  onSubmit,
+  onCancel,
+  children,
+  initiallySelectedUsers = [],
+  onSelectionEnd,
+  onUserRemove,
+  UserItemUtilComponent,
+  disableSubmit,
+  disableCancel,
+  className,
+}) => {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>(
+    initiallySelectedUsers,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const removeUser = (targetUser: User) => {
@@ -27,14 +44,25 @@ const UserSelectionForm: FC<
 
   const handleSelectionEnd = (selectedUsers: Partial<StringifiedUser>[]) => {
     const normalizedUsers = getNormalizedTableUsers(selectedUsers);
+    console.log('normalizedUsers', normalizedUsers);
     setSelectedUsers(normalizedUsers);
     setSheetIsOpen(false);
+    onSelectionEnd?.(normalizedUsers);
   };
 
+  useEffect(() => {
+    setSelectedUsers(initiallySelectedUsers);
+    console.log('initiallySelectedUsers', initiallySelectedUsers);
+  }, [...initiallySelectedUsers]);
+
   return (
-    <div className="flex max-w-lg flex-1 flex-col gap-8">
+    <div className={cn('flex max-w-lg flex-1 flex-col gap-8', className)}>
       <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
-        <div className="flex flex-col-reverse gap-10 md:flex-row">
+        <div
+          className={cn('flex flex-col-reverse md:flex-row', {
+            'gap-10': !!children,
+          })}
+        >
           <div className="flex flex-1 flex-col">
             <SheetTrigger asChild className="flex-1">
               <div>
@@ -50,7 +78,15 @@ const UserSelectionForm: FC<
               </div>
             </SheetTrigger>
             {error && <p className="text-md text-destructive">{error}</p>}
-            <UserScrollArea users={selectedUsers} handleRemove={removeUser} />
+            <UserScrollArea
+              users={selectedUsers}
+              handleRemove={user => {
+                removeUser(user);
+                onUserRemove?.(user);
+              }}
+            >
+              {UserItemUtilComponent}
+            </UserScrollArea>
           </div>
           <div className="self-center md:self-auto">{children}</div>
         </div>
@@ -76,9 +112,11 @@ const UserSelectionForm: FC<
             return;
           }
           setError(null);
-          onSubmit(selectedUsers);
+          onSubmit?.(selectedUsers);
         }}
         handleCancelClick={onCancel}
+        enableSubmit={!disableSubmit}
+        enableCancel={!disableCancel}
       />
     </div>
   );

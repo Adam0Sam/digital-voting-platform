@@ -1,7 +1,15 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
-import { ProposalAgentRole, ProposalAgentRoles } from 'src/lib/types';
+
 import { ParseStringLiteral, ZodValidationPipe } from 'src/pipes';
 import { ProposalDto, ProposalDtoSchema } from './dto';
 import { VoteService } from 'src/vote/vote.service';
@@ -23,6 +31,12 @@ export class ProposalController {
     return this.voteService.getAllUserVotes(userId);
   }
 
+  @Get('managed/all')
+  getAllManaged(@GetUser('id') userId: User['id']) {
+    console.log('Getting All Managed Proposals', userId);
+    return this.proposalService.getAllManaged(userId);
+  }
+
   @Get('votes/:id')
   getUserVote(
     @GetUser('id') userId: User['id'],
@@ -40,28 +54,37 @@ export class ProposalController {
     return this.voteService.voteForProposal(userId, proposalId, choices);
   }
 
-  @Get(':agentRole/all')
-  getProposalsByAgentRole(
-    @GetUser('id') userId: User['id'],
-    @Param('agentRole', new ParseStringLiteral(ProposalAgentRoles))
-    agentRole: ProposalAgentRole,
-  ) {
-    console.log('Getting Proposals by Agent Role');
-    return this.proposalService.getProposalByAgent(userId, agentRole);
-  }
+  // @Get(':agentRole/all')
+  // getProposalsByAgentRole(
+  //   @GetUser('id') userId: User['id'],
+  //   @Param('agentRole', new ParseStringLiteral(ProposalAgentRoles))
+  //   agentRole: ProposalAgentRole,
+  // ) {
+  //   return this.proposalService.getProposalByAgent(userId, agentRole);
+  // }
 
-  @Post('create')
+  @Post('')
   createOne(
     @Body('proposal', new ZodValidationPipe(ProposalDtoSchema))
     proposal: ProposalDto,
   ) {
-    return this.proposalService.createProposal(proposal);
+    return this.proposalService.createOne(proposal);
   }
 
   @Get(':id/choice-count')
   async getChoiceCount(@Param('id') proposalId: string) {
     const { choiceCount } = await this.proposalService.getOne(proposalId);
     return { choiceCount };
+  }
+
+  @Put('update/:id')
+  async updateOne(
+    @Param('id') proposalId: string,
+    @Body('proposal')
+    proposal: ProposalDto,
+  ) {
+    console.log('Updating Proposal', proposal);
+    // return this.proposalService.updateProposal(proposalId, proposal);
   }
 
   // @Post(':id/vote')

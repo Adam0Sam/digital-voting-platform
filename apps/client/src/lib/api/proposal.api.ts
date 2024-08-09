@@ -1,7 +1,5 @@
 import {
-  isProposalAgentRole,
   Proposal,
-  ProposalAgentRole,
   ProposalChoice,
   ProposalDto,
 } from '@/lib/types/proposal.type';
@@ -13,8 +11,12 @@ export class ProposalApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/proposal`);
 
   async createOne(data: ProposalDto) {
-    return (await this.httpClient.fetchWithAuth('create', {
-      method: 'POST',
+    return (await this.httpClient.post('', { proposal: data })) as Proposal;
+  }
+
+  async updateOne(id: string, data: Partial<ProposalDto>) {
+    return (await this.httpClient.fetchWithAuth(`update/${id}`, {
+      method: 'PUT',
       body: JSON.stringify({ proposal: data }),
       headers: {
         'Content-Type': 'application/json',
@@ -28,13 +30,17 @@ export class ProposalApi {
     });
   }
 
-  async getProposalsByAgentRole(agentRole: ProposalAgentRole) {
-    if (!isProposalAgentRole(agentRole)) {
-      throw new Response(`Invalid agent role ${agentRole}`, { status: 400 });
-    }
-    return (await this.httpClient.fetchWithAuth(
-      `${agentRole}/all`,
-    )) as Proposal[];
+  // async getProposalsByAgentRole(agentRole: ProposalAgentRole) {
+  //   if (!isProposalAgentRole(agentRole)) {
+  //     throw new Response(`Invalid agent role ${agentRole}`, { status: 400 });
+  //   }
+  //   return (await this.httpClient.fetchWithAuth(
+  //     `${agentRole}/all`,
+  //   )) as Proposal[];
+  // }
+
+  async getAllManaged() {
+    return (await this.httpClient.fetchWithAuth('managed/all')) as Proposal[];
   }
 
   async getUserVote(id: string) {

@@ -29,6 +29,7 @@ export type DateFormProps = ExtendedFormProps<
   {
     defaultStartDate?: Date;
     defaultEndDate?: Date;
+    submitButtonLabel?: string;
   }
 >;
 
@@ -50,6 +51,7 @@ const DateForm: FC<DateFormProps> = ({
   defaultEndDate,
   onCancel,
   onSubmit,
+  submitButtonLabel = 'Submit',
 }) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(zodFormSchema),
@@ -63,10 +65,7 @@ const DateForm: FC<DateFormProps> = ({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex max-w-sm flex-1 flex-col gap-4"
-      >
+      <form className="flex max-w-sm flex-1 flex-col gap-4">
         <FormField
           control={form.control}
           name="date"
@@ -112,7 +111,8 @@ const DateForm: FC<DateFormProps> = ({
           )}
         />
         <FormHandleButtons
-          formSubmitLabel="Next"
+          formSubmitLabel={submitButtonLabel}
+          handleSubmitClick={form.handleSubmit(onSubmit)}
           handleCancelClick={onCancel}
         />
       </form>

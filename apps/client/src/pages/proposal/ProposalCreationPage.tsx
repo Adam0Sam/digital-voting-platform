@@ -5,19 +5,15 @@ import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { redirect } from 'react-router-dom';
 import {
   isProposalChoiceDtoArray,
-  isProposalManagerDtoArray,
   ProposalChoiceDto,
   ProposalDto,
-  ProposalManagerRole,
-  ProposalManagerRoles,
   ProposalStatusOptions,
   ProposalVisibility,
   ProposalVisibilityOptions,
 } from '@/lib/types/proposal.type';
-import { api, APIError } from '@/lib/api';
+import { api } from '@/lib/api';
 import {
   Card,
   CardContent,
@@ -29,36 +25,24 @@ import { Button } from '@/components/ui/button';
 
 import { isUserArray, User } from '@/lib/types';
 
-import ProposalOwnerReviewerSelectionForm from '@/components/forms/user/ProposalOwnerReviewerSelectionForm';
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 
 import Combobox from '@/components/Combobox';
 import ProposalChoiceForm from '@/components/forms/choice-selection/ProposalChoiceForm';
+import { ProposalManagerListDto } from '@/lib/types/proposal-manager.type';
+import ManagerSelectionForm from '@/components/forms/user/ManagerSelectionForm';
 
 const createProposal = async (data: ProposalDto) => {
-  try {
-    const createdProposal = await api.proposals.createOne(data);
-    const { id } = createdProposal;
-    // TODO: Undo proposal creation via scheduled worker request disruption
-    toast(`Proposal ${data.title} has been created`, {
-      description: new Date().toLocaleTimeString(),
-      action: {
-        label: 'Undo',
-        onClick: () => api.proposals.deleteOne(id),
-      },
-    });
-  } catch (error) {
-    if (error instanceof APIError) {
-      if (error.status === 401) {
-        console.error('Unauthorized Request');
-        return redirect('/signin');
-      } else {
-        console.error(`API Error: ${error.message}, ${error.status}`);
-      }
-    } else {
-      console.error('Failed to create proposal ', error);
-    }
-  }
+  const createdProposal = await api.proposals.createOne(data);
+  const { id } = createdProposal;
+  // TODO: Undo proposal creation via scheduled worker request disruption
+  toast(`Proposal ${data.title} has been created`, {
+    description: new Date().toLocaleTimeString(),
+    action: {
+      label: 'Undo',
+      onClick: () => api.proposals.deleteOne(id),
+    },
+  });
 };
 // TODO: Make a prettier proposal summary component
 function ProposalSummary({
@@ -68,21 +52,13 @@ function ProposalSummary({
   data: ProposalDto;
   onCancel: () => void;
 }) {
-  const managerNameMap = new Map<ProposalManagerRole, string[]>();
-
-  data.managers.forEach(({ role, user }) => {
-    managerNameMap.set(role, [
-      ...(managerNameMap.get(role) ?? []),
-      `${user.personalNames.join(' ')} ${user.familyName}`,
-    ]);
-  });
-
   return (
     <Card>
       <form
         method="post"
         onSubmit={e => {
           e.preventDefault();
+          console.log(data);
           createProposal(data);
         }}
       >
@@ -101,8 +77,6 @@ function ProposalSummary({
                 .join(', ');
             } else if (isProposalChoiceDtoArray(value)) {
               outputString = value.map(choice => choice.value).join(', ');
-            } else if (isProposalManagerDtoArray(value)) {
-              return null;
             } else {
               outputString = String(value);
             }
@@ -113,12 +87,6 @@ function ProposalSummary({
               </div>
             );
           })}
-          {Array.from(managerNameMap).map(([role, name]) => (
-            <div key={role}>
-              <span className="italic">{role}:</span>{' '}
-              {name.map(n => n).join(', ')}
-            </div>
-          ))}
         </CardContent>
         <CardFooter>
           <div className="flex gap-10">
@@ -180,6 +148,7 @@ const DateCard: FC<{
       defaultEndDate={
         defaultValues.endDate ? new Date(defaultValues.endDate) : undefined
       }
+      submitButtonLabel="Next"
     />
   </CardWrapper>
 );
@@ -210,18 +179,38 @@ const ResolutionValueCard: FC<{
   );
 };
 
+// const ManagerSelectionCard: FC<{
+//   carouselApi: CarouselScrollHandles;
+//   handleSubmit: (owners: User[], reviewers: User[]) => void;
+// }> = ({ carouselApi, handleSubmit }) => {
+//   return (
+//     <CardWrapper
+//       cardTitle="Select Managers"
+//       cardDescription="Select the users who will be the owners and reviewers of this proposal"
+//     >
+//       <ProposalOwnerReviewerSelectionForm
+//         onSubmit={values => {
+//           handleSubmit(values.owners, values.reviewers);
+//           carouselApi.scrollNext();
+//         }}
+//         onCancel={carouselApi.scrollPrev}
+//       />
+//     </CardWrapper>
+//   );
+// };
+
 const ManagerSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
-  handleSubmit: (owners: User[], reviewers: User[]) => void;
+  handleSubmit: (managers: ProposalManagerListDto[]) => void;
 }> = ({ carouselApi, handleSubmit }) => {
   return (
     <CardWrapper
       cardTitle="Select Managers"
-      cardDescription="Select the users who will be the owners and reviewers of this proposal"
+      cardDescription="Select the users who will be able to manage this proposal. Assign your own permissions"
     >
-      <ProposalOwnerReviewerSelectionForm
+      <ManagerSelectionForm
         onSubmit={values => {
-          handleSubmit(values.owners, values.reviewers);
+          handleSubmit(values);
           carouselApi.scrollNext();
         }}
         onCancel={carouselApi.scrollPrev}
@@ -289,10 +278,7 @@ export default function ProposalCreationPage() {
     useState<ProposalVisibility>();
 
   const [proposalManagers, setProposalManagers] = useState<
-    {
-      type: ProposalManagerRole;
-      users: User[];
-    }[]
+    ProposalManagerListDto[]
   >([]);
 
   const [proposalVoters, setProposalVoters] = useState<User[]>([]);
@@ -349,6 +335,12 @@ export default function ProposalCreationPage() {
             endDate: proposalEndDate,
           }}
         />
+        <ManagerSelectionCard
+          carouselApi={carouselApi}
+          handleSubmit={managers => {
+            setProposalManagers(managers);
+          }}
+        />
         <VoterSelectionCard
           carouselApi={carouselApi}
           handleSubmit={(users, proposalVisibility) => {
@@ -356,15 +348,7 @@ export default function ProposalCreationPage() {
             setProposalVisibility(proposalVisibility);
           }}
         />
-        <ManagerSelectionCard
-          carouselApi={carouselApi}
-          handleSubmit={(owners, reviewers) => {
-            setProposalManagers([
-              { type: ProposalManagerRoles.OWNER, users: owners },
-              { type: ProposalManagerRoles.REVIEWER, users: reviewers },
-            ]);
-          }}
-        />
+
         <ProposalSummary
           data={{
             title: proposalTitle,
@@ -375,12 +359,7 @@ export default function ProposalCreationPage() {
             visibility:
               proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
             voters: proposalVoters,
-            managers: proposalManagers.flatMap(({ type, users }) => {
-              return users.map(user => ({
-                role: type,
-                user,
-              }));
-            }),
+            managers: proposalManagers,
             choices: proposalChoices,
             choiceCount: proposalChoiceCount,
           }}

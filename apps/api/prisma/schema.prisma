@@ -48,9 +48,12 @@ model User {
     grade         Grade
     roles         UserRole[]
 
-    actionLogs       UserActionLog[]
+    actionLogs UserActionLog[]
+
     votes            Vote[]
     managedProposals ProposalManager[]
+
+    authoredPermissions ManagerPermissions[]
 
     @@unique([personalNames, familyName, grade])
     @@index([personalNames, familyName, grade])
@@ -98,19 +101,44 @@ model ProposalChoice {
     @@unique([value, proposalId])
 }
 
-enum ProposalManagerRole {
-    OWNER
-    REVIEWER
+model ProposalManagerRole {
+    id          String  @id @default(uuid())
+    roleName    String
+    description String?
+
+    managers ProposalManager[]
+
+    permissionsId String
+    permissions   ManagerPermissions @relation(fields: [permissionsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model ManagerPermissions {
+    id                 String                @id @default(uuid())
+    managerRoles       ProposalManagerRole[]
+    author             User                  @relation(fields: [authorId], references: [id])
+    authorId           String
+    canEditTitle       Boolean               @default(false)
+    canEditDescription Boolean               @default(false)
+    canEditDates       Boolean               @default(false)
+    canEditStatus      Boolean               @default(false)
+    canEditVisibility  Boolean               @default(false)
+    canEditVotes       Boolean               @default(false)
+    canEditManagers    Boolean               @default(false)
+    canEditChoices     Boolean               @default(false)
+    canEditChoiceCount Boolean               @default(false)
 }
 
 model ProposalManager {
-    id   String              @id @default(uuid())
-    role ProposalManagerRole
+    id String @id @default(uuid())
+
+    role                  ProposalManagerRole @relation(fields: [proposalManagerRoleId], references: [id])
+    proposalManagerRoleId String
 
     proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
-    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId     String
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId String
 }
 
 enum VoteStatus {

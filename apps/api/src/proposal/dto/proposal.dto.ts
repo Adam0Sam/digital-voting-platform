@@ -1,26 +1,40 @@
-import {
-  ProposalManagerRole,
-  ProposalStatus,
-  ProposalVisibility,
-} from '@prisma/client';
+import { ProposalStatus, ProposalVisibility } from '@prisma/client';
 import { UserSchema } from 'src/user/schema/user.schema';
 import { z } from 'zod';
-
-export const ProposalResolutionSchema = z.object({
-  value: z.string().min(1),
-  description: z.string().optional(),
-});
-
-export type ProposalResolution = z.infer<typeof ProposalResolutionSchema>;
-
-export const ProposalManagerDtoSchema = z.object({
-  role: z.nativeEnum(ProposalManagerRole),
-  user: UserSchema,
-});
 
 export const ProposalChoiceDtoSchema = z.object({
   value: z.string().min(1),
   description: z.string().optional(),
+});
+
+export const ManagerPermissionsDtoSchema = z.object({
+  canEditTitle: z.boolean(),
+  canEditDescription: z.boolean(),
+  canEditDates: z.boolean(),
+  canEditStatus: z.boolean(),
+  canEditVisibility: z.boolean(),
+  canEditVotes: z.boolean(),
+  canEditManagers: z.boolean(),
+  canEditChoices: z.boolean(),
+  canEditChoiceCount: z.boolean(),
+});
+
+export const ProposalManagerRoleSchema = z.object({
+  id: z.string(),
+  roleName: z.string().min(1),
+  description: z.string().optional(),
+  permissions: ManagerPermissionsDtoSchema,
+});
+
+export const ProposalManagerRoleDtoSchema = z.object({
+  roleName: z.string().min(1),
+  description: z.string().optional(),
+  permissions: ManagerPermissionsDtoSchema,
+});
+
+export const ProposalManagerListDtoSchema = z.object({
+  users: z.array(UserSchema).min(1),
+  role: ProposalManagerRoleSchema,
 });
 
 export const ProposalDtoSchema = z.object({
@@ -28,12 +42,12 @@ export const ProposalDtoSchema = z.object({
   description: z.string().optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
-  status: z.nativeEnum(ProposalStatus).optional().default(ProposalStatus.DRAFT),
+  status: z.nativeEnum(ProposalStatus).default(ProposalStatus.DRAFT),
   visibility: z
     .nativeEnum(ProposalVisibility)
     .default(ProposalVisibility.AGENT_ONLY),
 
-  managers: z.array(ProposalManagerDtoSchema).min(1),
+  managers: z.array(ProposalManagerListDtoSchema).min(1),
   voters: z.array(UserSchema).min(1),
 
   choices: z.array(ProposalChoiceDtoSchema).min(1),
