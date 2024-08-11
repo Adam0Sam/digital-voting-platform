@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,19 +7,20 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+} from '@/components/ui/card';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { BarChartBigIcon, CalendarClock } from 'lucide-react';
-import { Calendar } from '../ui/calendar';
+import { Calendar } from '@/components/ui/calendar';
 import { getTimeLeft } from '@/lib/time';
-import { Proposal, VoteStatusOptions } from '@/lib/types';
-import { SingularLabeledBarChart } from '../bar-chart/SingularLabeledChart';
-
-type choiceChartItem = {
-  choiceValue: string;
-  choiceVotes: number;
-};
+import { Proposal } from '@/lib/types';
+import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
+import { getChoiceData } from '@/lib/proposal-data';
+import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
 
 export default function ManagerCard({
   proposalData,
@@ -38,30 +39,7 @@ export default function ManagerCard({
     (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
   );
 
-  const choiceChartDataMap = new Map<string, choiceChartItem>();
-  let resolvedVoteCount = 0;
-
-  for (const availableChoice of proposalData.choices) {
-    choiceChartDataMap.set(availableChoice.id, {
-      choiceValue: availableChoice.value,
-      choiceVotes: 0,
-    });
-  }
-
-  for (const vote of proposalData.votes) {
-    if (vote.status !== VoteStatusOptions.RESOLVED) return;
-    resolvedVoteCount++;
-    for (const voteChoice of vote.choices) {
-      if (!choiceChartDataMap.has(voteChoice.id)) continue;
-      choiceChartDataMap.set(voteChoice.id, {
-        ...choiceChartDataMap.get(voteChoice.id)!,
-        choiceVotes: choiceChartDataMap.get(voteChoice.id)!.choiceVotes + 1,
-      });
-    }
-  }
-
-  const choiceChartData = Array.from(choiceChartDataMap.values());
-  console.log('data', choiceChartData);
+  const { choiceChartData, resolvedVoteCount } = getChoiceData(proposalData);
 
   return (
     <Card className={cn('flex flex-col justify-between', className)}>
@@ -105,15 +83,22 @@ export default function ManagerCard({
                 </PopoverTrigger>
               </div>
               {/*
-               * TODO: Make this value dynamic
+               * TODO: Make width value dynamic
                */}
-              <PopoverContent className="w-96">
+              <PopoverContent className="flex w-96 flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-xl font-bold">
+                    Votes ({proposalData.votes.length})
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Choices/Vote: {proposalData.choiceCount}
+                  </p>
+                </div>
+
                 <SingularLabeledBarChart
                   chartData={choiceChartData}
                   dataLabelKey="choiceValue"
                   dataValueKey="choiceVotes"
-                  chartTitle="Votes"
-                  chartDescription={`Max choice count per vote: ${proposalData.choiceCount}`}
                 />
               </PopoverContent>
             </Popover>
@@ -124,7 +109,7 @@ export default function ManagerCard({
         <Button className="w-full p-0">
           <Link
             className="flex h-full w-full items-center justify-center"
-            to={`../${proposalData.id}`}
+            to={`${PROPOSAL_HREFS.MANAGE}/${proposalData.id}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`}
           >
             View
           </Link>

@@ -43,6 +43,9 @@ import {
 import { GENERIC_PATHS } from './lib/routes/util.routes';
 import ManagerRoleTemplates from './pages/profile/profile-templates/ManagerRoleTemplates';
 import ManagerSelectionForm from './components/forms/user/ManagerSelectionForm';
+import VoteOverviewPage from './pages/proposal/manager/VoteOverviewPage';
+import ContentOverviewPage from './pages/proposal/manager/ContentOverviewPage';
+import { Component } from './test components/test-chart';
 
 function App() {
   const router = createBrowserRouter(
@@ -62,39 +65,41 @@ function App() {
           id={AUTH_LOADER_ID}
           loader={authLoader}
         />
-        <Route loader={managerRolesLoader} id={MANAGER_ROLES_LOADER_ID}>
+        <Route>
           <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
             <Route
               path={PROPOSAL_PATHS.VOTE}
               id={VOTER_PROPOSALS_LOADER_ID}
-              // loader={voterProposalsLoader}
+              loader={voterProposalsLoader}
             >
-              <Route
-                path={GENERIC_PATHS.ALL}
-                // element={<VoterLandingPage />}
-              />
-              <Route
-                path={GENERIC_PATHS.ONE}
-                // element={<ProposalVotePage />}
-              />
+              <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
+              <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
             </Route>
 
             <Route
               path={PROPOSAL_PATHS.MANAGE}
               id={MANAGER_PROPOSALS_LOADER_ID}
-              // loader={managerProposalsLoader}
+              loader={managerProposalsLoader}
             >
               <Route
                 path={GENERIC_PATHS.ALL}
-                // element={<ManagerLandingPage />}
+                element={<ManagerLandingPage />}
               />
-              <Route
-                path={GENERIC_PATHS.ONE}
-                // element={<ProposalManagePage />}
-              />
+              <Route path={GENERIC_PATHS.ONE} element={<ProposalManagePage />}>
+                <Route
+                  path={PROPOSAL_PATHS.VOTES_OVERVIEW}
+                  element={<VoteOverviewPage />}
+                />
+                <Route
+                  path={PROPOSAL_PATHS.CONTENT_OVERVIEW}
+                  element={<ContentOverviewPage />}
+                />
+              </Route>
             </Route>
             <Route
               path={PROPOSAL_PATHS.CREATE}
+              loader={managerRolesLoader}
+              id={MANAGER_ROLES_LOADER_ID}
               element={<ProposalCreationPage />}
             />
           </Route>
@@ -116,11 +121,12 @@ function App() {
             >
               <Route
                 path={USER_TEMPLATES_PATHS.MANAGER}
+                loader={managerRolesLoader}
                 element={<ManagerRoleTemplates />}
               />
             </Route>
           </Route>
-          <Route path="test" element={<ManagerSelectionForm />} />
+          <Route path="test" element={<Component />} />
           <Route path="*" element={<div>404</div>} />
         </Route>
       </Route>,

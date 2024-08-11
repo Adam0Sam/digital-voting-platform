@@ -1,4 +1,7 @@
-import { ProposalManagerListDto } from './proposal-manager.type';
+import {
+  ProposalManager,
+  ProposalManagerListDto,
+} from './proposal-manager.type';
 import { User } from './user.type';
 import {
   isKeyOfStringLiteralObj,
@@ -9,11 +12,12 @@ import { Vote } from './vote.type';
 
 export type ProposalChoice = ProposalChoiceDto & { id: string };
 
-export type Proposal = Omit<ProposalDto, 'choices' | 'voters'> & {
+export type Proposal = Omit<ProposalDto, 'choices' | 'voters' | 'managers'> & {
   id: string;
 } & {
   choices: ProposalChoice[];
   votes: Vote[];
+  managers: ProposalManager[];
 };
 
 export type ProposalDto = {

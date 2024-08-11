@@ -1,4 +1,8 @@
-import { ProposalStatus, ProposalVisibility } from '@prisma/client';
+import {
+  ProposalChoice,
+  ProposalStatus,
+  ProposalVisibility,
+} from '@prisma/client';
 import { UserSchema } from 'src/user/schema/user.schema';
 import { z } from 'zod';
 
@@ -37,7 +41,7 @@ export const ProposalManagerListDtoSchema = z.object({
   role: ProposalManagerRoleSchema,
 });
 
-export const ProposalDtoSchema = z.object({
+export const CreateProposalDtoSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   startDate: z.coerce.date().optional(),
@@ -54,4 +58,9 @@ export const ProposalDtoSchema = z.object({
   choiceCount: z.number().int().min(1),
 });
 
-export type ProposalDto = z.infer<typeof ProposalDtoSchema>;
+export type CreateProposalDto = z.infer<typeof CreateProposalDtoSchema>;
+export type UpdateProposalDto = Partial<
+  Omit<CreateProposalDto, 'choices'> & {
+    choices: ProposalChoice[];
+  }
+>;

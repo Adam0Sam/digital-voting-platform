@@ -27,7 +27,9 @@ export type TitleDescriptionFormProps = ExtendedFormProps<
   FormValues,
   {
     titleLabel?: string;
+    titleEditDisabled?: boolean;
     descriptionLabel?: string;
+    descriptionEditDisabled?: boolean;
     defaultTitle?: string;
     defaultDescription?: string;
     className?: string;
@@ -42,6 +44,10 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
   defaultDescription = '',
   onCancel,
   onSubmit,
+  disableSubmit,
+  disableCancel,
+  titleEditDisabled,
+  descriptionEditDisabled,
   className,
 }) => {
   const form = useForm<FormValues>({
@@ -67,6 +73,7 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
                   <Input
                     placeholder={`Your ${titleLabel}`}
                     type="text"
+                    disabled={titleEditDisabled}
                     {...field}
                   />
                 </FormControl>
@@ -85,6 +92,7 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
                 <FormControl>
                   <Textarea
                     placeholder={`Your ${descriptionLabel}`}
+                    disabled={descriptionEditDisabled}
                     {...field}
                   />
                 </FormControl>
@@ -97,6 +105,8 @@ const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({
           formSubmitLabel={formSubmitLabel}
           handleSubmitClick={form.handleSubmit(onSubmit)}
           handleCancelClick={onCancel}
+          enableSubmit={!disableSubmit}
+          enableCancel={!disableCancel}
         />
       </form>
     </Form>

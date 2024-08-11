@@ -1,27 +1,33 @@
-import CardWrapper from '@/components/CardWrapper';
-import DateForm from '@/components/forms/DateForm';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { api } from '@/lib/api';
+import { StandaloneNavLink } from '@/components/nav/NavLinkItem';
+import ProposalManageDate from '@/components/proposal/manager/ProposalManageDate';
+import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import {
   MANAGER_PROPOSALS_LOADER_ID,
   ManagerProposalsLoaderReturnType,
 } from '@/lib/loaders';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
+import { Proposal } from '@/lib/types';
+import { ManagerPermissionsDto } from '@/lib/types/proposal-manager.type';
+
+import { cn } from '@/lib/utils';
 import {
-  useNavigate,
+  Outlet,
+  useOutletContext,
   useParams,
-  useRevalidator,
   useRouteLoaderData,
 } from 'react-router-dom';
+
+function buildHrefs(proposalId: string) {
+  return {
+    Votes: `${PROPOSAL_HREFS.MANAGE}/${proposalId}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`,
+    Content: `${PROPOSAL_HREFS.MANAGE}/${proposalId}/${PROPOSAL_PATHS.CONTENT_OVERVIEW}`,
+  };
+}
+
+type ContextType = {
+  proposal: Proposal;
+  permissions: ManagerPermissionsDto;
+};
 
 export default function ProposalManagePage() {
   const { id: proposalId } = useParams();
@@ -29,86 +35,50 @@ export default function ProposalManagePage() {
     MANAGER_PROPOSALS_LOADER_ID,
   ) as ManagerProposalsLoaderReturnType;
 
-  const proposal = useRef(
-    proposals.find(proposal => proposal.id === proposalId),
-  );
+  const proposal = proposals.find(proposal => proposal.id === proposalId);
+  const signedInUser = useSignedInUser();
+  const permissions = proposal?.managers.find(
+    manager => manager.userId === signedInUser.id,
+  )?.role.permissions;
 
-  if (!proposal.current) {
+  if (!proposal || !permissions || !proposalId) {
     throw new Response('Proposal not found', { status: 404 });
   }
 
-  const revalidator = useRevalidator();
-  const navigate = useNavigate();
-
-  const [dateSheetIsOpen, setDateSheetIsOpen] = useState(false);
-  const [startDate, setStartDate] = useState<Date>(
-    new Date(proposal.current.startDate),
-  );
-  const [endDate, setEndDate] = useState<Date>(
-    new Date(proposal.current.endDate),
-  );
-
-  console.log(proposal.current);
-
   return (
-    <div className="flex-col px-10 sm:px-20">
-      <div className="flex justify-between">
-        <h3 className="text-4xl font-bold">Dashboard</h3>
-        <div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={'outline'}
-                className="w-full justify-start text-left font-normal"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {`${format(startDate, 'LLL dd, y')} - ${format(endDate, 'LLL dd, y')}`}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="flex w-auto flex-col items-center gap-2 p-0 pb-4"
-              align="start"
-            >
-              <Calendar
-                mode="range"
-                selected={{
-                  from: startDate,
-                  to: endDate,
-                }}
-              />
-              <Sheet open={dateSheetIsOpen} onOpenChange={setDateSheetIsOpen}>
-                <SheetTrigger asChild>
-                  <Button className="w-1/2">Edit Date</Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="flex w-full max-w-full items-center sm:w-3/4 sm:max-w-screen-sm"
-                >
-                  <CardWrapper
-                    cardTitle="Edit Date"
-                    cardDescription="Edit the start and end date"
-                    className="w-full"
-                  >
-                    <DateForm
-                      onSubmit={values => {
-                        setStartDate(values.date.from);
-                        setEndDate(values.date.to);
-                        api.proposals.updateOne(proposalId!, {
-                          startDate: values.date.from.toISOString(),
-                          endDate: values.date.to.toISOString(),
-                        });
-                        setDateSheetIsOpen(false);
-                      }}
-                      defaultStartDate={startDate}
-                      defaultEndDate={endDate}
-                    />
-                  </CardWrapper>
-                </SheetContent>
-              </Sheet>
-            </PopoverContent>
-          </Popover>
+    <div className="flex flex-col gap-8 px-10 sm:px-20">
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between">
+          <h3 className="text-4xl font-bold">Dashboard</h3>
+          <div>
+            <ProposalManageDate
+              proposal={proposal}
+              canEdit={permissions.canEditDates}
+            />
+          </div>
+        </div>
+        <div className="flex max-w-max rounded-md border-2 border-secondary">
+          {Object.entries(buildHrefs(proposalId)).map(([key, href], index) => (
+            <StandaloneNavLink
+              key={key}
+              to={href}
+              title={key}
+              titleAlign="center"
+              titleClassName="text-md"
+              className={cn('min-w-0 flex-1 rounded-none px-6 py-6', {
+                'rounded-l-md': index === 0,
+                'rounded-r-md':
+                  index === Object.keys(buildHrefs(proposalId)).length - 1,
+              })}
+            />
+          ))}
         </div>
       </div>
+      <Outlet context={{ proposal, permissions } satisfies ContextType} />
     </div>
   );
+}
+
+export function useManagerProposal() {
+  return useOutletContext<ContextType>();
 }

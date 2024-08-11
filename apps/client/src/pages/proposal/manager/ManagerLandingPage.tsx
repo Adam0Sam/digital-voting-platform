@@ -1,4 +1,4 @@
-import ManagerCard from '@/components/proposal/ManagerCard';
+import ManagerCard from '@/components/proposal/manager/ManagerCard';
 import {
   MANAGER_PROPOSALS_LOADER_ID,
   ManagerProposalsLoaderReturnType,

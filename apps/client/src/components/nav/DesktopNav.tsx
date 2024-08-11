@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/navigation-menu';
 
 import { CircleUserRound } from 'lucide-react';
-import { PROPOSAL_LINK_COLLECTION } from '../../lib/constants/href/proposal.links';
+import { PROPOSAL_LINK_COLLECTION } from '../../lib/href/proposal.links';
 
 import { NavLinkItem, StandaloneNavLink } from './NavLinkItem';
 import { USER_PROFILE_HREFS } from '@/lib/routes';

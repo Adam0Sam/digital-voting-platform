@@ -5,10 +5,7 @@ import { FC } from 'react';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { CircleUserRound } from 'lucide-react';
-import {
-  PROPOSAL_LINK_COLLECTION,
-  type LinkCollection,
-} from '@/lib/constants/href';
+import { PROPOSAL_LINK_COLLECTION, type LinkCollection } from '@/lib/href';
 import { USER_PROFILE_HREFS } from '@/lib/routes';
 const LinkCollection: FC<{
   collection: LinkCollection;

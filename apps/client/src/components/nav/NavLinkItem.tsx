@@ -37,6 +37,7 @@ export type LinkComponentProps = NavLinkProps & {
   className?: string;
   titleAlign?: VariantProps<typeof titleVariants>['align'];
   textClassName?: string;
+  titleClassName?: string;
 };
 
 export const StandaloneNavLink = ({
@@ -46,6 +47,7 @@ export const StandaloneNavLink = ({
   className,
   textClassName,
   titleAlign,
+  titleClassName,
   end = true,
   ...props
 }: LinkComponentProps) => (
@@ -57,7 +59,9 @@ export const StandaloneNavLink = ({
     end={end}
     {...props}
   >
-    <div className={cn(titleVariants({ align: titleAlign }))}>{title}</div>
+    <div className={cn(titleVariants({ align: titleAlign }), titleClassName)}>
+      {title}
+    </div>
     <p
       className={cn(
         'line-clamp-2 text-sm leading-snug text-muted-foreground',

@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { USER_PROFILE_LINK_COLLECTION } from '@/lib/constants/href';
+import { USER_PROFILE_LINK_COLLECTION } from '@/lib/href';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { Outlet } from 'react-router-dom';
 

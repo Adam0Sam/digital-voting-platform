@@ -1,14 +1,13 @@
-import VoterCard from '@/components/proposal/VoterCard';
+import VoterCard from '@/components/proposal/voter/VoterCard';
 import {
   VOTER_PROPOSALS_LOADER_ID,
   VoterProposalsLoaderReturnType,
 } from '@/lib/loaders';
-import { Vote } from '@/lib/types';
 
 import { useRouteLoaderData } from 'react-router-dom';
 
 export default function VoterLandingPage() {
-  const [proposals, userVotes] = useRouteLoaderData(
+  const proposals = useRouteLoaderData(
     VOTER_PROPOSALS_LOADER_ID,
   ) as VoterProposalsLoaderReturnType;
 
@@ -17,9 +16,7 @@ export default function VoterLandingPage() {
       {proposals.map(proposal => (
         <VoterCard
           proposalData={proposal}
-          voteData={
-            userVotes.find(vote => vote.proposalId === proposal.id) as Vote
-          }
+          voteData={proposal.votes[0]}
           className="max-w-70 h-80 flex-1 basis-60"
           key={proposal.id}
         />

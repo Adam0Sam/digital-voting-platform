@@ -1,18 +1,13 @@
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis } from 'recharts';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { BarChartComponentProps } from './bar-chart.type';
+import { cn } from '@/lib/utils';
 
 export function SingularLabeledBarChart<
   T extends Record<string, string | number>,
@@ -21,64 +16,60 @@ export function SingularLabeledBarChart<
   chartData,
   dataLabelKey,
   dataValueKey,
-  chartTitle: chartLabel,
-  chartDescription,
-}: {
-  chartData: T[];
-  dataLabelKey: K;
-  dataValueKey: K;
-  chartTitle?: string;
-  chartDescription?: string;
+  selectedCells,
+  className,
+}: BarChartComponentProps<T, K> & {
+  className?: string;
+  selectedCells?: string[];
 }) {
   const chartConfig = {
     [dataValueKey]: {
       label: dataValueKey,
-      color: 'hsl(var(--chart-1))',
     },
   } satisfies ChartConfig;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{chartLabel ?? 'Bar Chart'}</CardTitle>
-        <CardDescription>{chartDescription ?? ''}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              top: 30,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey={dataLabelKey}
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={value => value}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar
-              dataKey={dataValueKey}
-              fill={`var(--color-${dataValueKey})`}
-              radius={8}
-            >
-              <LabelList
-                position="top"
-                offset={12}
-                className="fill-foreground"
-                fontSize={12}
+    <ChartContainer config={chartConfig} className={className}>
+      <BarChart
+        accessibilityLayer
+        data={chartData}
+        margin={{
+          top: 30,
+        }}
+      >
+        <CartesianGrid vertical={false} />
+        <XAxis
+          dataKey={dataLabelKey}
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+          tickFormatter={value => value}
+        />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+        <Bar dataKey={dataValueKey} radius={8}>
+          <LabelList
+            position="top"
+            offset={12}
+            className="fill-foreground"
+            fontSize={12}
+          />
+          {chartData.map(entry => {
+            const isInactive =
+              selectedCells &&
+              selectedCells.length > 0 &&
+              !selectedCells.includes(entry[dataLabelKey] as string);
+
+            return (
+              <Cell
+                key={entry[dataLabelKey] as string}
+                className={cn('fill-primary transition-opacity', {
+                  'opacity-50': isInactive,
+                })}
               />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+            );
+          })}
+        </Bar>
+      </BarChart>
+    </ChartContainer>
   );
 }

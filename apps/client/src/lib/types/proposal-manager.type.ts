@@ -1,5 +1,11 @@
 import { User } from './user.type';
 
+export type ProposalManager = {
+  id: string;
+  userId: string;
+  role: ProposalManagerRole;
+};
+
 export type ProposalManagerListDto = {
   users: User[];
   role: ProposalManagerRole;
