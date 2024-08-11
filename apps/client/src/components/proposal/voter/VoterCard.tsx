@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { PROPOSAL_HREFS } from '@/lib/routes';
 
 import { getTimeLeft } from '@/lib/time';
 import { Proposal, Vote, VoteStatusOptions } from '@/lib/types';
@@ -26,7 +27,7 @@ export default function VoterCard({
   voteData,
   className,
 }: {
-  proposalData: Proposal;
+  proposalData: Omit<Proposal, 'managers'>;
   voteData: Vote;
   className?: string;
 }) {
@@ -92,7 +93,7 @@ export default function VoterCard({
         <Button className="w-full p-0">
           <Link
             className="flex h-full w-full items-center justify-center"
-            to={`../${proposalData.id}`}
+            to={`${PROPOSAL_HREFS.VOTE}/${proposalData.id}`}
           >
             View
           </Link>

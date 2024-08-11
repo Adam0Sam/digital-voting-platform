@@ -10,29 +10,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class VoteService {
   constructor(private prisma: PrismaService) {}
 
-  async getOneUserVote(userId: string, proposalId: string) {
-    return await this.prisma.vote.findUnique({
-      where: {
-        userId_proposalId: {
-          userId,
-          proposalId,
-        },
-      },
-      include: {
-        choices: true,
-      },
-    });
-  }
-  async getAllUserVotes(userId: string) {
-    return await this.prisma.vote.findMany({
-      where: {
-        userId,
-      },
-      include: {
-        choices: true,
-      },
-    });
-  }
   async voteForProposal(
     userId: string,
     proposalId: string,
@@ -44,41 +21,34 @@ export class VoteService {
       },
       include: {
         choices: true,
+        votes: true,
       },
     });
+
     if (!proposal) {
       throw new BadRequestException('Proposal not found');
     }
     if (proposal.choices.length < choices.length) {
       throw new BadRequestException('Invalid number of choices');
     }
+    const userVote = proposal.votes.find((vote) => vote.userId === userId);
+
+    if (!userVote) {
+      throw new BadRequestException(
+        'User is not allowed to vote on this proposal',
+      );
+    }
+
+    if (userVote.status === VoteStatus.RESOLVED) {
+      throw new ConflictException('User vote already resolved');
+    }
 
     const availableChoiceIdSet = new Set(
       proposal.choices.map((choice) => choice.id),
     );
+
     if (!choices.every((choice) => availableChoiceIdSet.has(choice.id))) {
       throw new BadRequestException('Invalid choice id');
-    }
-
-    const { status } = await this.prisma.vote.findUnique({
-      where: {
-        userId_proposalId: {
-          userId,
-          proposalId,
-        },
-      },
-    });
-
-    const allVotes = await this.prisma.vote.findMany({
-      include: {
-        choices: true,
-      },
-    });
-
-    console.log('ALL VOTES', allVotes[1].choices);
-
-    if (status === VoteStatus.RESOLVED) {
-      throw new ConflictException('Vote already resolved');
     }
 
     return await this.prisma.vote.update({

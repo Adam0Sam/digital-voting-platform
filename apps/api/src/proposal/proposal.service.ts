@@ -1,55 +1,22 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ManagerPermissions,
+  Prisma,
+  Proposal,
+  ProposalChoice,
+} from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ProposalDto, ProposalManagerListDtoSchema } from './dto';
+import {
+  CreateProposalDto,
+  ProposalManagerListDtoSchema,
+  UpdateProposalDto,
+} from './dto';
 import { z } from 'zod';
 
 @Injectable()
 export class ProposalService {
   constructor(private prisma: PrismaService) {}
-
-  // private getWhereClauseByAgent(
-  //   agentId: string,
-  //   agentRole: ProposalAgentRole,
-  // ): Prisma.ProposalWhereInput {
-  //   if (agentRole === 'VOTER') {
-  //     return {
-  //       votes: { some: { userId: agentId } },
-  //       OR: [
-  //         {
-  //           visibility: ProposalVisibility.PUBLIC,
-  //         },
-  //         {
-  //           visibility: ProposalVisibility.AGENT_ONLY,
-  //         },
-  //       ],
-  //     };
-  //   }
-  //   return { managers: { some: { userId: agentId, role: agentRole } } };
-  // }
-
-  // private getIncludeClauseByAgent(
-  //   agentRole: ProposalAgentRole,
-  // ): Prisma.ProposalInclude {
-  //   if (agentRole === 'VOTER') {
-  //     return {
-  //       choices: true,
-  //     };
-  //   }
-  //   return {
-  //     votes: true,
-  //     managers: true,
-  //     choices: true,
-  //   };
-  // }
-
-  // async getProposalByAgent(agentId: string, agentRole: ProposalAgentRole) {
-  //   return this.prisma.proposal.findMany({
-  //     where: this.getWhereClauseByAgent(agentId, agentRole),
-  //     include: this.getIncludeClauseByAgent(agentRole),
-  //   });
-  // }
 
   private getCreateManagersInput(
     managerLists: z.infer<typeof ProposalManagerListDtoSchema>[],
@@ -72,7 +39,7 @@ export class ProposalService {
     };
   }
 
-  async createOne(proposal: ProposalDto) {
+  async createOne(proposal: CreateProposalDto) {
     const voteUserIds =
       proposal.voters?.map((voter) => ({ userId: voter.id })) ?? [];
     const choices = proposal.choices.map((choice) => ({
@@ -100,13 +67,134 @@ export class ProposalService {
     });
   }
 
-  async getOne(id: string) {
-    return this.prisma.proposal.findUnique({
-      where: { id },
+  private getProposalUpdateInput(
+    proposalDto: UpdateProposalDto,
+    permissions: ManagerPermissions,
+  ): Prisma.ProposalUpdateInput {
+    const updateInput: Prisma.ProposalUpdateInput = {};
+    for (const key in proposalDto) {
+      switch (key) {
+        case 'title':
+          if (permissions.canEditTitle) {
+            updateInput.title = proposalDto.title;
+          }
+          break;
+        case 'description':
+          if (permissions.canEditDescription) {
+            updateInput.description = proposalDto.description;
+          }
+          break;
+        case 'startDate':
+          if (permissions.canEditDates) {
+            updateInput.startDate = proposalDto.startDate;
+          }
+          break;
+        case 'endDate':
+          if (permissions.canEditDates) {
+            updateInput.endDate = proposalDto.endDate;
+          }
+          break;
+        case 'status':
+          if (permissions.canEditStatus) {
+            updateInput.status = proposalDto.status;
+          }
+          break;
+        case 'visibility':
+          if (permissions.canEditVisibility) {
+            updateInput.visibility = proposalDto.visibility;
+          }
+          break;
+        case 'choices':
+          if (permissions.canEditChoices) {
+            updateInput.choices = {
+              upsert: proposalDto.choices.map((choice) => ({
+                where: {
+                  id: choice.id,
+                },
+                update: {
+                  value: choice.value,
+                  description: choice.description,
+                },
+                create: {
+                  value: choice.value,
+                  description: choice.description,
+                },
+              })),
+            };
+          }
+          break;
+        case 'choiceCount':
+          if (permissions.canEditChoiceCount) {
+            updateInput.choiceCount = proposalDto.choiceCount;
+          }
+          break;
+      }
+    }
+    return updateInput;
+  }
+
+  async updateOne(
+    proposalId: string,
+    proposalDto: UpdateProposalDto,
+    userId: string,
+  ) {
+    const { managers } = await this.prisma.proposal.findUnique({
+      where: {
+        id: proposalId,
+      },
+      select: {
+        managers: {
+          where: {
+            userId,
+          },
+          select: {
+            role: {
+              select: {
+                permissions: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!managers.length) {
+      throw new UnauthorizedException('User is not a manager of this proposal');
+    }
+    const permissions = managers[0].role.permissions;
+
+    return this.prisma.proposal.update({
+      where: {
+        id: proposalId,
+      },
+      data: this.getProposalUpdateInput(proposalDto, permissions),
     });
   }
 
-  async getAllManaged(userId: string) {
+  async getAllVoterProposals(userId: string) {
+    return this.prisma.proposal.findMany({
+      where: {
+        votes: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        choices: true,
+        votes: {
+          where: {
+            userId,
+          },
+          include: {
+            choices: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getAllManagerProposals(userId: string) {
     return this.prisma.proposal.findMany({
       where: {
         managers: {
@@ -119,91 +207,20 @@ export class ProposalService {
         votes: {
           include: {
             choices: true,
+            user: true,
           },
         },
         choices: true,
-        managers: true,
+        managers: {
+          include: {
+            role: {
+              include: {
+                permissions: true,
+              },
+            },
+          },
+        },
       },
     });
   }
-
-  /**
-   * TODO: Might be useful l8r but currently completely deprecated
-   */
-  //   async getAllProposalsDemo(): Promise<Proposal[]> {
-  //     return this.prisma.proposal.findMany({
-  //       include: {
-  //         owners: true,
-  //         reviewers: true,
-  //         resolutionValues: true,
-  //         userVotes: true,
-  //       },
-  //     });
-  //   }
-
-  //   private getRequiredRolesByVisibility(
-  //     userId: string,
-  //     visibility: ProposalVisibility,
-  //   ) {
-  //     const requiredRolesByVisibility = {
-  //       PUBLIC: [],
-  //       MANAGER_ONLY: [
-  //         { owners: { some: { id: userId } } },
-  //         { reviewers: { some: { id: userId } } },
-  //       ],
-  //       RESTRICTED: [
-  //         { owners: { some: { id: userId } } },
-  //         { reviewers: { some: { id: userId } } },
-  //         { userVotes: { some: { userId: userId } } },
-  //       ],
-  //     } satisfies PrismaQuery<ProposalVisibility, Record<string, any>[]>;
-
-  //     return requiredRolesByVisibility[visibility];
-  //   }
-
-  //   async getAllSpecificProposals(
-  //     userId: string,
-  //     proposalVisibility: ProposalVisibility,
-  //     proposalStatus: ProposalStatus,
-  //   ) {
-  //     return this.prisma.proposal.findMany({
-  //       where: {
-  //         status: proposalStatus,
-  //         visibility: proposalVisibility,
-  //         OR: this.getRequiredRolesByVisibility(userId, proposalVisibility),
-  //       },
-  //       include: {
-  //         owners: true,
-  //         reviewers: true,
-  //         resolutionValues: true,
-  //         userVotes: true,
-  //       },
-  //     });
-  //   }
-
-  //   async getProposalsByVisibility(
-  //     userId: string,
-  //     proposalVisibility: ProposalVisibility,
-  //   ) {
-  //     const requiredRoles = this.getRequiredRolesByVisibility(
-  //       userId,
-  //       proposalVisibility,
-  //     );
-  //     const query: PrismaQuery = {
-  //       where: {
-  //         visibility: proposalVisibility,
-  //       },
-  //     };
-  //     if (requiredRoles.length > 0) {
-  //       query.where.OR = requiredRoles;
-  //     }
-
-  //     return this.prisma.proposal.findMany({
-  //       where: query.where,
-  //       include: {
-  //         resolutionValues: true,
-  //         userVotes: true,
-  //       },
-  //     });
-  //   }
 }

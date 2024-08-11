@@ -1,11 +1,6 @@
-import {
-  Proposal,
-  ProposalChoice,
-  ProposalDto,
-} from '@/lib/types/proposal.type';
+import { Proposal, ProposalDto } from '@/lib/types/proposal.type';
 import { HttpClient } from './http-client';
 import URI from '../constants/uri-constants';
-import { Vote } from '../types';
 
 export class ProposalApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/proposal`);
@@ -15,49 +10,23 @@ export class ProposalApi {
   }
 
   async updateOne(id: string, data: Partial<ProposalDto>) {
-    return (await this.httpClient.fetchWithAuth(`update/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ proposal: data }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    return (await this.httpClient.put(`${id}`, {
+      proposal: data,
     })) as Proposal;
   }
 
   async deleteOne(id: string) {
-    return await this.httpClient.fetchWithAuth(`delete/${id}`, {
-      method: 'DELETE',
-    });
+    return await this.httpClient.delete(`${id}`);
   }
 
-  // async getProposalsByAgentRole(agentRole: ProposalAgentRole) {
-  //   if (!isProposalAgentRole(agentRole)) {
-  //     throw new Response(`Invalid agent role ${agentRole}`, { status: 400 });
-  //   }
-  //   return (await this.httpClient.fetchWithAuth(
-  //     `${agentRole}/all`,
-  //   )) as Proposal[];
-  // }
-
-  async getAllManaged() {
-    return (await this.httpClient.fetchWithAuth('managed/all')) as Proposal[];
+  async getAllVoterProposals() {
+    return (await this.httpClient.get('voter/all')) as Omit<
+      Proposal,
+      'managers'
+    >[];
   }
 
-  async getUserVote(id: string) {
-    return await this.httpClient.fetchWithAuth(`votes/${id}`);
-  }
-
-  async getAllUserVotes() {
-    return (await this.httpClient.fetchWithAuth('votes/all')) as Vote[];
-  }
-
-  async castUserVote(id: string, choices: ProposalChoice[]) {
-    return (await this.httpClient.fetchWithAuth(`votes/${id}`, {
-      method: 'POST',
-      body: JSON.stringify({ choices }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })) as Proposal;
+  async getAllManagerProposals() {
+    return (await this.httpClient.get('manager/all')) as Proposal[];
   }
 }

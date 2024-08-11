@@ -1,22 +1,30 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
   Put,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
 
-import { ParseStringLiteral, ZodValidationPipe } from 'src/pipes';
-import { ProposalDto, ProposalDtoSchema } from './dto';
+import { ZodValidationPipe } from 'src/pipes';
+import {
+  CreateProposalDto,
+  CreateProposalDtoSchema,
+  UpdateProposalDto,
+} from './dto';
 import { VoteService } from 'src/vote/vote.service';
 
 import { ProposalChoice, User } from '@prisma/client';
 import { GetUser } from 'src/user/decorator';
 
+@UsePipes(new ValidationPipe({ transform: true }))
 @UseGuards(JwtAuthGuard)
 @Controller('proposal')
 export class ProposalController {
@@ -25,34 +33,20 @@ export class ProposalController {
     private voteService: VoteService,
   ) {}
 
-  @Get('votes/all')
-  getAllUserVotes(@GetUser('id') userId: User['id']) {
-    console.log('Getting All User Votes');
-    return this.voteService.getAllUserVotes(userId);
-  }
+  // @Get('managed/all')
+  // getAllManaged(@GetUser('id') userId: User['id']) {
+  //   console.log('Getting All Managed Proposals', userId);
+  //   return this.proposalService.getAllManaged(userId);
+  // }
 
-  @Get('managed/all')
-  getAllManaged(@GetUser('id') userId: User['id']) {
-    console.log('Getting All Managed Proposals', userId);
-    return this.proposalService.getAllManaged(userId);
-  }
-
-  @Get('votes/:id')
-  getUserVote(
-    @GetUser('id') userId: User['id'],
-    @Param('id') proposalId: string,
-  ) {
-    return this.voteService.getOneUserVote(userId, proposalId);
-  }
-
-  @Post('votes/:id')
-  castUserVote(
-    @GetUser('id') userId: User['id'],
-    @Param('id') proposalId: string,
-    @Body('choices') choices: ProposalChoice[],
-  ) {
-    return this.voteService.voteForProposal(userId, proposalId, choices);
-  }
+  // @Post('votes/:id')
+  // castUserVote(
+  //   @GetUser('id') userId: User['id'],
+  //   @Param('id') proposalId: string,
+  //   @Body('choices') choices: ProposalChoice[],
+  // ) {
+  //   return this.voteService.voteForProposal(userId, proposalId, choices);
+  // }
 
   // @Get(':agentRole/all')
   // getProposalsByAgentRole(
@@ -65,28 +59,43 @@ export class ProposalController {
 
   @Post('')
   createOne(
-    @Body('proposal', new ZodValidationPipe(ProposalDtoSchema))
-    proposal: ProposalDto,
+    @Body('proposal', new ZodValidationPipe(CreateProposalDtoSchema))
+    proposal: CreateProposalDto,
   ) {
     return this.proposalService.createOne(proposal);
   }
 
-  @Get(':id/choice-count')
-  async getChoiceCount(@Param('id') proposalId: string) {
-    const { choiceCount } = await this.proposalService.getOne(proposalId);
-    return { choiceCount };
-  }
-
-  @Put('update/:id')
+  @Put(':id')
   async updateOne(
     @Param('id') proposalId: string,
     @Body('proposal')
-    proposal: ProposalDto,
+    proposalDto: UpdateProposalDto,
+    @GetUser('id') userId: User['id'],
   ) {
-    console.log('Updating Proposal', proposal);
-    // return this.proposalService.updateProposal(proposalId, proposal);
+    return this.proposalService.updateOne(proposalId, proposalDto, userId);
   }
 
+  @Delete(':id')
+  async deleteOne(@Param('id') proposalId: string) {
+    console.log('Deleting Proposal', proposalId);
+    return 'deleted';
+  }
+
+  @Get('voter/all')
+  async getAllVoterProposals(@GetUser('id') userId: User['id']) {
+    return this.proposalService.getAllVoterProposals(userId);
+  }
+
+  @Get('manager/all')
+  async getAllManagerProposals(@GetUser('id') userId: User['id']) {
+    return this.proposalService.getAllManagerProposals(userId);
+  }
+
+  // @Get(':id/choice-count')
+  // async getChoiceCount(@Param('id') proposalId: string) {
+  //   const { choiceCount } = await this.proposalService.getOne(proposalId);
+  //   return { choiceCount };
+  // }
   // @Post(':id/vote')
   // async voteForProposalChoice(
   //   @GetUser('id') userId: User['id'],

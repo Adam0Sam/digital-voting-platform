@@ -12,6 +12,7 @@ export class HttpClient {
   }
 
   async fetch(path: string, options?: RequestInit) {
+    console.log('Fetching', this.getUrl(path));
     const response = await fetch(this.getUrl(path), options);
     if (!response.ok) {
       throw new APIError(response.statusText);
