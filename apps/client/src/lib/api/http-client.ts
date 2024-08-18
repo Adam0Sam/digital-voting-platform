@@ -1,6 +1,10 @@
 import JWTController from '../auth/jwt-controller';
 import { APIError } from './error';
 
+type AuthClientOptions = RequestInit & {
+  id_token?: string;
+};
+
 export class HttpClient {
   constructor(protected readonly authority: string) {}
   protected getUrl(path: string) {
@@ -20,21 +24,21 @@ export class HttpClient {
     return await response.json();
   }
 
-  async fetchWithAuth(path: string, options?: RequestInit, id_token?: string) {
+  async fetchWithAuth(path: string, options?: AuthClientOptions) {
     return await this.fetch(path, {
       ...options,
       headers: {
         ...options?.headers,
-        Authorization: `Bearer ${id_token ?? JWTController.getItem()}`,
+        Authorization: `Bearer ${options?.id_token ?? JWTController.getItem()}`,
       },
     });
   }
 
-  async get(path: string, options?: RequestInit) {
+  async get(path: string, options?: AuthClientOptions) {
     return await this.fetchWithAuth(path, options);
   }
 
-  async post<T>(path: string, data: T, options?: RequestInit) {
+  async post<T>(path: string, data: T, options?: AuthClientOptions) {
     return await this.fetchWithAuth(path, {
       ...options,
       method: 'POST',
@@ -45,7 +49,7 @@ export class HttpClient {
     });
   }
 
-  async put<T>(path: string, data: T, options?: RequestInit) {
+  async put<T>(path: string, data: T, options?: AuthClientOptions) {
     return await this.fetchWithAuth(path, {
       ...options,
       method: 'PUT',
@@ -56,7 +60,7 @@ export class HttpClient {
     });
   }
 
-  async delete(path: string, options?: RequestInit) {
+  async delete(path: string, options?: AuthClientOptions) {
     return await this.fetchWithAuth(path, {
       ...options,
       method: 'DELETE',

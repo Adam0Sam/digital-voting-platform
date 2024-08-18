@@ -17,12 +17,22 @@ const EMPTY_USER_TEMPLATE = {
   familyName: '',
   grade: Grades.NONE,
   roles: [],
+  email: null,
+  active: false,
 } satisfies User;
 
-export const SignedInUserContext = createContext<User>(EMPTY_USER_TEMPLATE);
+export const SignedInUserContext = createContext<{
+  user: User;
+  mutate: (newUser: User) => void;
+}>({ user: EMPTY_USER_TEMPLATE, mutate: () => {} });
 
 export default function RootLayout() {
   const [user, setUser] = useState<User | null>(null);
+
+  const mutate = (newUser: User) => {
+    setUser(newUser);
+    UserController.setItem(newUser);
+  };
 
   const loadedData = useRouteLoaderData(USER_LOADER_ID) as UserLoaderReturnType;
 
@@ -55,7 +65,7 @@ export default function RootLayout() {
   }
 
   return (
-    <SignedInUserContext.Provider value={user}>
+    <SignedInUserContext.Provider value={{ user, mutate }}>
       <div className="flex h-full flex-col">
         <div className="my-10 ml-5 md:ml-0 md:justify-center">
           <DesktopNav className="hidden md:flex" />

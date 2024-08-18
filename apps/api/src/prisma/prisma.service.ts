@@ -1,5 +1,5 @@
 import { Global, Injectable, OnModuleInit } from '@nestjs/common';
-import { Grade, PrismaClient, User, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
 @Global()
@@ -25,37 +25,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
   async cleanDb() {
     await this.user.deleteMany();
-  }
-
-  async populateDatabase() {
-    const userData: User[] = [
-      {
-        id: '1',
-        personalNames: ['John', 'Michael'],
-        familyName: 'Doe',
-        grade: Grade.IA,
-        roles: [UserRole.STUDENT],
-      },
-      {
-        id: '2',
-        personalNames: ['Jane', 'Anne'],
-        familyName: 'Smith',
-        grade: Grade.IB,
-        roles: [UserRole.ADMIN],
-      },
-    ];
-
-    for (const user of userData) {
-      try {
-        await this.user.create({
-          data: user,
-        });
-      } catch (error) {
-        console.error(
-          `Error creating user ${user.personalNames.join(' ')} ${user.familyName}:`,
-          error,
-        );
-      }
-    }
   }
 }

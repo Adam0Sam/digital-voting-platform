@@ -36,7 +36,7 @@ export default function ProposalManagePage() {
   ) as ManagerProposalsLoaderReturnType;
 
   const proposal = proposals.find(proposal => proposal.id === proposalId);
-  const signedInUser = useSignedInUser();
+  const { user: signedInUser } = useSignedInUser();
   const permissions = proposal?.managers.find(
     manager => manager.userId === signedInUser.id,
   )?.role.permissions;

@@ -3,15 +3,9 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
-  redirect,
 } from 'react-router-dom';
 import './App.css';
-import getOAuth2Endpoint from './lib/auth/getAuthEndpoint';
-
-import HomeLayout from './pages/HomeLayout';
-
 import { ThemeProvider } from './components/theme-provider';
-
 import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
@@ -30,7 +24,7 @@ import {
   MANAGER_ROLES_LOADER_ID,
 } from './lib/loaders';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
-import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
+import ProfilePageLayout from './pages/profile/ProfilePageLayout';
 import RootErrorBoundary from './components/RootErrorBoundary';
 import ProposalsLayout from './pages/ProposalsLayout';
 import ProfileTemplatesPage from './pages/profile/profile-templates/ProfileTemplatesPage';
@@ -47,6 +41,7 @@ import ContentOverviewPage from './pages/proposal/manager/ContentOverviewPage';
 import { Component } from './test components/test-chart';
 import GreetingPage from './pages/GreetingPage';
 import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
+import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
 
 function App() {
   const router = createBrowserRouter(
@@ -68,71 +63,64 @@ function App() {
           id={AUTH_LOADER_ID}
           loader={authLoader}
         />
-        <Route>
-          <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
-            <Route index element={<ProposalGreetingPage />} />
-            <Route
-              path={PROPOSAL_PATHS.VOTE}
-              id={VOTER_PROPOSALS_LOADER_ID}
-              loader={voterProposalsLoader}
-            >
-              <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
-              <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
-            </Route>
 
-            <Route
-              path={PROPOSAL_PATHS.MANAGE}
-              id={MANAGER_PROPOSALS_LOADER_ID}
-              loader={managerProposalsLoader}
-            >
+        <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
+          <Route index element={<ProposalGreetingPage />} />
+          <Route
+            path={PROPOSAL_PATHS.VOTE}
+            id={VOTER_PROPOSALS_LOADER_ID}
+            loader={voterProposalsLoader}
+          >
+            <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
+            <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
+          </Route>
+
+          <Route
+            path={PROPOSAL_PATHS.MANAGE}
+            id={MANAGER_PROPOSALS_LOADER_ID}
+            loader={managerProposalsLoader}
+          >
+            <Route path={GENERIC_PATHS.ALL} element={<ManagerLandingPage />} />
+            <Route path={GENERIC_PATHS.ONE} element={<ProposalManagePage />}>
               <Route
-                path={GENERIC_PATHS.ALL}
-                element={<ManagerLandingPage />}
+                path={PROPOSAL_PATHS.VOTES_OVERVIEW}
+                element={<VoteOverviewPage />}
               />
-              <Route path={GENERIC_PATHS.ONE} element={<ProposalManagePage />}>
-                <Route
-                  path={PROPOSAL_PATHS.VOTES_OVERVIEW}
-                  element={<VoteOverviewPage />}
-                />
-                <Route
-                  path={PROPOSAL_PATHS.CONTENT_OVERVIEW}
-                  element={<ContentOverviewPage />}
-                />
-              </Route>
+              <Route
+                path={PROPOSAL_PATHS.CONTENT_OVERVIEW}
+                element={<ContentOverviewPage />}
+              />
             </Route>
-            <Route
-              path={PROPOSAL_PATHS.CREATE}
-              loader={managerRolesLoader}
-              id={MANAGER_ROLES_LOADER_ID}
-              element={<ProposalCreationPage />}
-            />
           </Route>
           <Route
-            path={USER_PROFILE_PATHS.BASE}
+            path={PROPOSAL_PATHS.CREATE}
+            loader={managerRolesLoader}
+            id={MANAGER_ROLES_LOADER_ID}
+            element={<ProposalCreationPage />}
+          />
+        </Route>
+        <Route path={USER_PROFILE_PATHS.BASE} element={<ProfilePageLayout />}>
+          <Route
+            path={USER_PROFILE_PATHS.PROFILE}
             element={<ProfileSettingsPage />}
+          />
+          <Route
+            path={USER_PROFILE_PATHS.HISTORY}
+            element={<div>History</div>}
+          />
+          <Route
+            path={USER_TEMPLATES_PATHS.BASE}
+            element={<ProfileTemplatesPage />}
           >
             <Route
-              path={USER_PROFILE_PATHS.PROFILE}
-              element={<div>Profile</div>}
+              path={USER_TEMPLATES_PATHS.MANAGER}
+              loader={managerRolesLoader}
+              element={<ManagerRoleTemplates />}
             />
-            <Route
-              path={USER_PROFILE_PATHS.HISTORY}
-              element={<div>History</div>}
-            />
-            <Route
-              path={USER_TEMPLATES_PATHS.BASE}
-              element={<ProfileTemplatesPage />}
-            >
-              <Route
-                path={USER_TEMPLATES_PATHS.MANAGER}
-                loader={managerRolesLoader}
-                element={<ManagerRoleTemplates />}
-              />
-            </Route>
           </Route>
-          <Route path="test" element={<Component />} />
-          <Route path="*" element={<div>404</div>} />
         </Route>
+        <Route path="test" element={<Component />} />
+        <Route path="*" element={<div>404</div>} />
       </Route>,
     ),
   );

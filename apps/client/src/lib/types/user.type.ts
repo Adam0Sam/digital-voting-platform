@@ -16,13 +16,16 @@ export type User = {
   familyName: string;
   grade: Grade;
   roles: UserRole[];
+  email: string | null;
+  active: boolean;
 };
 
 export type StringifiedUser = WithValuesAsStrings<User>;
 
 export function isUser(user: unknown): user is User {
   if (typeof user === 'object' && user !== null) {
-    const { id, personalNames, familyName, grade, roles } = user as User;
+    const { id, personalNames, familyName, grade, roles, email, active } =
+      user as User;
     return (
       typeof id === 'string' &&
       Array.isArray(personalNames) &&
@@ -30,7 +33,9 @@ export function isUser(user: unknown): user is User {
       typeof familyName === 'string' &&
       isGrade(grade) &&
       Array.isArray(roles) &&
-      roles.every(role => typeof role === 'string')
+      roles.every(role => typeof role === 'string') &&
+      (typeof email === 'string' || email === null) &&
+      typeof active === 'boolean'
     );
   }
   return false;
