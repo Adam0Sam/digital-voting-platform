@@ -10,8 +10,12 @@ export class UserApi {
     return user;
   }
 
-  async setUserEmail(userId: string, email: string) {
-    return await this.httpClient.put(`${userId}/email`, { email });
+  async setUserEmail(email: string) {
+    return await this.httpClient.put(`email`, { email });
+  }
+
+  async deactivateUserAccount() {
+    return await this.httpClient.put(`deactivate`);
   }
 
   async getAll() {

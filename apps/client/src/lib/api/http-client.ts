@@ -49,7 +49,7 @@ export class HttpClient {
     });
   }
 
-  async put<T>(path: string, data: T, options?: AuthClientOptions) {
+  async put<T>(path: string, data?: T, options?: AuthClientOptions) {
     return await this.fetchWithAuth(path, {
       ...options,
       method: 'PUT',
