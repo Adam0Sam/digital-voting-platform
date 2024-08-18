@@ -4,6 +4,7 @@ import {
   Headers,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
@@ -29,5 +30,17 @@ export class VoteController {
   ) {
     this.logger.logAction(UserActions.VOTE, { userId, userAgent });
     return this.voteService.voteForProposal(userId, proposalId, choices);
+  }
+
+  @Put(':proposalId/:voteId')
+  async editVote(
+    @Param('proposalId') proposalId: string,
+    @Param('voteId') voteId: string,
+    @Body('choices') choices: ProposalChoice[],
+    @Headers('user-agent') userAgent: string,
+    @GetUser('id') userId: User['id'],
+  ) {
+    this.logger.logAction(UserActions.EDIT_VOTE, { userId, userAgent });
+    return this.voteService.editVote(userId, proposalId, voteId, choices);
   }
 }

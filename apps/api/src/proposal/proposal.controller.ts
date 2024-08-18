@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -37,11 +38,12 @@ export class ProposalController {
   @Post('')
   createOne(
     @Body('proposal', new ZodValidationPipe(CreateProposalDtoSchema))
+    proposal: CreateProposalDto,
     @Headers('user-agent')
     userAgent: string,
+    @Req() req,
     @GetUser('id')
     userId: User['id'],
-    proposal: CreateProposalDto,
   ) {
     this.logger.logAction(UserActions.CREATE_PROPOSAL, {
       userId,

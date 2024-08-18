@@ -34,7 +34,9 @@ export default function ProposalManageDate({
           className="w-full justify-start text-left font-normal"
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {`${format(startDate, 'LLL dd, y')} - ${format(endDate, 'LLL dd, y')}`}
+          <p className="hidden sm:block">
+            {`${format(startDate, 'LLL dd, y')} - ${format(endDate, 'LLL dd, y')}`}
+          </p>
         </Button>
       </PopoverTrigger>
       <PopoverContent
