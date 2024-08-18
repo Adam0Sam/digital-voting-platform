@@ -1,3 +1,5 @@
+import { MobileNav } from '@/components/nav';
+import { DesktopNav } from '@/components/nav';
 import { Toaster } from '@/components/ui/sonner';
 import JWTController from '@/lib/auth/jwt-controller';
 
@@ -55,6 +57,10 @@ export default function RootLayout() {
   return (
     <SignedInUserContext.Provider value={user}>
       <div className="flex h-full flex-col">
+        <div className="my-10 ml-5 md:ml-0 md:justify-center">
+          <DesktopNav className="hidden md:flex" />
+          <MobileNav className="md:hidden" />
+        </div>
         <Outlet />
         <Toaster />
       </div>

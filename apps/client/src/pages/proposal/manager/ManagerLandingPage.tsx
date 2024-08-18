@@ -15,7 +15,7 @@ export default function ManagerLandingPage() {
       {proposals.map(proposal => (
         <ManagerCard
           proposalData={proposal}
-          className="max-w-70 h-80 flex-1 basis-60"
+          className="h-80 max-w-screen-sm flex-1 basis-60"
           key={proposal.id}
         />
       ))}

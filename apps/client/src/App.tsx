@@ -42,10 +42,11 @@ import {
 } from './lib/routes';
 import { GENERIC_PATHS } from './lib/routes/util.routes';
 import ManagerRoleTemplates from './pages/profile/profile-templates/ManagerRoleTemplates';
-import ManagerSelectionForm from './components/forms/user/ManagerSelectionForm';
 import VoteOverviewPage from './pages/proposal/manager/VoteOverviewPage';
 import ContentOverviewPage from './pages/proposal/manager/ContentOverviewPage';
 import { Component } from './test components/test-chart';
+import GreetingPage from './pages/GreetingPage';
+import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
 
 function App() {
   const router = createBrowserRouter(
@@ -59,6 +60,7 @@ function App() {
           path={AUTH_PATHS.SIGNIN}
           id={USER_LOADER_ID}
           loader={userLoader}
+          element={<GreetingPage />}
         />
         <Route
           path={AUTH_PATHS.SIGNUP}
@@ -67,6 +69,7 @@ function App() {
         />
         <Route>
           <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
+            <Route index element={<ProposalGreetingPage />} />
             <Route
               path={PROPOSAL_PATHS.VOTE}
               id={VOTER_PROPOSALS_LOADER_ID}
