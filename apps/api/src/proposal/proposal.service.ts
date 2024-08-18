@@ -1,10 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import {
-  ManagerPermissions,
-  Prisma,
-  Proposal,
-  ProposalChoice,
-} from '@prisma/client';
+import { ManagerPermissions, Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import {

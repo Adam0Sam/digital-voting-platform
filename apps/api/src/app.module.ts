@@ -11,6 +11,7 @@ import { ProposalModule } from './proposal/proposal.module';
 import { VoteModule } from './vote/vote.module';
 import { ManagerRoleModule } from './manager-role/manager-role.module';
 import appConfig from './config/app.config';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import appConfig from './config/app.config';
     ProposalModule,
     VoteModule,
     ManagerRoleModule,
+    LoggerModule,
   ],
   providers: [
     AppService,
