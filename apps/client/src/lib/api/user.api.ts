@@ -6,16 +6,16 @@ export class UserApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/user`);
 
   async getOne(id_token: string) {
-    const user = (await this.httpClient.fetchWithAuth(
-      '',
-      undefined,
-      id_token,
-    )) as User;
+    const user = (await this.httpClient.get('', { id_token })) as User;
     return user;
   }
 
+  async setUserEmail(userId: string, email: string) {
+    return await this.httpClient.put(`${userId}/email`, { email });
+  }
+
   async getAll() {
-    const allUsers = (await this.httpClient.fetchWithAuth('all')) as User[];
+    const allUsers = (await this.httpClient.get('all')) as User[];
     return allUsers;
   }
 }

@@ -5,7 +5,7 @@ import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 
 export default function GreetingPage() {
-  const user = useSignedInUser();
+  const { user } = useSignedInUser();
   const navigate = useNavigate();
   const { t } = useTranslation();
 

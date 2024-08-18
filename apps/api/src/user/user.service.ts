@@ -22,7 +22,7 @@ export class UserService {
   }
 
   async createUser(userPayload: JwtDto & UserQueryDto) {
-    const user: Omit<User, 'id'> = {
+    const user: Omit<User, 'id' | 'email' | 'active'> = {
       personalNames: userPayload.personalNames,
       familyName: userPayload.familyName,
       grade: userPayload.grade,
@@ -30,6 +30,20 @@ export class UserService {
     };
     return await this.prisma.user.create({
       data: user,
+    });
+  }
+
+  async setUserEmail(userId: string, email: string) {
+    return await this.prisma.user.update({
+      where: { id: userId },
+      data: { email },
+    });
+  }
+
+  async setUserActiveStatus(userId: string, active: boolean) {
+    return await this.prisma.user.update({
+      where: { id: userId },
+      data: { active },
     });
   }
 

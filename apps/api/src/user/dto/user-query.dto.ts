@@ -6,6 +6,7 @@ import {
   IsString,
   IsEnum,
 } from 'class-validator';
+import { z } from 'zod';
 // TODO: Is class-validator bundled with nestjs by default?
 export class UserQueryDto {
   @IsArray()
@@ -18,3 +19,5 @@ export class UserQueryDto {
   @IsEnum(Grade)
   grade: Grade;
 }
+
+export const UserEmailSchema = z.string().email();
