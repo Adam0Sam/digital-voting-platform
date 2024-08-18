@@ -12,6 +12,11 @@ export default function ManagerLandingPage() {
 
   return (
     <div className="mx-8 mt-10 flex flex-wrap justify-center gap-12 md:mx-12">
+      {proposals.length === 0 && (
+        <h1 className="self-center text-4xl text-muted-foreground">
+          No proposals available
+        </h1>
+      )}
       {proposals.map(proposal => (
         <ManagerCard
           proposalData={proposal}

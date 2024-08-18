@@ -1,5 +1,6 @@
 import { MobileNav } from '@/components/nav';
 import { DesktopNav } from '@/components/nav';
+import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 import JWTController from '@/lib/auth/jwt-controller';
 
@@ -23,13 +24,19 @@ const EMPTY_USER_TEMPLATE = {
 
 export const SignedInUserContext = createContext<{
   user: User;
-  mutate: (newUser: User) => void;
+  mutate: (newUserData: Partial<User>) => void;
 }>({ user: EMPTY_USER_TEMPLATE, mutate: () => {} });
 
 export default function RootLayout() {
   const [user, setUser] = useState<User | null>(null);
 
-  const mutate = (newUser: User) => {
+  const mutate = (newUserData: Partial<User>) => {
+    if (!user) return;
+    const newUser = {
+      ...user,
+      ...newUserData,
+    };
+
     setUser(newUser);
     UserController.setItem(newUser);
   };
@@ -62,6 +69,28 @@ export default function RootLayout() {
 
   if (!user) {
     return <h1>Loading...</h1>;
+  }
+
+  if (!user.active) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-12">
+          <h1 className="text-4xl">Your account is deactivated.</h1>
+          <div className="smjustify-between flex flex-col gap-8 sm:flex-row">
+            <Button variant="secondary" size="lg">
+              Contact Admin
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate(AUTH_PATHS.SIGNUP)}
+            >
+              New Account
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
