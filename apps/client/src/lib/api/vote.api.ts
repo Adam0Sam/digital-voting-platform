@@ -8,4 +8,12 @@ export class VoteApi {
   async voteForProposal(proposalId: string, choices: ProposalChoice[]) {
     return await this.httpClient.post(`${proposalId}`, { choices });
   }
+
+  async editVote(
+    proposalId: string,
+    voteId: string,
+    choices: ProposalChoice[],
+  ) {
+    return await this.httpClient.put(`${proposalId}/${voteId}`, { choices });
+  }
 }

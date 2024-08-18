@@ -1,22 +1,25 @@
-import { Proposal, VoteStatusOptions } from '../types';
+import { Proposal, ProposalChoice, VoteStatusOptions } from '../types';
 
 export type choiceChartItem = {
   choiceValue: string;
   choiceVotes: number;
 };
 
-export function getChoiceData(proposalData: Proposal) {
+export function getChoiceData(
+  proposalChoices: ProposalChoice[],
+  proposalVotes: Proposal['votes'],
+) {
   const choiceChartDataMap = new Map<string, choiceChartItem>();
   let resolvedVoteCount = 0;
 
-  for (const availableChoice of proposalData.choices) {
+  for (const availableChoice of proposalChoices) {
     choiceChartDataMap.set(availableChoice.id, {
       choiceValue: availableChoice.value,
       choiceVotes: 0,
     });
   }
 
-  for (const vote of proposalData.votes) {
+  for (const vote of proposalVotes) {
     if (vote.status !== VoteStatusOptions.RESOLVED) continue;
     resolvedVoteCount++;
     for (const voteChoice of vote.choices) {

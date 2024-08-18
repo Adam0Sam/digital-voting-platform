@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { ProposalChoice, VoteStatus } from '@prisma/client';
+import { Proposal, ProposalChoice, VoteStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -18,6 +18,11 @@ export class VoteService {
     const proposal = await this.prisma.proposal.findUnique({
       where: {
         id: proposalId,
+        votes: {
+          some: {
+            userId,
+          },
+        },
       },
       include: {
         choices: true,
@@ -32,12 +37,6 @@ export class VoteService {
       throw new BadRequestException('Invalid number of choices');
     }
     const userVote = proposal.votes.find((vote) => vote.userId === userId);
-
-    if (!userVote) {
-      throw new BadRequestException(
-        'User is not allowed to vote on this proposal',
-      );
-    }
 
     if (userVote.status === VoteStatus.RESOLVED) {
       throw new ConflictException('User vote already resolved');
@@ -65,6 +64,68 @@ export class VoteService {
           })),
         },
         status: VoteStatus.RESOLVED,
+      },
+    });
+  }
+
+  async editVote(
+    userId: string,
+    proposalId: string,
+    voteId: string,
+    choices: ProposalChoice[],
+  ) {
+    const proposal = await this.prisma.proposal.findUnique({
+      where: {
+        id: proposalId,
+        managers: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        choices: true,
+        votes: true,
+        managers: {
+          include: {
+            role: {
+              include: {
+                permissions: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!proposal) {
+      throw new BadRequestException('Proposal not found');
+    }
+
+    if (proposal.choices.length < choices.length) {
+      throw new BadRequestException('Invalid number of choices');
+    }
+
+    const manager = proposal.managers.find(
+      (manager) => manager.userId === userId,
+    );
+
+    if (!manager.role.permissions.canEditChoices) {
+      throw new ConflictException(
+        'User does not have permission to edit choices',
+      );
+    }
+
+    return await this.prisma.vote.update({
+      where: {
+        id: voteId,
+      },
+      data: {
+        choices: {
+          set: choices.map((choice) => ({
+            id: choice.id,
+          })),
+        },
       },
     });
   }

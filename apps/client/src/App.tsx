@@ -56,6 +56,7 @@ function App() {
         element={<RootLayout />}
         errorElement={<RootErrorBoundary />}
       >
+        <Route index element={<GreetingPage />} />
         <Route
           path={AUTH_PATHS.SIGNIN}
           id={USER_LOADER_ID}
