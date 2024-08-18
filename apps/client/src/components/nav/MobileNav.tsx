@@ -67,7 +67,7 @@ function MobileBurgerSvg() {
   );
 }
 
-export function MobileNav({ className }: { className?: string }) {
+export default function MobileNav({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
 
   return (

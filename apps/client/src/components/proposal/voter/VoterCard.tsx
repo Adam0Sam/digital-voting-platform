@@ -18,6 +18,7 @@ import { PROPOSAL_HREFS } from '@/lib/routes';
 import { getTimeLeft } from '@/lib/time';
 import { Proposal, Vote, VoteStatusOptions } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { time } from 'console';
 
 import { CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -41,6 +42,15 @@ export default function VoterCard({
     (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
   );
 
+  let timeLeftText: string;
+  if (!hasStarted) {
+    timeLeftText = `Starts in ${daysLeft}d. ${hoursLeft}h.`;
+  } else if (!hasEnded) {
+    timeLeftText = `Ends in ${daysLeft}d. ${hoursLeft}h.`;
+  } else {
+    timeLeftText = 'Has Ended';
+  }
+
   return (
     <Card className={cn('flex flex-col justify-between', className)}>
       <div>
@@ -53,33 +63,28 @@ export default function VoterCard({
           <div className="flex flex-col items-center gap-1">
             <Popover>
               <div className="flex items-center gap-2">
-                <p>
-                  {hasEnded ? 'Ended' : hasStarted ? 'Active' : 'Upcoming'}
-                  {` until ${daysLeft}d. ${hoursLeft}h.`}
-                </p>
+                <p>{timeLeftText}</p>
                 <PopoverTrigger asChild>
                   <Button variant="ghost">
                     <CalendarClock size={24} />
                   </Button>
                 </PopoverTrigger>
               </div>
-              {!hasEnded && (
-                <PopoverContent className="w-min">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      !hasStarted
-                        ? new Date(proposalData.startDate)
-                        : new Date(proposalData.endDate)
-                    }
-                    defaultMonth={
-                      !hasStarted
-                        ? new Date(proposalData.startDate)
-                        : new Date(proposalData.endDate)
-                    }
-                  />
-                </PopoverContent>
-              )}
+              <PopoverContent className="w-min">
+                <Calendar
+                  mode="single"
+                  selected={
+                    !hasStarted
+                      ? new Date(proposalData.startDate)
+                      : new Date(proposalData.endDate)
+                  }
+                  defaultMonth={
+                    !hasStarted
+                      ? new Date(proposalData.startDate)
+                      : new Date(proposalData.endDate)
+                  }
+                />
+              </PopoverContent>
             </Popover>
             <p>
               {voteData.status === VoteStatusOptions.PENDING

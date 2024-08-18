@@ -1,1 +1,1 @@
-export * from './getTimeLeft';
+export * from './get-time-left';

@@ -1,2 +1,2 @@
-export * from './DesktopNav';
-export * from './MobileNav';
+export { default as DesktopNav } from './DesktopNav';
+export { default as MobileNav } from './MobileNav';
