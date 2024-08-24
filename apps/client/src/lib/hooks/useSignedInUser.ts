@@ -1,10 +1,15 @@
-import { SignedInUserContext } from '@/pages/RootLayout';
+'@/pages/RootLayout';
+import { UserContext } from '@/App';
 import { useContext } from 'react';
 
 export const useSignedInUser = () => {
-  const context = useContext(SignedInUserContext);
-  if (!context) {
-    throw new Error('useUser must be used within a UserContextProvider');
+  const context = useContext(UserContext);
+  const user = context.user;
+  if (!user) {
+    throw new Error('User is not signed in');
   }
-  return context;
+  return {
+    user,
+    mutate: context.mutate,
+  };
 };
