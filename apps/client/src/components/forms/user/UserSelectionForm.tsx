@@ -1,7 +1,7 @@
-import { StringifiedUser, User } from '@/lib/types';
+import { User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
 import { FC, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
-import getNormalizedTableUsers from '@/components/tables/user/utils/normalize-users';
+
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import FormHandleButtons from '../FormHandleButtons';
 import UserScrollArea from '../../UserScrollArea';
+import getNormalizedUsers from '@/components/tables/user/utils/normalize-users';
+import { TablifiedUser } from '@/components/tables/user/table.types';
 
 type FormValues = User[];
 export type UserSelectionFormProps = ExtendedFormProps<FormValues> & {
@@ -42,8 +44,8 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
     setSelectedUsers(selectedUsers.filter(user => user.id !== targetUser.id));
   };
 
-  const handleSelectionEnd = (selectedUsers: Partial<StringifiedUser>[]) => {
-    const normalizedUsers = getNormalizedTableUsers(selectedUsers);
+  const handleSelectionEnd = (selectedUsers: Partial<TablifiedUser>[]) => {
+    const normalizedUsers = getNormalizedUsers(selectedUsers);
     console.log('normalizedUsers', normalizedUsers);
     setSelectedUsers(normalizedUsers);
     setSheetIsOpen(false);
@@ -52,8 +54,8 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
 
   useEffect(() => {
     setSelectedUsers(initiallySelectedUsers);
-    console.log('initiallySelectedUsers', initiallySelectedUsers);
-  }, [...initiallySelectedUsers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className={cn('flex max-w-lg flex-1 flex-col gap-8', className)}>

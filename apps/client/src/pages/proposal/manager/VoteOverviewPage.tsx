@@ -27,7 +27,9 @@ function UserVoteItem({
   vote,
   onFocus,
   onBlur,
-  canEditVotes,
+  canEditChoices,
+  canCreateVotes,
+  canDeleteVotes,
   canEditChoiceCount,
   allChoices,
   maxChoiceCount,
@@ -36,7 +38,9 @@ function UserVoteItem({
   vote: Vote;
   onFocus?: (vote: Vote) => void;
   onBlur?: () => void;
-  canEditVotes?: boolean;
+  canEditChoices?: boolean;
+  canCreateVotes?: boolean;
+  canDeleteVotes?: boolean;
   canEditChoiceCount?: boolean;
   allChoices: ProposalChoice[];
   maxChoiceCount: number;
@@ -49,7 +53,7 @@ function UserVoteItem({
   const [choiceOverflow, setChoiceOverflow] = useState(false);
 
   const handleChoiceClick = (choice: ProposalChoice) => {
-    if (!canEditVotes) return;
+    if (!canEditChoices) return;
     setChoiceOverflow(false);
     setChoices(prevChoices =>
       prevChoices.map(prevChoice => {
@@ -98,7 +102,7 @@ function UserVoteItem({
             {vote.choices.map(choice => choice.value).join(', ')}
           </p>
         </div>
-        {canEditVotes && (
+        {canEditChoices && (
           <div className="flex flex-col justify-center">
             <SheetTrigger asChild>
               <Button variant="outline">
@@ -123,11 +127,7 @@ function UserVoteItem({
               })}
             >
               <p className="text-xl">Choice Count: {maxChoiceCount}</p>
-              {canEditChoiceCount && (
-                <Button variant="ghost" size="icon">
-                  <Pencil />
-                </Button>
-              )}
+              {canEditChoiceCount && <Pencil />}
             </div>
             <div className="flex w-full flex-col gap-4">
               {choices.map(choice => {
@@ -144,7 +144,7 @@ function UserVoteItem({
                 );
               })}
             </div>
-            {canEditVotes && (
+            {canEditChoices && (
               <Button onClick={handleVoteEdit}>
                 <span>Save</span>
               </Button>
@@ -195,7 +195,9 @@ export default function VoteOverviewPage() {
                 }}
                 maxChoiceCount={proposal.choiceCount}
                 onBlur={() => setHighlightedChoices([])}
-                canEditVotes={permissions.canEditVotes}
+                canEditChoices={permissions.canEditChoices}
+                canCreateVotes={permissions.canCreateVotes}
+                canDeleteVotes={permissions.canDeleteVotes}
                 canEditChoiceCount={permissions.canEditChoiceCount}
                 key={vote.id}
                 saveVoteEdit={(voteId, choices) => {

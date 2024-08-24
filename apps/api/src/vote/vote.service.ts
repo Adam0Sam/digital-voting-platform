@@ -126,6 +126,7 @@ export class VoteService {
             id: choice.id,
           })),
         },
+        status: VoteStatus.RESOLVED,
       },
     });
   }

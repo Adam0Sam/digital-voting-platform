@@ -68,7 +68,7 @@ export default function ProposalVotePage() {
               : 'Your submitted votes'}
           </h4>
           <div className="flex w-full flex-wrap justify-center gap-14">
-            {proposal.choices.map(choice => (
+            {proposal.choices?.map(choice => (
               <ChoiceCard
                 choiceData={choice}
                 isSelected={selectedChoices.some(

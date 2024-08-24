@@ -1,36 +1,16 @@
 import { RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from './components/theme-provider';
-import { Grades, User } from './lib/types';
+import { User } from './lib/types';
 import { createContext, useContext, useEffect, useState } from 'react';
-import JWTController from './lib/auth/jwt-controller';
-import { api } from './lib/api';
 import router from './app.routes';
 import './App.css';
-
-const EMPTY_USER_TEMPLATE = {
-  id: '',
-  personalNames: [],
-  familyName: '',
-  grade: Grades.NONE,
-  roles: [],
-  email: null,
-  active: false,
-} satisfies User;
-
-export const fetchUser: (idToken?: string | null) => Promise<User> = async (
-  idToken = JWTController.getItem(),
-) => {
-  if (!idToken) {
-    throw new Error('No id_token found');
-  }
-  const user = await api.users.getOne(idToken);
-  return user;
-};
+import { fetchUser } from './lib/fetch-user';
 
 export const UserContext = createContext<{
   user: User | null;
   mutate: (newUserData: Partial<User>) => void;
-}>({ user: EMPTY_USER_TEMPLATE, mutate: () => {} });
+  isFetchingUser: boolean;
+}>({ user: null, mutate: () => {}, isFetchingUser: true });
 
 export const useUser = () => {
   const context = useContext(UserContext);
@@ -42,6 +22,7 @@ export const useUser = () => {
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [isFetchingUser, setIsFetchingUser] = useState(true);
 
   const mutate = (newUserData: Partial<User>) => {
     setUser(prevUserData => {
@@ -54,11 +35,18 @@ function App() {
   };
 
   useEffect(() => {
-    fetchUser().then(setUser);
+    fetchUser()
+      .then(userData => {
+        setUser(userData);
+        setIsFetchingUser(false);
+      })
+      .catch(() => {
+        setIsFetchingUser(false);
+      });
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, mutate }}>
+    <UserContext.Provider value={{ user, mutate, isFetchingUser }}>
       <ThemeProvider>
         <RouterProvider router={router} />
       </ThemeProvider>

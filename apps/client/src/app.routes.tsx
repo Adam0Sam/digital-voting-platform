@@ -39,6 +39,8 @@ import { Component } from './test components/test-chart';
 import GreetingPage from './pages/GreetingPage';
 import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
+import { ADMIN_PATHS } from './lib/routes/admin.routes';
+import AdminPage from './pages/admin/AdminPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -108,7 +110,7 @@ const router = createBrowserRouter(
           />
         </Route>
       </Route>
-
+      <Route path={ADMIN_PATHS.BASE} element={<AdminPage />} />
       <Route path="test" element={<Component />} />
       <Route path="*" element={<div>404</div>} />
     </Route>,

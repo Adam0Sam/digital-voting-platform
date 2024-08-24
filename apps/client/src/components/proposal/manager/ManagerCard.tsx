@@ -39,7 +39,10 @@ export default function ManagerCard({
     (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
   );
 
-  const { choiceChartData, resolvedVoteCount } = getChoiceData(proposalData);
+  const { choiceChartData, resolvedVoteCount } = getChoiceData(
+    proposalData.choices,
+    proposalData.votes,
+  );
 
   return (
     <Card className={cn('flex flex-col justify-between', className)}>

@@ -1,5 +1,5 @@
+import { fetchUser } from '../fetch-user';
 import { User } from '../types';
-import { fetchUser } from '@/App';
 
 export async function userLoader({
   request,

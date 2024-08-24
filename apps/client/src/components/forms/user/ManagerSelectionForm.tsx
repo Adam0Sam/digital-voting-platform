@@ -139,10 +139,12 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                 </CardHeader>
                 <UserSelectionForm
                   initiallySelectedUsers={users}
-                  onSelectionEnd={selectedUsers =>
-                    handleUserSelectionEnd(selectedUsers, role)
-                  }
+                  onSelectionEnd={selectedUsers => {
+                    console.log('selectedUsers', selectedUsers);
+                    handleUserSelectionEnd(selectedUsers, role);
+                  }}
                   onUserRemove={handleUserRemove}
+                  onSubmit={null}
                   disableSubmit={true}
                   className="w-full px-4"
                 />
@@ -168,7 +170,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                   return (
                     <div
                       className={cn(
-                        'mb-4 flex h-20 w-full cursor-pointer items-center justify-center border-2 border-secondary hover:bg-primary-foreground',
+                        'mb-4 flex h-20 w-full cursor-pointer flex-col items-center justify-center rounded-md border-2 border-secondary hover:bg-primary-foreground',
                         {
                           'bg-secondary': isSelected,
                           'border-primary': isSelected,
@@ -184,8 +186,10 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                         setSheetIsOpen(false);
                       }}
                     >
-                      <p className="text-xl">{role.roleName}</p>
-                      <p>{role.description}</p>
+                      <p className="text-xl font-bold">{role.roleName}</p>
+                      <p className="max-w-prose overflow-hidden text-ellipsis text-secondary-foreground">
+                        {role.description}
+                      </p>
                     </div>
                   );
                 })}

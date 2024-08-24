@@ -35,7 +35,20 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   idKey: keyof TData;
   selectedRows: TData[];
+  onEnd?: (selectedRows: Partial<TData>[]) => void;
+  rowVisibilityWidths?: Record<string, number>;
 }
+
+const getVisibilityStateFromRowVisibilityWidths = (
+  rowVisibilityWidths?: Record<string, number>,
+) => {
+  const visibilityState: VisibilityState = {};
+  for (const [key, width] of Object.entries(rowVisibilityWidths ?? {})) {
+    visibilityState[key] = window.innerWidth > width;
+  }
+  return visibilityState;
+};
+
 // TODO: Should I even make this a generic DataTable? Can I just bind it with UserColumns?
 export function DataTable<TData, TValue>({
   columns,
@@ -43,17 +56,15 @@ export function DataTable<TData, TValue>({
   idKey,
   selectedRows,
   onEnd,
-}: DataTableProps<TData, TValue> & {
-  onEnd?: (selectedRows: Partial<TData>[]) => void;
-}) {
+  rowVisibilityWidths,
+}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const { filterColumn } = useFilterColumn();
   const { width: windowWidth } = useWindowSize();
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    roles: windowWidth > 768,
-    grade: windowWidth > 768,
-  });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    getVisibilityStateFromRowVisibilityWidths(rowVisibilityWidths),
+  );
 
   const [rowSelection, setRowSelection] = useState(() => {
     const selectedRowsObj: Record<string, boolean> = {};
@@ -86,10 +97,9 @@ export function DataTable<TData, TValue>({
   useEffect(() => {
     setColumnVisibility(prev => ({
       ...prev,
-      roles: windowWidth > 840,
-      grade: windowWidth > 840,
+      ...getVisibilityStateFromRowVisibilityWidths(rowVisibilityWidths),
     }));
-  }, [windowWidth]);
+  }, [windowWidth, rowVisibilityWidths]);
 
   return (
     <div>

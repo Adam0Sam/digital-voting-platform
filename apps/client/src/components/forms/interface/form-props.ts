@@ -1,7 +1,7 @@
 export interface FormProps<T> {
   formSubmitLabel?: string;
   formCancelLabel?: string;
-  onSubmit: (values: T) => void;
+  onSubmit: ((values: T) => void) | null;
   onCancel?: () => void;
   disableSubmit?: boolean;
   disableCancel?: boolean;
