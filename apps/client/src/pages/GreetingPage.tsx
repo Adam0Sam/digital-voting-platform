@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { PROPOSAL_HREFS } from '@/lib/routes';
+import { UserRoles } from '@/lib/types';
 
 export default function GreetingPage() {
   const { user } = useSignedInUser();
@@ -14,13 +15,26 @@ export default function GreetingPage() {
       <h3 className="text-4xl">
         {t('Hello')}, {user?.personalNames.join(' ')}
       </h3>
-      <Button
-        variant="default"
-        size="lg"
-        onClick={() => navigate(PROPOSAL_HREFS.BASE)}
-      >
-        {t('Explore the app')}
-      </Button>
+      <div className="flex flex-col gap-8 sm:flex-row">
+        <Button
+          variant="default"
+          size="lg"
+          onClick={() => navigate(PROPOSAL_HREFS.BASE)}
+          className="min-w-0 flex-1"
+        >
+          {t('Explore the user app')}
+        </Button>
+        {user.roles.includes(UserRoles.ADMIN) && (
+          <Button
+            variant="default"
+            size="lg"
+            onClick={() => navigate('idk')}
+            className="min-w-0 flex-1"
+          >
+            {t('Explore the admin app')}
+          </Button>
+        )}
+      </div>
     </main>
   );
 }

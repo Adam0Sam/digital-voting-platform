@@ -1,8 +1,5 @@
-import { redirect } from 'react-router-dom';
-
-import { api } from '../api';
 import { User } from '../types';
-import JWTController from '../auth/jwt-controller';
+import { fetchUser } from '@/App';
 
 export async function userLoader({
   request,
@@ -10,16 +7,12 @@ export async function userLoader({
   request: Request;
 }): Promise<ReturnType | Response> {
   const url = new URL(request.url);
-  const idToken = url.searchParams.get('id_token') || JWTController.getItem();
-  if (!idToken) {
-    console.error('No id_token found');
-    return redirect('/signup');
-  }
-  const user = await api.users.getOne(idToken);
+  const idToken = url.searchParams.get('id_token');
+  const user = await fetchUser(idToken);
   window.history.replaceState({}, '', `${url.origin}${url.pathname}`);
-  return { user, idToken };
+  return user;
 }
 
 export const LOADER_ID = 'user';
 
-export type ReturnType = { user: User; idToken: string };
+export type ReturnType = User;
