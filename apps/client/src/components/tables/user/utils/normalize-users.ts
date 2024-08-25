@@ -1,8 +1,8 @@
 import { isGrade, isUserRoleArray, User } from '@/lib/types';
-import { StringifiedUser } from '../UserColumns';
+import { TablifiedUser } from '../table.types';
 
-const getNormalizedTableUsers: (
-  users: Partial<StringifiedUser>[],
+const getNormalizedUsers: (
+  users: Partial<TablifiedUser>[],
 ) => User[] = users => {
   const normalizedUsers = users.map(user => {
     if (!user.id || !user.personalNames || !user.familyName || !user.roles) {
@@ -18,7 +18,7 @@ const getNormalizedTableUsers: (
     const familyName = user.familyName;
 
     const stringifiedRoles =
-      user.roles.indexOf(' ') > -1 ? user.roles.split(' ') : [user.roles];
+      user.roles.indexOf(' ') > -1 ? user.roles.split(', ') : [user.roles];
     if (!isUserRoleArray(stringifiedRoles)) {
       throw new Error(
         `Invalid ${user.familyName} user roles: ${JSON.stringify(user.roles)}`,
@@ -39,9 +39,11 @@ const getNormalizedTableUsers: (
       familyName,
       roles,
       grade,
+      email: user.email || null,
+      active: user.active || false,
     };
   });
   return normalizedUsers;
 };
 
-export default getNormalizedTableUsers;
+export default getNormalizedUsers;

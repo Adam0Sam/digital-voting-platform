@@ -9,46 +9,56 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
-import { UserSelectionColumn } from './common/column.enum';
+import { UserSelectionColumn } from './column.enum';
 import useFilterColumn from './context/FilterColumnContext';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User } from '@/lib/types';
+import { TablifiedUser } from './table.types';
 
-export type WithValuesAsStrings<T> = {
-  [K in keyof T]: string;
+const HeaderFilterButton = ({
+  filterValue,
+}: {
+  filterValue: UserSelectionColumn;
+}) => {
+  const { setFilterColumn } = useFilterColumn();
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setFilterColumn(filterValue)}
+    >
+      <Filter className="h-4 w-4" />
+    </Button>
+  );
 };
 
-// export type StringifiedUser = {
-//   id: string;
-//   personalNames: string;
-//   familyName: string;
-//   roles: string;
-//   grade: string;
-// };
-
-export type StringifiedUser = WithValuesAsStrings<User>;
+const HeaderSortButton = ({
+  column,
+}: {
+  column: Column<TablifiedUser, unknown>;
+}) => {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+    >
+      <ArrowUpDown className="h-4 w-4" />
+    </Button>
+  );
+};
 
 const PersonalNamesHeader = ({
   column,
 }: {
-  column: Column<StringifiedUser, unknown>;
+  column: Column<TablifiedUser, unknown>;
 }) => {
-  const { setFilterColumn } = useFilterColumn();
   return (
     <div className="flex items-center justify-end gap-1">
-      <p className="hidden md:block">Personal Names</p>
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        <ArrowUpDown className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        onClick={() => setFilterColumn(UserSelectionColumn.PersonalNames)}
-      >
-        <Filter className="h-4 w-4" />
-      </Button>
+      <p className="hidden lg:block">Personal Names</p>
+      <div>
+        <HeaderSortButton column={column} />
+        <HeaderFilterButton filterValue={UserSelectionColumn.PersonalNames} />
+      </div>
     </div>
   );
 };
@@ -56,29 +66,31 @@ const PersonalNamesHeader = ({
 const FamilyNameHeader = ({
   column,
 }: {
-  column: Column<StringifiedUser, unknown>;
+  column: Column<TablifiedUser, unknown>;
 }) => {
-  const { setFilterColumn } = useFilterColumn();
   return (
     <div className="flex items-center justify-end gap-1">
-      <p className="hidden md:block">Family Names</p>
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        <ArrowUpDown className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        onClick={() => setFilterColumn(UserSelectionColumn.FamilyName)}
-      >
-        <Filter className="h-4 w-4" />
-      </Button>
+      <p className="hidden lg:block">Family Names</p>
+      <div>
+        <HeaderSortButton column={column} />
+        <HeaderFilterButton filterValue={UserSelectionColumn.FamilyName} />
+      </div>
     </div>
   );
 };
 
-export const columns: ColumnDef<StringifiedUser>[] = [
+const EmailHeader = () => {
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <p className="hidden md:block">Email</p>
+      <div>
+        <HeaderFilterButton filterValue={UserSelectionColumn.Email} />
+      </div>
+    </div>
+  );
+};
+
+export const columns: ColumnDef<TablifiedUser>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -128,6 +140,17 @@ export const columns: ColumnDef<StringifiedUser>[] = [
     },
   },
   {
+    accessorKey: UserSelectionColumn.Email,
+    header: EmailHeader,
+    cell: ({ row }) => {
+      return (
+        <div className="text-right font-medium">
+          {row.getValue(UserSelectionColumn.Email)}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: UserSelectionColumn.Roles,
     header: () => {
       return <p className="text-right">Roles</p>;
@@ -153,6 +176,7 @@ export const columns: ColumnDef<StringifiedUser>[] = [
       );
     },
   },
+
   {
     id: 'actions',
     cell: ({ row }) => {

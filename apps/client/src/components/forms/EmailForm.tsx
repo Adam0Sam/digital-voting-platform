@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ExtendedFormProps } from './interface';
+import { ExtendedFormProps, WithRequiredSubmit } from './interface';
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,13 +33,15 @@ const formStyleVariants = cva('flex max-w-sm flex-1 gap-4', {
   },
 });
 
-export type EmailFormProps = ExtendedFormProps<
-  FormValues,
-  {
-    className?: string;
-    defaultEmail: string | null;
-    direction?: VariantProps<typeof formStyleVariants>['direction'];
-  }
+export type EmailFormProps = WithRequiredSubmit<
+  ExtendedFormProps<
+    FormValues,
+    {
+      className?: string;
+      defaultEmail: string | null;
+      direction?: VariantProps<typeof formStyleVariants>['direction'];
+    }
+  >
 >;
 
 const EmailForm: FC<EmailFormProps> = ({
@@ -74,6 +76,7 @@ const EmailForm: FC<EmailFormProps> = ({
             );
           }}
         />
+
         <FormHandleButtons
           handleSubmitClick={form.handleSubmit(onSubmit)}
           enableSubmit={!disableSubmit}

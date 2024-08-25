@@ -3,4 +3,5 @@ export enum UserSelectionColumn {
   FamilyName = 'familyName',
   Roles = 'roles',
   Grade = 'grade',
+  Email = 'email',
 }

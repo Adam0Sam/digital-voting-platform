@@ -12,7 +12,10 @@ import {
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ManagerRoleService } from './manager-role.service';
 import { ZodValidationPipe } from 'src/pipes';
-import { ManagerRoleDto, ManagerRoleDtoSchema } from './dto/manager-role.dto';
+import {
+  ProposalManagerDto,
+  ProposalManagerRoleDtoSchema,
+} from './dto/manager-role.dto';
 import { GetUser } from 'src/user/decorator';
 import { User } from '@prisma/client';
 
@@ -23,7 +26,8 @@ export class ManagerRoleController {
 
   @Post('')
   async createManagerRole(
-    @Body(new ZodValidationPipe(ManagerRoleDtoSchema)) roleDto: ManagerRoleDto,
+    @Body(new ZodValidationPipe(ProposalManagerRoleDtoSchema))
+    roleDto: ProposalManagerDto,
     @GetUser() user: User,
   ) {
     return await this.managerRoleService.createRole(roleDto, user);
@@ -31,7 +35,8 @@ export class ManagerRoleController {
 
   @Put(':roleId')
   async updateManagerRole(
-    @Body(new ZodValidationPipe(ManagerRoleDtoSchema)) roleDto: ManagerRoleDto,
+    @Body(new ZodValidationPipe(ProposalManagerRoleDtoSchema))
+    roleDto: ProposalManagerDto,
     @GetUser() user: User,
     @Param(
       'roleId',

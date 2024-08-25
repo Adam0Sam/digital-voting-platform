@@ -3,6 +3,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { cva } from 'class-variance-authority';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -106,6 +107,20 @@ const DialogDescription = React.forwardRef<
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
+const triggerButtonStyleVariants = cva('', {
+  variants: {
+    trigger: {
+      destructive:
+        'hover border-2 border-red-500 transition-colors hover:bg-red-500 hover:text-secondary',
+      regular:
+        'hover border-2 border-secondary/0 transition-colors hover:bg-secondary/0 hover:text-secondary',
+    },
+  },
+  defaultVariants: {
+    trigger: 'regular',
+  },
+});
+
 export {
   Dialog,
   DialogPortal,
@@ -117,4 +132,5 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+  triggerButtonStyleVariants,
 };

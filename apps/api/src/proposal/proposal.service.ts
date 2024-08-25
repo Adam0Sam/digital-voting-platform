@@ -1,13 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ManagerPermissions, Prisma } from '@prisma/client';
+import {
+  ManagerPermissions,
+  Prisma,
+  ProposalChoice,
+  VoteStatus,
+} from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import {
-  CreateProposalDto,
-  ProposalManagerListDtoSchema,
-  UpdateProposalDto,
-} from './dto';
+import { CreateProposalDto, UpdateProposalDto } from './dto';
 import { z } from 'zod';
+import { ProposalManagerListDtoSchema } from 'src/manager-role/dto/manager-role.dto';
 
 @Injectable()
 export class ProposalService {
@@ -62,11 +64,19 @@ export class ProposalService {
     });
   }
 
-  private getProposalUpdateInput(
-    proposalDto: UpdateProposalDto,
-    permissions: ManagerPermissions,
-  ): Prisma.ProposalUpdateInput {
+  private getProposalUpdateInput({
+    proposalId,
+    proposalDto,
+    permissions,
+    prevChoices,
+  }: {
+    proposalId?: string;
+    proposalDto: UpdateProposalDto;
+    permissions: ManagerPermissions;
+    prevChoices: ProposalChoice[];
+  }): Prisma.ProposalUpdateInput {
     const updateInput: Prisma.ProposalUpdateInput = {};
+    let shouldResetVotes = false;
     for (const key in proposalDto) {
       switch (key) {
         case 'title':
@@ -100,11 +110,20 @@ export class ProposalService {
           }
           break;
         case 'choices':
-          if (permissions.canEditChoices) {
+          if (permissions.canEditAvailableChoices) {
+            const choiceIdsForDeletion: string[] = prevChoices
+              .filter(
+                (prevChoice) =>
+                  !proposalDto.choices.some(
+                    (newChoice) => newChoice.id === prevChoice.id,
+                  ),
+              )
+              .map((choice) => choice.id);
+
             updateInput.choices = {
               upsert: proposalDto.choices.map((choice) => ({
                 where: {
-                  id: choice.id,
+                  id: choice.id ?? '',
                 },
                 update: {
                   value: choice.value,
@@ -115,16 +134,38 @@ export class ProposalService {
                   description: choice.description,
                 },
               })),
+              deleteMany: {
+                id: {
+                  in: choiceIdsForDeletion,
+                },
+              },
             };
+
+            shouldResetVotes = true;
           }
           break;
         case 'choiceCount':
           if (permissions.canEditChoiceCount) {
             updateInput.choiceCount = proposalDto.choiceCount;
+            shouldResetVotes = true;
           }
           break;
       }
     }
+
+    if (shouldResetVotes) {
+      updateInput.votes = {
+        updateMany: {
+          where: {
+            proposalId: proposalId ?? proposalDto.id,
+          },
+          data: {
+            status: VoteStatus.PENDING,
+          },
+        },
+      };
+    }
+
     return updateInput;
   }
 
@@ -133,11 +174,12 @@ export class ProposalService {
     proposalDto: UpdateProposalDto,
     userId: string,
   ) {
-    const { managers } = await this.prisma.proposal.findUnique({
+    const { managers, choices } = await this.prisma.proposal.findUnique({
       where: {
         id: proposalId,
       },
       select: {
+        choices: true,
         managers: {
           where: {
             userId,
@@ -162,10 +204,14 @@ export class ProposalService {
       where: {
         id: proposalId,
       },
-      data: this.getProposalUpdateInput(proposalDto, permissions),
+      data: this.getProposalUpdateInput({
+        proposalId,
+        proposalDto,
+        permissions,
+        prevChoices: choices,
+      }),
     });
   }
-
   async getAllVoterProposals(userId: string) {
     return this.prisma.proposal.findMany({
       where: {

@@ -18,9 +18,11 @@ import {
 } from 'react-router-dom';
 
 function buildHrefs(proposalId: string) {
+  const BASE = `${PROPOSAL_HREFS.MANAGE}/${proposalId}`;
   return {
-    Votes: `${PROPOSAL_HREFS.MANAGE}/${proposalId}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`,
-    Content: `${PROPOSAL_HREFS.MANAGE}/${proposalId}/${PROPOSAL_PATHS.CONTENT_OVERVIEW}`,
+    Votes: `${BASE}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`,
+    Content: `${BASE}/${PROPOSAL_PATHS.CONTENT_OVERVIEW}`,
+    Choices: `${BASE}/${PROPOSAL_PATHS.CHOICES_OVERVIEW}`,
   };
 }
 

@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import { UserRoles } from '@/lib/types';
+import { ADMIN_HREFS } from '@/lib/routes/admin.routes';
 
 export default function GreetingPage() {
   const { user } = useSignedInUser();
@@ -28,7 +29,7 @@ export default function GreetingPage() {
           <Button
             variant="default"
             size="lg"
-            onClick={() => navigate('idk')}
+            onClick={() => navigate(ADMIN_HREFS.BASE)}
             className="min-w-0 flex-1"
           >
             {t('Explore the admin app')}

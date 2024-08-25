@@ -174,6 +174,7 @@ const ResolutionValueCard: FC<{
           carouselApi.scrollNext();
         }}
         onCancel={carouselApi.scrollPrev}
+        formSubmitLabel="Next"
       />
     </CardWrapper>
   );

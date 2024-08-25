@@ -7,14 +7,33 @@ import { AUTH_PATHS } from '@/lib/routes';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 export default function RootLayout() {
-  const { user } = useUser();
+  const { user, isFetchingUser } = useUser();
   const navigate = useNavigate();
 
-  if (!user) {
+  if (!user && isFetchingUser) {
     return <h1>Loading...</h1>;
   }
 
-  if (!user.active) {
+  if (!user && !isFetchingUser) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-12">
+          <h1 className="text-4xl">Failed to fetch user data.</h1>
+          <div className="smjustify-between flex flex-col gap-8 sm:flex-row">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate(AUTH_PATHS.SIGNUP)}
+            >
+              Sign up with your school account
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user!.active) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="flex flex-col items-center gap-12">

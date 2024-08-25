@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { Proposal, ProposalChoice, VoteStatus } from '@prisma/client';
+import { ProposalChoice, VoteStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -73,6 +73,7 @@ export class VoteService {
     proposalId: string,
     voteId: string,
     choices: ProposalChoice[],
+    voteStatus: VoteStatus,
   ) {
     const proposal = await this.prisma.proposal.findUnique({
       where: {
@@ -110,9 +111,9 @@ export class VoteService {
       (manager) => manager.userId === userId,
     );
 
-    if (!manager.role.permissions.canEditChoices) {
+    if (!manager.role.permissions.canEditVoteChoices) {
       throw new ConflictException(
-        'User does not have permission to edit choices',
+        'User does not have permission to edit votes',
       );
     }
 
@@ -126,6 +127,7 @@ export class VoteService {
             id: choice.id,
           })),
         },
+        status: voteStatus,
       },
     });
   }
