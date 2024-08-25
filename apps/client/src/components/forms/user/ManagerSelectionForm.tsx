@@ -144,7 +144,6 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                     handleUserSelectionEnd(selectedUsers, role);
                   }}
                   onUserRemove={handleUserRemove}
-                  onSubmit={null}
                   disableSubmit={true}
                   className="w-full px-4"
                 />

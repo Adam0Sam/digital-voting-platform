@@ -1,6 +1,7 @@
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import {
+  ManagerPermissionsDto,
   ManagerPermissionsList,
   ProposalManagerRole,
   ProposalManagerRoleDto,
@@ -20,7 +21,7 @@ export type ManageRoleFormProps = {
   className?: string;
 };
 
-const DEFAULT_PERMISSIONS = {
+const DEFAULT_PERMISSIONS: ManagerPermissionsDto = {
   canEditTitle: false,
   canEditDescription: false,
   canEditDates: false,
@@ -29,7 +30,8 @@ const DEFAULT_PERMISSIONS = {
   canDeleteVotes: false,
   canCreateVotes: false,
   canEditManagers: false,
-  canEditChoices: false,
+  canEditVoteChoices: false,
+  canEditAvailableChoices: false,
   canEditChoiceCount: false,
 };
 
@@ -94,9 +96,8 @@ export default function ManagerRoleForm({
             description,
             permissions,
           });
+          resetForm();
         }
-
-        resetForm();
       }}
       className={className}
     >
@@ -179,7 +180,6 @@ export default function ManagerRoleForm({
                   permissions,
                   id: defaultRoleTemplate!.id,
                 });
-                console.log('handleCancel');
                 resetForm();
               }
             : undefined

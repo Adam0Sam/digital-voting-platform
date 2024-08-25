@@ -7,6 +7,7 @@ export const PROPOSAL_PATHS = {
   CREATE: 'create',
   VOTES_OVERVIEW: 'votes-overview',
   CONTENT_OVERVIEW: 'content-overview',
+  CHOICES_OVERVIEW: 'choices-overview',
 };
 
 export const PROPOSAL_HREFS = {

@@ -41,6 +41,7 @@ import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
 import { ADMIN_PATHS } from './lib/routes/admin.routes';
 import AdminPage from './pages/admin/AdminPage';
+import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -83,6 +84,10 @@ const router = createBrowserRouter(
             <Route
               path={PROPOSAL_PATHS.CONTENT_OVERVIEW}
               element={<ContentOverviewPage />}
+            />
+            <Route
+              path={PROPOSAL_PATHS.CHOICES_OVERVIEW}
+              element={<ChoicesOverviewPage />}
             />
           </Route>
         </Route>

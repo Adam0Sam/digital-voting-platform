@@ -9,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { VoteService } from './vote.service';
-import { ProposalChoice, User, UserActions } from '@prisma/client';
+import { ProposalChoice, User, UserActions, VoteStatus } from '@prisma/client';
 import { GetUser } from 'src/user/decorator';
 import { LoggerService } from 'src/logger/logger.service';
+import { ParseStringLiteral } from 'src/pipes';
 
 @UseGuards(JwtAuthGuard)
 @Controller('vote')
@@ -37,10 +38,19 @@ export class VoteController {
     @Param('proposalId') proposalId: string,
     @Param('voteId') voteId: string,
     @Body('choices') choices: ProposalChoice[],
+    @Body('status', new ParseStringLiteral(Object.values(VoteStatus)))
+    voteStatus: VoteStatus,
     @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
     this.logger.logAction(UserActions.EDIT_VOTE, { userId, userAgent });
-    return this.voteService.editVote(userId, proposalId, voteId, choices);
+
+    return this.voteService.editVote(
+      userId,
+      proposalId,
+      voteId,
+      choices,
+      voteStatus,
+    );
   }
 }

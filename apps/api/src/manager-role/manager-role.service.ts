@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ManagerRoleDto } from './dto/manager-role.dto';
+import { ProposalManagerDto } from './dto/manager-role.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 
@@ -20,7 +20,7 @@ export class ManagerRoleService {
     });
   }
 
-  async updateRole(roleId: string, roleDto: ManagerRoleDto, user: User) {
+  async updateRole(roleId: string, roleDto: ProposalManagerDto, user: User) {
     return await this.prisma.proposalManagerRole.update({
       where: {
         id: roleId,
@@ -38,7 +38,7 @@ export class ManagerRoleService {
     });
   }
 
-  async createRole(roleDto: ManagerRoleDto, user: User) {
+  async createRole(roleDto: ProposalManagerDto, user: User) {
     return await this.prisma.proposalManagerRole.create({
       data: {
         roleName: roleDto.roleName,

@@ -116,26 +116,27 @@ model ProposalManagerRole {
 }
 
 model ManagerPermissions {
-    id                 String                @id @default(uuid())
-    managerRoles       ProposalManagerRole[]
-    author             User                  @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    authorId           String
-    canEditTitle       Boolean               @default(false)
-    canEditDescription Boolean               @default(false)
-    canEditDates       Boolean               @default(false)
-    canEditStatus      Boolean               @default(false)
-    canEditVisibility  Boolean               @default(false)
-    canDeleteVotes     Boolean               @default(false)
-    canCreateVotes     Boolean               @default(false)
-    canEditManagers    Boolean               @default(false)
-    canEditChoices     Boolean               @default(false)
-    canEditChoiceCount Boolean               @default(false)
+    id                      String                @id @default(uuid())
+    managerRoles            ProposalManagerRole[]
+    author                  User                  @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    authorId                String
+    canEditTitle            Boolean               @default(false)
+    canEditDescription      Boolean               @default(false)
+    canEditDates            Boolean               @default(false)
+    canEditStatus           Boolean               @default(false)
+    canEditVisibility       Boolean               @default(false)
+    canDeleteVotes          Boolean               @default(false)
+    canCreateVotes          Boolean               @default(false)
+    canEditManagers         Boolean               @default(false)
+    canEditVoteChoices      Boolean               @default(false)
+    canEditAvailableChoices Boolean               @default(false)
+    canEditChoiceCount      Boolean               @default(false)
 }
 
 model ProposalManager {
     id String @id @default(uuid())
 
-    role                  ProposalManagerRole @relation(fields: [proposalManagerRoleId], references: [id])
+    role                  ProposalManagerRole @relation(fields: [proposalManagerRoleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalManagerRoleId String
 
     proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)

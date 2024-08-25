@@ -1,4 +1,9 @@
-import { FC, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { ExtendedFormProps } from '../interface';
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import { Button } from '../../ui/button';
@@ -16,33 +21,52 @@ type FormValues = {
   choices: ProposalChoiceDto[];
   choiceCount: number;
 };
-export type ProposalChoiceFormProps = ExtendedFormProps<FormValues>;
+export type ProposalChoiceFormProps = ExtendedFormProps<FormValues> & {
+  initialChoices?: ProposalChoiceDto[];
+  disableEdit?: boolean;
+  children?: React.JSX.Element;
+};
 
-const ProposalChoiceForm: FC<ProposalChoiceFormProps> = ({
-  onSubmit,
-  onCancel,
-}) => {
+export type ProposalChoiceFormHandle = {
+  getChoices: () => ProposalChoiceDto[];
+  getChoiceCount: () => number;
+};
+
+const ProposalChoiceForm = forwardRef(_ProposalChoiceForm);
+export default ProposalChoiceForm;
+
+function _ProposalChoiceForm(
+  props: ProposalChoiceFormProps,
+  ref: React.Ref<ProposalChoiceFormHandle>,
+) {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [proposalChoices, setProposalChoices] = useState<ProposalChoiceDto[]>(
-    [],
+    props.initialChoices ?? [],
   );
   const choiceCount = useRef(1);
   const [error, setError] = useState<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    getChoices: () => proposalChoices,
+    getChoiceCount: () => choiceCount.current,
+  }));
 
   return (
     <div className="flex max-w-md flex-1 flex-col gap-8">
       <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
         <div className="flex flex-col-reverse gap-10 md:flex-row">
           <div className="flex flex-1 flex-col">
-            <SheetTrigger asChild>
+            <SheetTrigger asChild disabled={!!props.disableEdit}>
               <div>
                 <div className="flex items-center justify-between">
                   <p className={cn({ 'text-destructive': error })}>
                     Resolution Values
                   </p>
-                  <Button variant="ghost">
-                    <SquarePlus />
-                  </Button>
+                  {!props.disableEdit && (
+                    <Button variant="ghost">
+                      <SquarePlus />
+                    </Button>
+                  )}
                 </div>
                 <Separator className="mb-5 mt-2" />
               </div>
@@ -55,16 +79,18 @@ const ProposalChoiceForm: FC<ProposalChoiceFormProps> = ({
                   key={resolution.value}
                 >
                   <p className="ml-4">{resolution.value}</p>
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      setProposalChoices(prev =>
-                        prev.filter(res => res.value !== resolution.value),
-                      )
-                    }
-                  >
-                    <SquareMinus size={22} />
-                  </Button>
+                  {!props.disableEdit && (
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setProposalChoices(prev =>
+                          prev.filter(res => res.value !== resolution.value),
+                        )
+                      }
+                    >
+                      <SquareMinus size={22} />
+                    </Button>
+                  )}
                 </div>
               ))}
             </ScrollArea>
@@ -75,6 +101,7 @@ const ProposalChoiceForm: FC<ProposalChoiceFormProps> = ({
             }
             defaultChoiceCount={choiceCount.current}
             handleSelect={value => {
+              if (props.disableEdit) return;
               choiceCount.current = value;
             }}
           />
@@ -100,24 +127,27 @@ const ProposalChoiceForm: FC<ProposalChoiceFormProps> = ({
           </div>
         </SheetContent>
       </Sheet>
-      <FormHandleButtons
-        formSubmitLabel="Next"
-        formCancelLabel="Cancel"
-        handleSubmitClick={() => {
-          if (proposalChoices.length === 0) {
-            setError('Please add at least one resolution value');
-            return;
-          }
-          setError(null);
-          onSubmit({
-            choices: proposalChoices,
-            choiceCount: choiceCount.current,
-          });
-        }}
-        handleCancelClick={onCancel}
-      />
+      {props.children ? (
+        props.children
+      ) : (
+        <FormHandleButtons
+          formSubmitLabel={props.formSubmitLabel}
+          formCancelLabel={props.formCancelLabel}
+          handleSubmitClick={() => {
+            if (proposalChoices.length === 0) {
+              setError('Please add at least one resolution value');
+              return;
+            }
+            setError(null);
+            props.onSubmit?.({
+              choices: proposalChoices,
+              choiceCount: choiceCount.current,
+            });
+          }}
+          enableSubmit={!props.disableSubmit && !props.disableEdit}
+          handleCancelClick={props.onCancel}
+        />
+      )}
     </div>
   );
-};
-
-export default ProposalChoiceForm;
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Check } from 'lucide-react';
 import { Button } from './ui/button';
@@ -18,29 +18,54 @@ import {
   TooltipTrigger,
 } from './ui/tooltip';
 
-type ComboboxItem<T> = {
+export type ComboboxItem<T> = {
   label: string;
   value: T;
   description?: string;
 };
 
-export default function Combobox<T>({
-  items,
-  handleSelectedValue,
-  defaultItem,
-  itemNameSingular = 'item',
-  itemNamePlural = 'items',
-}: {
+type ComboboxProps<T> = {
   items: ComboboxItem<T>[];
-  handleSelectedValue: (value: T) => void;
+  handleSelectedValue?: (value: T) => void;
   defaultItem?: ComboboxItem<T>;
   itemNameSingular?: string;
   itemNamePlural?: string;
-}) {
+};
+
+export type ComboboxHandle<T> = {
+  getSelectedItem: () => ComboboxItem<T> | null;
+  setSelectedItem: (item: ComboboxItem<T>) => void;
+};
+
+const Combobox = forwardRef(_Combobox) as <T>(
+  props: ComboboxProps<T> & { ref?: React.Ref<ComboboxHandle<T>> },
+) => ReturnType<typeof _Combobox>;
+
+export default Combobox;
+
+function _Combobox<T>(
+  {
+    items,
+    handleSelectedValue,
+    defaultItem,
+    itemNameSingular = 'item',
+    itemNamePlural = 'items',
+  }: ComboboxProps<T>,
+  ref: React.Ref<ComboboxHandle<T>>,
+) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ComboboxItem<T> | null>(
     defaultItem ?? null,
   );
+  console.log('selectedItem', selectedItem);
+  useImperativeHandle(ref, () => ({
+    getSelectedItem: () => selectedItem,
+    setSelectedItem: item => {
+      console.log('setting item', item);
+      setSelectedItem(item);
+    },
+  }));
+
   // TODO: Make it so tooltip works
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -49,7 +74,7 @@ export default function Combobox<T>({
           variant="outline"
           role="combobox"
           aria-expanded={isOpen}
-          className="w-48"
+          size="lg"
         >
           {selectedItem ? selectedItem.label : `Select ${itemNameSingular}`}
         </Button>
@@ -68,7 +93,7 @@ export default function Combobox<T>({
                         value={item.label}
                         onSelect={() => {
                           setSelectedItem(item);
-                          handleSelectedValue(item.value);
+                          handleSelectedValue?.(item.value);
                           setIsOpen(false);
                         }}
                       >

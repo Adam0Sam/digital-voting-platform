@@ -30,7 +30,8 @@ export const ManagerPermissionsList = [
   'canDeleteVotes',
   'canCreateVotes',
   'canEditManagers',
-  'canEditChoices',
+  'canEditVoteChoices',
+  'canEditAvailableChoices',
   'canEditChoiceCount',
 ] as const;
 

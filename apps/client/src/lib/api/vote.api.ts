@@ -1,5 +1,5 @@
 import URI from '../constants/uri-constants';
-import { ProposalChoice } from '../types';
+import { ProposalChoice, VoteStatus } from '../types';
 import { HttpClient } from './http-client';
 
 export class VoteApi {
@@ -13,7 +13,11 @@ export class VoteApi {
     proposalId: string,
     voteId: string,
     choices: ProposalChoice[],
+    status: VoteStatus,
   ) {
-    return await this.httpClient.put(`${proposalId}/${voteId}`, { choices });
+    return await this.httpClient.put(`${proposalId}/${voteId}`, {
+      choices,
+      status,
+    });
   }
 }
