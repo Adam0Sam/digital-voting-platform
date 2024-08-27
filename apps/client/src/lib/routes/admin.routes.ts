@@ -1,9 +1,11 @@
 export const ADMIN_PATHS = {
   BASE: 'admin',
-  OVERVIEW: 'overview',
+  USERS: 'users',
+  PROPOSALS: 'proposals',
 };
 
 export const ADMIN_HREFS = {
   BASE: `/${ADMIN_PATHS.BASE}`,
-  OVERVIEW: `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.OVERVIEW}`,
+  USERS: `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.USERS}`,
+  PROPOSALS: `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.PROPOSALS}`,
 };

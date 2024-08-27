@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { api } from '@/lib/api';
 import useWindowSize from '@/lib/hooks/useWindowSize';
-import { ManagerRolesLoaderReturnType } from '@/lib/loaders';
+import { ManagerRolesLoaderResolved } from '@/lib/loaders';
 import {
   ProposalManagerRole,
   ProposalManagerRoleDto,
@@ -49,7 +49,7 @@ function ManagertRoleItem({
 }
 
 export default function ManagerRoleTemplates() {
-  const authoredRoles = useLoaderData() as ManagerRolesLoaderReturnType;
+  const authoredRoles = useLoaderData() as ManagerRolesLoaderResolved;
   const revalidator = useRevalidator();
 
   const [templates, setTemplates] = useState(authoredRoles);

@@ -47,7 +47,24 @@ export class UserService {
     });
   }
 
-  async getAllUsers() {
+  async getAllUserShallowInfo() {
     return await this.prisma.user.findMany();
+  }
+
+  async getAllUserDeepInfo() {
+    return await this.prisma.user.findMany({
+      include: {
+        managedProposals: {
+          include: {
+            role: true,
+          },
+        },
+        votes: {
+          include: {
+            choices: true,
+          },
+        },
+      },
+    });
   }
 }

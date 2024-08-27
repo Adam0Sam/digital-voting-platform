@@ -1,21 +1,12 @@
-import { Grades, User } from '@/lib/types';
+import { User } from '@/lib/types';
 import { DataTable } from './DataTable';
-import { columns } from './UserColumns';
-import { FilterColumnContextProvider } from './context/FilterColumnContext';
+import { getUserColumnConfig } from './user-columns';
 import useAllUsers from '@/lib/hooks/useAllUsers';
 import { TablifiedUser } from './table.types';
+import { tablifyUser } from './utils';
+import { FilterColumnContextProvider } from './context/FilterColumnContext';
 
-const tablifyUser = (user: User): TablifiedUser => {
-  return {
-    id: user.id,
-    personalNames: user.personalNames.join(' '),
-    familyName: user.familyName,
-    roles: user.roles.join(', '),
-    grade: user.grade || Grades.NONE,
-    email: user.email || '',
-    active: user.active,
-  };
-};
+const columns = getUserColumnConfig<TablifiedUser>();
 
 export default function UserSelectionTable({
   handleSelectionEnd,
@@ -37,7 +28,7 @@ export default function UserSelectionTable({
             data={tablifiedUsers}
             idKey="id"
             selectedRows={tablifiedSelectedUsers}
-            onEnd={handleSelectionEnd}
+            handleSubmit={handleSelectionEnd}
             rowVisibilityWidths={{
               roles: 1280,
               email: 1280,

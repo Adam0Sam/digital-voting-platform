@@ -3,12 +3,14 @@
  * to the the enums defined in the prisma schema file
  */
 
+import { ProposalManagerRole } from './proposal-manager.type';
 import {
   isKeyOfStringLiteralObj,
   isKeyOfStringLiteralObjArray,
   isTypeArray,
 } from './utils/type-validators';
 import { WithValuesAsStrings } from './utils/util-types';
+import { Vote } from './vote.type';
 
 export type User = {
   id: string;
@@ -21,6 +23,14 @@ export type User = {
 };
 
 export type StringifiedUser = WithValuesAsStrings<User>;
+
+export type UserDeep = User & {
+  managedProposals: {
+    proposalId: string;
+    role: ProposalManagerRole;
+  }[];
+  votes: Vote[];
+};
 
 export function isUser(user: unknown): user is User {
   if (typeof user === 'object' && user !== null) {

@@ -6,7 +6,7 @@ export default function useAllUsers() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    api.users.getAll().then(users => {
+    api.users.getAllShallow().then(users => {
       setAllUsers(users);
     });
   }, []);

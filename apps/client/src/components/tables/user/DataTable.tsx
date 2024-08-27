@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -29,14 +29,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import useFilterColumn from './context/FilterColumnContext';
 import useWindowSize from '@/lib/hooks/useWindowSize';
+import { IsTableBoolean } from './table.types';
+import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   idKey: keyof TData;
-  selectedRows: TData[];
-  onEnd?: (selectedRows: Partial<TData>[]) => void;
+  selectedRows?: TData[];
+  disableSubmit?: boolean;
+  handleSubmit?: (selectedRows: Partial<TData>[]) => void;
   rowVisibilityWidths?: Record<string, number>;
+  children?: ReactElement;
 }
 
 const getVisibilityStateFromRowVisibilityWidths = (
@@ -54,9 +58,11 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   idKey,
-  selectedRows,
-  onEnd,
+  selectedRows = [],
+  disableSubmit,
+  handleSubmit,
   rowVisibilityWidths,
+  children,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -102,8 +108,8 @@ export function DataTable<TData, TValue>({
   }, [windowWidth, rowVisibilityWidths]);
 
   return (
-    <div>
-      <div className="flex items-center py-4">
+    <>
+      <div className="flex items-center justify-between gap-8 py-4">
         <Input
           placeholder={`Filter ${filterColumn}...`}
           value={table.getColumn(filterColumn)?.getFilterValue() as string}
@@ -112,30 +118,35 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto hidden md:block">
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter(column => column.getCanHide())
-              .map(column => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={value => column.toggleVisibility(!!value)}
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex gap-4">
+          {children}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto hidden md:block">
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter(column => column.getCanHide())
+                .map(column => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={value =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -164,14 +175,30 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                 >
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map(cell => {
+                    if (IsTableBoolean(cell.getValue())) {
+                      return (
+                        <TableCell key={cell.id}>
+                          <p
+                            className={cn('text-right text-green-500', {
+                              'text-red-500': !cell.getValue(),
+                            })}
+                          >
+                            {cell.getValue() ? 'Yes' : 'No'}
+                          </p>
+                        </TableCell>
+                      );
+                    }
+
+                    return (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (
@@ -209,7 +236,7 @@ export function DataTable<TData, TValue>({
           Next
         </Button>
       </div>
-      {true && (
+      {!disableSubmit && (
         <div className="flex justify-center py-4">
           <Button
             variant="secondary"
@@ -229,13 +256,13 @@ export function DataTable<TData, TValue>({
                 }),
                   selectedRows.push(selectedRow);
               });
-              onEnd?.(selectedRows);
+              handleSubmit?.(selectedRows);
             }}
           >
             Submit
           </Button>
         </div>
       )}
-    </div>
+    </>
   );
 }

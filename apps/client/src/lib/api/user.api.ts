@@ -18,8 +18,13 @@ export class UserApi {
     return await this.httpClient.put(`deactivate`);
   }
 
-  async getAll() {
-    const allUsers = (await this.httpClient.get('all')) as User[];
+  async getAllShallow() {
+    const allUsers = (await this.httpClient.get('all/shallow')) as User[];
+    return allUsers;
+  }
+
+  async getAllDeep() {
+    const allUsers = (await this.httpClient.get('all/deep')) as User[];
     return allUsers;
   }
 }

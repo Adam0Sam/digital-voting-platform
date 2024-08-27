@@ -4,4 +4,15 @@ export enum UserSelectionColumn {
   Roles = 'roles',
   Grade = 'grade',
   Email = 'email',
+  Active = 'active',
 }
+
+enum _UserDeepExclusiveSelectionColumn {
+  ManagedProposals = 'managedProposals',
+  VotesResolved = 'votesResolved',
+}
+
+export const UserDeepSelectionColumns = {
+  ...UserSelectionColumn,
+  ..._UserDeepExclusiveSelectionColumn,
+};

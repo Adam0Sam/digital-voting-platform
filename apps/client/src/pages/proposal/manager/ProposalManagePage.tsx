@@ -1,15 +1,13 @@
-import { StandaloneNavLink } from '@/components/nav/NavLinkItem';
+import InnerPageNavButtons from '@/components/InnerPageNavButtons';
 import ProposalManageDate from '@/components/proposal/manager/ProposalManageDate';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import {
   MANAGER_PROPOSALS_LOADER_ID,
-  ManagerProposalsLoaderReturnType,
+  ManagerProposalsLoaderResolved,
 } from '@/lib/loaders';
 import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
 import { Proposal } from '@/lib/types';
 import { ManagerPermissionsDto } from '@/lib/types/proposal-manager.type';
-
-import { cn } from '@/lib/utils';
 import {
   Outlet,
   useOutletContext,
@@ -17,7 +15,7 @@ import {
   useRouteLoaderData,
 } from 'react-router-dom';
 
-function buildHrefs(proposalId: string) {
+function buildHrefEntries(proposalId: string) {
   const BASE = `${PROPOSAL_HREFS.MANAGE}/${proposalId}`;
   return {
     Votes: `${BASE}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`,
@@ -35,7 +33,7 @@ export default function ProposalManagePage() {
   const { id: proposalId } = useParams();
   const proposals = useRouteLoaderData(
     MANAGER_PROPOSALS_LOADER_ID,
-  ) as ManagerProposalsLoaderReturnType;
+  ) as ManagerProposalsLoaderResolved;
 
   const proposal = proposals.find(proposal => proposal.id === proposalId);
   const { user: signedInUser } = useSignedInUser();
@@ -51,7 +49,7 @@ export default function ProposalManagePage() {
     <div className="flex flex-col gap-8 px-10 sm:px-20">
       <div className="flex flex-col gap-4">
         <div className="flex justify-between">
-          <h3 className="text-4xl font-bold">Dashboard</h3>
+          <h3 className="text-4xl font-bold">Manager Dashboard</h3>
           <div>
             <ProposalManageDate
               proposal={proposal}
@@ -59,22 +57,7 @@ export default function ProposalManagePage() {
             />
           </div>
         </div>
-        <div className="flex max-w-max rounded-md border-2 border-secondary">
-          {Object.entries(buildHrefs(proposalId)).map(([key, href], index) => (
-            <StandaloneNavLink
-              key={key}
-              to={href}
-              title={key}
-              titleAlign="center"
-              titleClassName="text-md"
-              className={cn('min-w-0 flex-1 rounded-none px-6 py-6', {
-                'rounded-l-md': index === 0,
-                'rounded-r-md':
-                  index === Object.keys(buildHrefs(proposalId)).length - 1,
-              })}
-            />
-          ))}
-        </div>
+        <InnerPageNavButtons hrefEntries={buildHrefEntries(proposalId)} />
       </div>
       <Outlet context={{ proposal, permissions } satisfies ContextType} />
     </div>

@@ -19,6 +19,7 @@ import {
   userLoader,
   managerRolesLoader,
   MANAGER_ROLES_LOADER_ID,
+  adminUsersLoader,
 } from './lib/loaders';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 import ProfilePageLayout from './pages/profile/ProfilePageLayout';
@@ -42,6 +43,7 @@ import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
 import { ADMIN_PATHS } from './lib/routes/admin.routes';
 import AdminPage from './pages/admin/AdminPage';
 import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
+import UsersOverviewPage from './pages/admin/UsersOverviewPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -115,7 +117,13 @@ const router = createBrowserRouter(
           />
         </Route>
       </Route>
-      <Route path={ADMIN_PATHS.BASE} element={<AdminPage />} />
+      <Route path={ADMIN_PATHS.BASE} element={<AdminPage />}>
+        <Route
+          path={ADMIN_PATHS.USERS}
+          loader={adminUsersLoader}
+          element={<UsersOverviewPage />}
+        />
+      </Route>
       <Route path="test" element={<Component />} />
       <Route path="*" element={<div>404</div>} />
     </Route>,

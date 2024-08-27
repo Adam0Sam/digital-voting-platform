@@ -12,7 +12,7 @@ import {
 import { api } from '@/lib/api';
 import {
   VOTER_PROPOSALS_LOADER_ID,
-  VoterProposalsLoaderReturnType,
+  VoterProposalsLoaderResolved,
 } from '@/lib/loaders';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import { ProposalChoice } from '@/lib/types';
@@ -30,7 +30,7 @@ export default function ProposalVotePage() {
   const { id: proposalId } = useParams();
   const proposals = useRouteLoaderData(
     VOTER_PROPOSALS_LOADER_ID,
-  ) as VoterProposalsLoaderReturnType;
+  ) as VoterProposalsLoaderResolved;
 
   const proposal = proposals.find(proposal => proposal.id === proposalId);
 

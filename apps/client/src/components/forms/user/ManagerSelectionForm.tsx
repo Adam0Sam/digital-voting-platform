@@ -4,7 +4,7 @@ import { FC, useState } from 'react';
 import { useRouteLoaderData } from 'react-router-dom';
 import {
   MANAGER_ROLES_LOADER_ID,
-  ManagerRolesLoaderReturnType,
+  ManagerRolesLoaderResolved,
 } from '@/lib/loaders';
 import {
   ProposalManagerListDto,
@@ -43,7 +43,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
 }) => {
   const authoredManagerRoles = useRouteLoaderData(
     MANAGER_ROLES_LOADER_ID,
-  ) as ManagerRolesLoaderReturnType;
+  ) as ManagerRolesLoaderResolved;
 
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
 

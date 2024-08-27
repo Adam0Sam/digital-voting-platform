@@ -18,9 +18,16 @@ export class UserController {
     return user;
   }
 
-  @Get('all')
-  getAllUsers() {
-    return this.userService.getAllUsers();
+  @Get('all/shallow')
+  getAllUserShallowInfo() {
+    return this.userService.getAllUserShallowInfo();
+  }
+
+  @Get('all/deep')
+  @Roles(UserRole.ADMIN)
+  @UseGuards(UserRolesGuard)
+  getAllUserDeepInfo() {
+    return this.userService.getAllUserDeepInfo();
   }
 
   @Put('email')
