@@ -1,6 +1,6 @@
 import { User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useRouteLoaderData } from 'react-router-dom';
 import {
   MANAGER_ROLES_LOADER_ID,
@@ -26,12 +26,39 @@ import {
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FormHandleButtons from '../FormHandleButtons';
+import ManagerRoleForm from '../ManagerRoleForm';
+import { api } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 
 type FormValues = ProposalManagerListDto[];
 export type ManagerSelectionFormProps = ExtendedFormProps<FormValues>;
 
-const getCardStyles = () =>
-  'flex flex-col items-center gap-4 overflow-hidden  max-w-sm';
+type RoleCardProps = {
+  role: ProposalManagerRole;
+  isSelected: boolean;
+  handleClick: () => void;
+};
+
+const RoleCard: FC<RoleCardProps> = ({ role, handleClick, isSelected }) => {
+  return (
+    <div
+      className={cn(
+        'mb-4 flex h-20 w-full cursor-pointer flex-col items-center justify-center rounded-md border-2 border-secondary hover:bg-primary-foreground',
+        {
+          'bg-secondary': isSelected,
+          'border-primary': isSelected,
+        },
+      )}
+      key={role.id}
+      onClick={handleClick}
+    >
+      <p className="text-xl font-bold">{role.roleName}</p>
+      <p className="max-w-prose overflow-hidden text-ellipsis text-secondary-foreground">
+        {role.description}
+      </p>
+    </div>
+  );
+};
 
 /**
  * Algorithms in this component can be significantly improved.
@@ -41,15 +68,27 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const authoredManagerRoles = useRouteLoaderData(
-    MANAGER_ROLES_LOADER_ID,
-  ) as ManagerRolesLoaderReturnType;
+  const [authoredManagerRoles, setAuthoredManagerRoles] = useState<
+    ProposalManagerRole[]
+  >([]);
 
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
+  const [roleFormIsOpen, setRoleFormIsOpen] = useState(false);
 
   const [mappedManagers, setMappedManagers] = useState<
     ProposalManagerListDto[]
   >([]);
+
+  const loadedManagerRoles = useRouteLoaderData(
+    MANAGER_ROLES_LOADER_ID,
+  ) as ManagerRolesLoaderReturnType;
+
+  useEffect(() => {
+    setAuthoredManagerRoles(loadedManagerRoles);
+    if (loadedManagerRoles.length === 0) {
+      setSheetIsOpen(true);
+    }
+  }, [loadedManagerRoles]);
 
   const handleUserRemove = (targetUser: User) => {
     setMappedManagers(prevManagers =>
@@ -132,7 +171,10 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
         <div className="grid grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-10 [grid-auto-rows:20rem]">
           {mappedManagers.map(({ role, users }) => {
             return (
-              <Card key={role.id} className={getCardStyles()}>
+              <Card
+                key={role.id}
+                className="flex max-w-sm flex-col items-center gap-4 overflow-hidden"
+              >
                 <CardHeader>
                   <CardTitle>{role.roleName}</CardTitle>
                   <CardDescription>{role.description}</CardDescription>
@@ -161,37 +203,70 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
               className="w-full max-w-full py-20 sm:w-1/2 sm:max-w-screen-md"
             >
               <ScrollArea className="h-full">
-                {authoredManagerRoles?.map(role => {
-                  const isSelected = !!mappedManagers.find(
-                    manager => manager.role.id === role.id,
-                  );
-
-                  return (
-                    <div
-                      className={cn(
-                        'mb-4 flex h-20 w-full cursor-pointer flex-col items-center justify-center rounded-md border-2 border-secondary hover:bg-primary-foreground',
-                        {
-                          'bg-secondary': isSelected,
-                          'border-primary': isSelected,
-                        },
-                      )}
-                      key={role.id}
-                      onClick={() => {
-                        if (isSelected) {
-                          handleRoleRemoval(role);
-                        } else {
-                          handleRoleAddition(role);
-                        }
-                        setSheetIsOpen(false);
+                {roleFormIsOpen ? (
+                  <div className="flex flex-col items-center">
+                    {authoredManagerRoles.length === 0 && (
+                      <div className="mb-12 flex flex-col items-center gap-2">
+                        <h3 className="text-xl text-muted-foreground">
+                          You have not created any manager roles
+                        </h3>
+                        <p className="text-2xl">Create a Manager Role</p>
+                      </div>
+                    )}
+                    <ManagerRoleForm
+                      handleCreateSubmit={templateDto => {
+                        api.managerRole.createRole(templateDto).then(role => {
+                          const newRole: ProposalManagerRole = {
+                            ...role,
+                            permissions: templateDto.permissions,
+                          };
+                          setAuthoredManagerRoles(prevRoles => [
+                            ...prevRoles,
+                            newRole,
+                          ]);
+                          handleRoleAddition(newRole);
+                          setSheetIsOpen(false);
+                        });
                       }}
-                    >
-                      <p className="text-xl font-bold">{role.roleName}</p>
-                      <p className="max-w-prose overflow-hidden text-ellipsis text-secondary-foreground">
-                        {role.description}
-                      </p>
+                      className="w-full max-w-sm"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-10">
+                    <div className="w-full max-w-lg">
+                      {authoredManagerRoles?.map(role => {
+                        const isSelected = !!mappedManagers.find(
+                          manager => manager.role.id === role.id,
+                        );
+
+                        return (
+                          <RoleCard
+                            key={role.id}
+                            role={role}
+                            isSelected={isSelected}
+                            handleClick={() => {
+                              if (isSelected) {
+                                handleRoleRemoval(role);
+                              } else {
+                                handleRoleAddition(role);
+                              }
+                              setSheetIsOpen(false);
+                            }}
+                          />
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                    <Button
+                      onClick={() => setRoleFormIsOpen(true)}
+                      className="flex max-w-sm items-center justify-center"
+                    >
+                      <div className="flex items-center gap-4 text-lg">
+                        Create a new role
+                        <SquarePlus />
+                      </div>
+                    </Button>
+                  </div>
+                )}
               </ScrollArea>
             </SheetContent>
           </Sheet>

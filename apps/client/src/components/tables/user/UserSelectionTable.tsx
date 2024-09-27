@@ -2,7 +2,7 @@ import { Grades, User } from '@/lib/types';
 import { DataTable } from './DataTable';
 import { columns } from './UserColumns';
 import { FilterColumnContextProvider } from './context/FilterColumnContext';
-import useAllUsers from '@/lib/hooks/useAllUsers';
+import { useAllUsers } from '@/lib/context/all-users';
 import { TablifiedUser } from './table.types';
 
 const tablifyUser = (user: User): TablifiedUser => {

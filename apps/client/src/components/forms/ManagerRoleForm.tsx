@@ -15,9 +15,9 @@ import { cn } from '@/lib/utils';
 
 export type ManageRoleFormProps = {
   defaultRoleTemplate?: ProposalManagerRole;
-  handleEditSubmit: (roleData: ProposalManagerRole) => void;
+  handleEditSubmit?: (roleData: ProposalManagerRole) => void;
   handleCreateSubmit: (roleData: ProposalManagerRoleDto) => void;
-  handleCancel: (roleData: ProposalManagerRole) => void;
+  handleCancel?: (roleData: ProposalManagerRole) => void;
   className?: string;
 };
 
@@ -84,7 +84,7 @@ export default function ManagerRoleForm({
       onSubmit={e => {
         e.preventDefault();
         if (isEdit) {
-          handleEditSubmit({
+          handleEditSubmit?.({
             roleName,
             description,
             permissions,
@@ -127,18 +127,17 @@ export default function ManagerRoleForm({
            * Add an option to select/deselect all permissions
            */}
           {Object.entries(permissions).map(([permName, isAllowed]) => (
-            <div className="flex items-center" key={permName}>
-              <div className="flex-1 overflow-auto">
-                <p>{permName}</p>
-              </div>
-              <div className="flex flex-1 items-center justify-center">
-                <Checkbox
-                  checked={isAllowed}
-                  onCheckedChange={checked => {
-                    setPermissions(prev => ({ ...prev, [permName]: checked }));
-                  }}
-                />
-              </div>
+            <div
+              className="flex items-center justify-between px-6"
+              key={permName}
+            >
+              <p>{permName}</p>
+              <Checkbox
+                checked={isAllowed}
+                onCheckedChange={checked => {
+                  setPermissions(prev => ({ ...prev, [permName]: checked }));
+                }}
+              />
             </div>
           ))}
         </div>
@@ -174,7 +173,7 @@ export default function ManagerRoleForm({
         handleCancelClick={
           isEdit
             ? () => {
-                handleCancel({
+                handleCancel?.({
                   roleName,
                   description,
                   permissions,

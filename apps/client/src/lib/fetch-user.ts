@@ -9,6 +9,7 @@ export const fetchUser: (idToken?: string | null) => Promise<User> = async (
   if (!idToken) {
     throw new Error('No id_token found');
   }
+  JWTController.setItem(idToken);
   const user = await api.users.getOne(idToken);
   return user;
 };

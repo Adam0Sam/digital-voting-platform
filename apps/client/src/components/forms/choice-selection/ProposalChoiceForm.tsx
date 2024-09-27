@@ -23,6 +23,7 @@ type FormValues = {
 };
 export type ProposalChoiceFormProps = ExtendedFormProps<FormValues> & {
   initialChoices?: ProposalChoiceDto[];
+  initialChoiceCount?: number;
   disableEdit?: boolean;
   children?: React.JSX.Element;
 };
@@ -43,7 +44,7 @@ function _ProposalChoiceForm(
   const [proposalChoices, setProposalChoices] = useState<ProposalChoiceDto[]>(
     props.initialChoices ?? [],
   );
-  const choiceCount = useRef(1);
+  const choiceCount = useRef(props.initialChoiceCount ?? 1);
   const [error, setError] = useState<string | null>(null);
 
   useImperativeHandle(ref, () => ({

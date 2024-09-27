@@ -47,6 +47,15 @@ export default function ProposalVotePage() {
 
   const canVote = proposal.votes[0].status === 'PENDING';
 
+  console.log(
+    'proposal',
+    proposal,
+    'selectedChoices',
+    selectedChoices,
+    'canVote',
+    canVote,
+  );
+
   /**
    * @Question
    * Why is proposal.current possibly undefined

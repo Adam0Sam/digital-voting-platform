@@ -15,7 +15,10 @@ export class ManagerRoleApi {
   }
 
   async createRole(managerRole: ProposalManagerRoleDto) {
-    return this.httpClient.post<ProposalManagerRoleDto>('', managerRole);
+    return this.httpClient.post<ProposalManagerRoleDto>(
+      '',
+      managerRole,
+    ) as Promise<Omit<ProposalManagerRole, 'permissions'>>;
   }
 
   async deleteOneRole(roleId: string) {
