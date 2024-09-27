@@ -9,6 +9,13 @@ import {
   isTypeArray,
 } from './utils/type-validators';
 import { WithValuesAsStrings } from './utils/util-types';
+import { VoteStatus } from './vote.type';
+
+export type UserDeep = User & {
+  managedProposals: { id: string }[];
+  votes: { id: string; status: VoteStatus }[];
+  authoredPermissions: { id: string }[];
+};
 
 export type User = {
   id: string;

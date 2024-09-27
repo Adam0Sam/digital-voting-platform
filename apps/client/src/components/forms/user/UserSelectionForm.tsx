@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import UserSelectionTable from '@/components/tables/user/UserSelectionTable';
 import FormHandleButtons from '../FormHandleButtons';
 import UserScrollArea from '../../UserScrollArea';
-import getNormalizedUsers from '@/components/tables/user/utils/normalize-users';
+import { normalizeUser } from '@/components/tables/user/utils/normalize-users';
 import { TablifiedUser } from '@/components/tables/user/table.types';
 
 type FormValues = User[];
@@ -45,7 +45,7 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
   };
 
   const handleSelectionEnd = (selectedUsers: Partial<TablifiedUser>[]) => {
-    const normalizedUsers = getNormalizedUsers(selectedUsers);
+    const normalizedUsers = selectedUsers.map(normalizeUser);
     console.log('normalizedUsers', normalizedUsers);
     setSelectedUsers(normalizedUsers);
     setSheetIsOpen(false);

@@ -3,6 +3,7 @@ export * from './user.api';
 export * from './http-client';
 export * from './error';
 
+import { AdminApi } from './admin.api';
 import { ManagerRoleApi } from './manager-role.api';
 import { ProposalApi } from './proposal.api';
 import { UserApi } from './user.api';
@@ -12,4 +13,5 @@ export const api = {
   users: new UserApi(),
   managerRole: new ManagerRoleApi(),
   vote: new VoteApi(),
+  admin: new AdminApi(),
 };

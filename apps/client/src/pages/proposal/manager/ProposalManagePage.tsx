@@ -1,4 +1,4 @@
-import { StandaloneNavLink } from '@/components/nav/NavLinkItem';
+import InnerPageNavLinks from '@/components/nav/InnerPageNavLinks';
 import ProposalManageDate from '@/components/proposal/manager/ProposalManageDate';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import {
@@ -8,8 +8,6 @@ import {
 import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
 import { Proposal } from '@/lib/types';
 import { ManagerPermissionsDto } from '@/lib/types/proposal-manager.type';
-
-import { cn } from '@/lib/utils';
 import {
   Outlet,
   useOutletContext,
@@ -17,13 +15,22 @@ import {
   useRouteLoaderData,
 } from 'react-router-dom';
 
-function buildHrefs(proposalId: string) {
+function getLinks(proposalId: string) {
   const BASE = `${PROPOSAL_HREFS.MANAGE}/${proposalId}`;
-  return {
-    Votes: `${BASE}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`,
-    Content: `${BASE}/${PROPOSAL_PATHS.CONTENT_OVERVIEW}`,
-    Choices: `${BASE}/${PROPOSAL_PATHS.CHOICES_OVERVIEW}`,
-  };
+  return [
+    {
+      title: 'Votes',
+      href: `${BASE}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`,
+    },
+    {
+      title: 'Content',
+      href: `${BASE}/${PROPOSAL_PATHS.CONTENT_OVERVIEW}`,
+    },
+    {
+      title: 'Choices',
+      href: `${BASE}/${PROPOSAL_PATHS.CHOICES_OVERVIEW}`,
+    },
+  ];
 }
 
 type ContextType = {
@@ -59,22 +66,10 @@ export default function ProposalManagePage() {
             />
           </div>
         </div>
-        <div className="flex max-w-max rounded-md border-2 border-secondary">
-          {Object.entries(buildHrefs(proposalId)).map(([key, href], index) => (
-            <StandaloneNavLink
-              key={key}
-              to={href}
-              title={key}
-              titleAlign="center"
-              titleClassName="text-md"
-              className={cn('min-w-0 flex-1 rounded-none px-6 py-6', {
-                'rounded-l-md': index === 0,
-                'rounded-r-md':
-                  index === Object.keys(buildHrefs(proposalId)).length - 1,
-              })}
-            />
-          ))}
-        </div>
+        <InnerPageNavLinks
+          links={getLinks(proposalId)}
+          forceFirstActive={true}
+        />
       </div>
       <Outlet context={{ proposal, permissions } satisfies ContextType} />
     </div>

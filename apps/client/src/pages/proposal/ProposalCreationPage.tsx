@@ -32,35 +32,34 @@ import ProposalChoiceForm from '@/components/forms/choice-selection/ProposalChoi
 import { ProposalManagerListDto } from '@/lib/types/proposal-manager.type';
 import ManagerSelectionForm from '@/components/forms/user/ManagerSelectionForm';
 import { AllUsersProvider } from '@/lib/context/all-users';
+import { DelayedFulfill } from '@/lib/delayed-fulfill';
 
-const createProposal = async (data: ProposalDto) => {
-  const createdProposal = await api.proposals.createOne(data);
-  const { id } = createdProposal;
-  // TODO: Undo proposal creation via scheduled worker request disruption
-  toast(`Proposal ${data.title} has been created`, {
-    description: new Date().toLocaleTimeString(),
-    action: {
-      label: 'Undo',
-      onClick: () => api.proposals.deleteOne(id),
-    },
-  });
-};
 // TODO: Make a prettier proposal summary component
-function ProposalSummary({
+export function ProposalSummary({
   data,
   onCancel,
 }: {
   data: ProposalDto;
   onCancel: () => void;
 }) {
+  const delayedFulfill = new DelayedFulfill(3000, async () => {
+    await api.proposals.createOne(data);
+  });
+
   return (
     <Card>
       <form
         method="post"
         onSubmit={e => {
           e.preventDefault();
-          console.log(data);
-          createProposal(data);
+          delayedFulfill.beginResolve();
+          toast(`Proposal ${data.title} has been created`, {
+            description: new Date().toLocaleTimeString(),
+            action: {
+              label: 'Undo',
+              onClick: () => delayedFulfill.reject(),
+            },
+          });
         }}
       >
         <CardHeader>

@@ -4,7 +4,9 @@ import {
   Route,
 } from 'react-router-dom';
 import RootLayout from './pages/RootLayout';
-import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
+import ProposalCreationPage, {
+  ProposalSummary,
+} from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
 import ManagerLandingPage from './pages/proposal/manager/ManagerLandingPage';
 import ProposalVotePage from './pages/proposal/voter/ProposalVotePage';
@@ -19,6 +21,7 @@ import {
   userLoader,
   managerRolesLoader,
   MANAGER_ROLES_LOADER_ID,
+  userLogsLoader,
 } from './lib/loaders';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 import ProfilePageLayout from './pages/profile/ProfilePageLayout';
@@ -35,13 +38,14 @@ import { GENERIC_PATHS } from './lib/routes/util.routes';
 import ManagerRoleTemplates from './pages/profile/profile-templates/ManagerRoleTemplates';
 import VoteOverviewPage from './pages/proposal/manager/VoteOverviewPage';
 import ContentOverviewPage from './pages/proposal/manager/ContentOverviewPage';
-import { Component } from './test components/test-chart';
 import GreetingPage from './pages/GreetingPage';
 import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
 import { ADMIN_PATHS } from './lib/routes/admin.routes';
-import AdminPage from './pages/admin/AdminPage';
+import AdminPage from './pages/admin/AdminPageLayout';
 import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
+import AdminUserPage from './pages/admin/AdminUserPage';
+import UserLogsPage from './pages/admin/UserLogsPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -115,8 +119,37 @@ const router = createBrowserRouter(
           />
         </Route>
       </Route>
-      <Route path={ADMIN_PATHS.BASE} element={<AdminPage />} />
-      <Route path="test" element={<Component />} />
+      <Route path={ADMIN_PATHS.BASE} element={<AdminPage />}>
+        <Route path={ADMIN_PATHS.USERS} element={<AdminUserPage />} />
+        <Route
+          path={`${ADMIN_PATHS.USER}/${GENERIC_PATHS.ONE}/${ADMIN_PATHS.LOGS}`}
+          loader={userLogsLoader}
+          element={<UserLogsPage />}
+        />
+        <Route path={ADMIN_PATHS.PROPOSALS} element={<div>Proposals</div>} />
+      </Route>
+      <Route
+        path="test"
+        element={
+          <ProposalSummary
+            data={{
+              title: '',
+              description: undefined,
+              startDate: '',
+              endDate: '',
+              status: 'DRAFT',
+              visibility: 'PUBLIC',
+              managers: [],
+              voters: [],
+              choices: [],
+              choiceCount: 0,
+            }}
+            onCancel={function (): void {
+              throw new Error('Function not implemented.');
+            }}
+          />
+        }
+      />
       <Route path="*" element={<div>404</div>} />
     </Route>,
   ),

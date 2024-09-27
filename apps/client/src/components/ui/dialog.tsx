@@ -114,6 +114,8 @@ const triggerButtonStyleVariants = cva('', {
         'hover border-2 border-red-500 transition-colors hover:bg-red-500 hover:text-secondary',
       regular:
         'hover border-2 border-secondary/0 transition-colors hover:bg-secondary/0 hover:text-secondary',
+      constructive:
+        'hover border-2 border-green-500 transition-colors hover:bg-green-500 hover:text-secondary',
     },
   },
   defaultVariants: {
