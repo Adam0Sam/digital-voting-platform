@@ -55,6 +55,9 @@ export class ProposalService {
         choices: {
           create: choices,
         },
+        userPattern: {
+          create: proposal.userPattern,
+        },
         choiceCount: proposal.choiceCount,
         votes: {
           create: voteUserIds,

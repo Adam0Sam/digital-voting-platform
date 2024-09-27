@@ -9,7 +9,6 @@ export default function ManagerLandingPage() {
   const proposals = useRouteLoaderData(
     MANAGER_PROPOSALS_LOADER_ID,
   ) as ManagerProposalsLoaderReturnType;
-
   return (
     <div className="mx-8 mt-10 flex flex-wrap justify-center gap-12 md:mx-12">
       {proposals.length === 0 && (

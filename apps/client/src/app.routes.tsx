@@ -4,9 +4,7 @@ import {
   Route,
 } from 'react-router-dom';
 import RootLayout from './pages/RootLayout';
-import ProposalCreationPage, {
-  ProposalSummary,
-} from './pages/proposal/ProposalCreationPage';
+import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
 import ManagerLandingPage from './pages/proposal/manager/ManagerLandingPage';
 import ProposalVotePage from './pages/proposal/voter/ProposalVotePage';
@@ -46,6 +44,7 @@ import AdminPage from './pages/admin/AdminPageLayout';
 import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import UserLogsPage from './pages/admin/UserLogsPage';
+import UserPatternForm from './components/forms/user/UserPatternForm';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -130,25 +129,7 @@ const router = createBrowserRouter(
       </Route>
       <Route
         path="test"
-        element={
-          <ProposalSummary
-            data={{
-              title: '',
-              description: undefined,
-              startDate: '',
-              endDate: '',
-              status: 'DRAFT',
-              visibility: 'PUBLIC',
-              managers: [],
-              voters: [],
-              choices: [],
-              choiceCount: 0,
-            }}
-            onCancel={function (): void {
-              throw new Error('Function not implemented.');
-            }}
-          />
-        }
+        element={<UserPatternForm onSubmit={val => console.log(val)} />}
       />
       <Route path="*" element={<div>404</div>} />
     </Route>,

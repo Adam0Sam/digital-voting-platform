@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-import { isUserArray, User } from '@/lib/types';
+import { isUserArray, User, UserPatternDto } from '@/lib/types';
 
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 
@@ -33,6 +33,7 @@ import { ProposalManagerListDto } from '@/lib/types/proposal-manager.type';
 import ManagerSelectionForm from '@/components/forms/user/ManagerSelectionForm';
 import { AllUsersProvider } from '@/lib/context/all-users';
 import { DelayedFulfill } from '@/lib/delayed-fulfill';
+import UserPatternForm from '@/components/forms/user/UserPatternForm';
 
 // TODO: Make a prettier proposal summary component
 export function ProposalSummary({
@@ -180,26 +181,6 @@ const ResolutionValueCard: FC<{
   );
 };
 
-// const ManagerSelectionCard: FC<{
-//   carouselApi: CarouselScrollHandles;
-//   handleSubmit: (owners: User[], reviewers: User[]) => void;
-// }> = ({ carouselApi, handleSubmit }) => {
-//   return (
-//     <CardWrapper
-//       cardTitle="Select Managers"
-//       cardDescription="Select the users who will be the owners and reviewers of this proposal"
-//     >
-//       <ProposalOwnerReviewerSelectionForm
-//         onSubmit={values => {
-//           handleSubmit(values.owners, values.reviewers);
-//           carouselApi.scrollNext();
-//         }}
-//         onCancel={carouselApi.scrollPrev}
-//       />
-//     </CardWrapper>
-//   );
-// };
-
 const ManagerSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: (managers: ProposalManagerListDto[]) => void;
@@ -243,7 +224,8 @@ const DEFAULT_PROPOSAL_VISIBILITY = ProposalVisibilityOptions.AGENT_ONLY;
 const VoterSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: (users: User[], proposalVisibility: ProposalVisibility) => void;
-}> = ({ carouselApi, handleSubmit }) => {
+  handlePatternSubmit: (pattern: UserPatternDto) => void;
+}> = ({ carouselApi, handleSubmit, handlePatternSubmit }) => {
   const [proposalVisibility, setProposalVisibility] =
     useState<ProposalVisibility>(DEFAULT_PROPOSAL_VISIBILITY);
   return (
@@ -258,13 +240,16 @@ const VoterSelectionCard: FC<{
         }}
         onCancel={carouselApi.scrollPrev}
       >
-        <Combobox
-          items={proposalVisibilityChoices}
-          handleSelectedValue={value => setProposalVisibility(value)}
-          defaultItem={proposalVisibilityChoices.find(
-            option => option.value === DEFAULT_PROPOSAL_VISIBILITY,
-          )}
-        />
+        <div className="flex flex-col gap-4">
+          <Combobox
+            items={proposalVisibilityChoices}
+            handleSelectedValue={value => setProposalVisibility(value)}
+            defaultItem={proposalVisibilityChoices.find(
+              option => option.value === DEFAULT_PROPOSAL_VISIBILITY,
+            )}
+          />
+          <UserPatternForm onSubmit={pattern => handlePatternSubmit(pattern)} />
+        </div>
       </UserSelectionForm>
     </CardWrapper>
   );
@@ -288,6 +273,8 @@ export default function ProposalCreationPage() {
     [],
   );
   const [proposalChoiceCount, setProposalChoiceCount] = useState(1);
+  const [proposalUserPattern, setProposalUserPattern] =
+    useState<UserPatternDto>();
 
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
@@ -349,6 +336,7 @@ export default function ProposalCreationPage() {
               setProposalVoters(users);
               setProposalVisibility(proposalVisibility);
             }}
+            handlePatternSubmit={pattern => setProposalUserPattern(pattern)}
           />
 
           <ProposalSummary
@@ -360,6 +348,7 @@ export default function ProposalCreationPage() {
               status: ProposalStatusOptions.DRAFT,
               visibility:
                 proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
+              userPattern: proposalUserPattern ?? {},
               voters: proposalVoters,
               managers: proposalManagers,
               choices: proposalChoices,

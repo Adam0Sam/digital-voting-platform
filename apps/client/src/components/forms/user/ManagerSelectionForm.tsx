@@ -206,7 +206,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                 {roleFormIsOpen ? (
                   <div className="flex flex-col items-center">
                     {authoredManagerRoles.length === 0 && (
-                      <div className="mb-12 flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-2">
                         <h3 className="text-xl text-muted-foreground">
                           You have not created any manager roles
                         </h3>
@@ -228,7 +228,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                           setSheetIsOpen(false);
                         });
                       }}
-                      className="w-full max-w-sm"
+                      className="mt-12 w-full max-w-sm"
                     />
                   </div>
                 ) : (

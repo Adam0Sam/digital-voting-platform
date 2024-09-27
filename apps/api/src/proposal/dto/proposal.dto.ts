@@ -1,7 +1,9 @@
 import {
+  Grade,
   ProposalChoice,
   ProposalStatus,
   ProposalVisibility,
+  UserRole,
 } from '@prisma/client';
 import { ProposalManagerListDtoSchema } from 'src/manager-role/dto/manager-role.dto';
 import { UserSchema } from 'src/user/schema/user.schema';
@@ -29,6 +31,10 @@ export const CreateProposalDtoSchema = z.object({
   visibility: z
     .nativeEnum(ProposalVisibility)
     .default(ProposalVisibility.AGENT_ONLY),
+  userPattern: z.object({
+    grades: z.array(z.nativeEnum(Grade)).optional().default([]),
+    roles: z.array(z.nativeEnum(UserRole)).optional().default([]),
+  }),
 
   managers: z.array(ProposalManagerListDtoSchema).min(1),
   voters: z.array(UserSchema).min(1),

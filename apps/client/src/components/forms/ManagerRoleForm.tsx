@@ -12,6 +12,7 @@ import { SquarePen, Trash2 } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
 import { FormItem } from '../ui/form';
 import { cn } from '@/lib/utils';
+import { Separator } from '../ui/separator';
 
 export type ManageRoleFormProps = {
   defaultRoleTemplate?: ProposalManagerRole;
@@ -50,6 +51,7 @@ export default function ManagerRoleForm({
   const [description, setDescription] = useState('');
   const [permissions, setPermissions] = useState(DEFAULT_PERMISSIONS);
   const [emptyTitleError, setEmptyTitleError] = useState(false);
+  const [emptyPermissionsError, setEmptyPermissionsError] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
   const resetForm = () => {
@@ -91,12 +93,16 @@ export default function ManagerRoleForm({
             id: defaultRoleTemplate!.id,
           });
         } else {
-          handleCreateSubmit({
-            roleName,
-            description,
-            permissions,
-          });
-          resetForm();
+          if (Object.values(permissions).some(perm => perm === true)) {
+            handleCreateSubmit({
+              roleName,
+              description,
+              permissions,
+            });
+            resetForm();
+          } else {
+            setEmptyPermissionsError(true);
+          }
         }
       }}
       className={className}
@@ -122,10 +128,21 @@ export default function ManagerRoleForm({
       </div>
       <FormItem>
         <div className="my-10 flex flex-col gap-4">
-          {/*
-           * TODO
-           * Add an option to select/deselect all permissions
-           */}
+          <div className="flex flex-col">
+            <h4
+              className={cn('text-center text-2xl', {
+                'text-red-500': emptyPermissionsError,
+              })}
+            >
+              Permissions
+            </h4>
+            {emptyPermissionsError && (
+              <p className="text-center text-sm text-red-500">
+                You must select at least one permission
+              </p>
+            )}
+          </div>
+          <Separator />
           {Object.entries(permissions).map(([permName, isAllowed]) => (
             <div
               className="flex items-center justify-between px-6"
@@ -136,6 +153,7 @@ export default function ManagerRoleForm({
                 checked={isAllowed}
                 onCheckedChange={checked => {
                   setPermissions(prev => ({ ...prev, [permName]: checked }));
+                  setEmptyPermissionsError(false);
                 }}
               />
             </div>

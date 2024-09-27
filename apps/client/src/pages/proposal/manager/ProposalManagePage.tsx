@@ -45,6 +45,7 @@ export default function ProposalManagePage() {
   ) as ManagerProposalsLoaderReturnType;
 
   const proposal = proposals.find(proposal => proposal.id === proposalId);
+  console.log('PROPOSAL: ', proposal);
   const { user: signedInUser } = useSignedInUser();
   const permissions = proposal?.managers.find(
     manager => manager.userId === signedInUser.id,
@@ -68,7 +69,7 @@ export default function ProposalManagePage() {
         </div>
         <InnerPageNavLinks
           links={getLinks(proposalId)}
-          forceFirstActive={true}
+          // forceFirstActive={true}
         />
       </div>
       <Outlet context={{ proposal, permissions } satisfies ContextType} />
