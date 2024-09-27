@@ -8,11 +8,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, MoreHorizontal, Filter } from 'lucide-react';
+import { ArrowUpDown, MoreHorizontal, Filter, Eye } from 'lucide-react';
 import { UserSelectionColumn } from './column.enum';
 import useFilterColumn from './context/FilterColumnContext';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TablifiedUser } from './table.types';
+import { TablifiedUser, TablifiedUserDeep } from './table.types';
+import DeactivateUserButton from '@/components/admin/DeactivateUserButton';
+import { StandaloneNavLink } from '@/components/nav/NavLinkItem';
+import { ADMIN_HREFS } from '@/lib/routes/admin.routes';
 
 const HeaderFilterButton = ({
   filterValue,
@@ -31,11 +34,11 @@ const HeaderFilterButton = ({
   );
 };
 
-const HeaderSortButton = ({
+function HeaderSortButton<T extends TablifiedUser>({
   column,
 }: {
-  column: Column<TablifiedUser, unknown>;
-}) => {
+  column: Column<T, unknown>;
+}) {
   return (
     <Button
       variant="ghost"
@@ -45,13 +48,13 @@ const HeaderSortButton = ({
       <ArrowUpDown className="h-4 w-4" />
     </Button>
   );
-};
+}
 
-const PersonalNamesHeader = ({
+function PersonalNamesHeader<T extends TablifiedUser>({
   column,
 }: {
-  column: Column<TablifiedUser, unknown>;
-}) => {
+  column: Column<T, unknown>;
+}) {
   return (
     <div className="flex items-center justify-end gap-1">
       <p className="hidden lg:block">Personal Names</p>
@@ -61,13 +64,13 @@ const PersonalNamesHeader = ({
       </div>
     </div>
   );
-};
+}
 
-const FamilyNameHeader = ({
+function FamilyNameHeader<T extends TablifiedUser>({
   column,
 }: {
-  column: Column<TablifiedUser, unknown>;
-}) => {
+  column: Column<T, unknown>;
+}) {
   return (
     <div className="flex items-center justify-end gap-1">
       <p className="hidden lg:block">Family Names</p>
@@ -77,7 +80,7 @@ const FamilyNameHeader = ({
       </div>
     </div>
   );
-};
+}
 
 const EmailHeader = () => {
   return (
@@ -90,93 +93,106 @@ const EmailHeader = () => {
   );
 };
 
-export const columns: ColumnDef<TablifiedUser>[] = [
-  {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllRowsSelected() ||
-          (table.getIsSomeRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={value => table.toggleAllRowsSelected(!!value)}
-        aria-label="Select all rows"
-      />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div>
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={value => row.toggleSelected(!!value)}
-            aria-label={`Select row ${row.id}`}
-          />
-        </div>
-      );
+function getPrimaryUserInfoColumns<T extends TablifiedUser>(): ColumnDef<T>[] {
+  return [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllRowsSelected() ||
+            (table.getIsSomeRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={value => table.toggleAllRowsSelected(!!value)}
+          aria-label="Select all rows"
+        />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div>
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={value => row.toggleSelected(!!value)}
+              aria-label={`Select row ${row.id}`}
+            />
+          </div>
+        );
+      },
+      enableSorting: false,
+      enableHiding: false,
     },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: UserSelectionColumn.PersonalNames,
-    header: PersonalNamesHeader,
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium">
-          {row.getValue(UserSelectionColumn.PersonalNames)}
-        </div>
-      );
+    {
+      accessorKey: UserSelectionColumn.PersonalNames,
+      header: PersonalNamesHeader,
+      cell: ({ row }) => {
+        return (
+          <div className="text-right font-medium">
+            {row.getValue(UserSelectionColumn.PersonalNames)}
+          </div>
+        );
+      },
     },
-  },
-  {
-    accessorKey: UserSelectionColumn.FamilyName,
-    header: FamilyNameHeader,
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium">
-          {row.getValue(UserSelectionColumn.FamilyName)}
-        </div>
-      );
+    {
+      accessorKey: UserSelectionColumn.FamilyName,
+      header: FamilyNameHeader,
+      cell: ({ row }) => {
+        return (
+          <div className="text-right font-medium">
+            {row.getValue(UserSelectionColumn.FamilyName)}
+          </div>
+        );
+      },
     },
-  },
-  {
-    accessorKey: UserSelectionColumn.Email,
-    header: EmailHeader,
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium">
-          {row.getValue(UserSelectionColumn.Email)}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: UserSelectionColumn.Roles,
-    header: () => {
-      return <p className="text-right">Roles</p>;
-    },
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium">
-          {row.getValue(UserSelectionColumn.Roles)}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: UserSelectionColumn.Grade,
-    header: () => {
-      return <p className="text-right">Grade</p>;
-    },
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium">
-          {row.getValue(UserSelectionColumn.Grade)}
-        </div>
-      );
-    },
-  },
+  ];
+}
 
+function getSecondaryUserInfoColumns<
+  T extends TablifiedUser,
+>(): ColumnDef<T>[] {
+  return [
+    {
+      accessorKey: UserSelectionColumn.Email,
+      header: EmailHeader,
+      cell: ({ row }) => {
+        return (
+          <div className="text-right font-medium">
+            {row.getValue(UserSelectionColumn.Email)}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: UserSelectionColumn.Roles,
+      header: () => {
+        return <p className="text-right">Roles</p>;
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="text-right font-medium">
+            {row.getValue(UserSelectionColumn.Roles)}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: UserSelectionColumn.Grade,
+      header: () => {
+        return <p className="text-right">Grade</p>;
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="text-right font-medium">
+            {row.getValue(UserSelectionColumn.Grade)}
+          </div>
+        );
+      },
+    },
+  ];
+}
+
+export const userColumns: ColumnDef<TablifiedUser>[] = [
+  ...getPrimaryUserInfoColumns(),
+  ...getSecondaryUserInfoColumns(),
   {
     id: 'actions',
     cell: ({ row }) => {
@@ -205,5 +221,27 @@ export const columns: ColumnDef<TablifiedUser>[] = [
       );
     },
     enableHiding: false,
+  },
+];
+
+export const userDeepColumns: ColumnDef<TablifiedUserDeep>[] = [
+  ...getPrimaryUserInfoColumns<TablifiedUserDeep>(),
+  ...getSecondaryUserInfoColumns<TablifiedUserDeep>(),
+  {
+    id: 'active',
+    cell: ({ row }) => (
+      <DeactivateUserButton
+        isUserActive={row.original.active}
+        userId={row.original.id}
+      />
+    ),
+  },
+  {
+    id: 'logs',
+    cell: ({ row }) => (
+      <StandaloneNavLink to={ADMIN_HREFS.LOGS(row.original.id)}>
+        <Eye />
+      </StandaloneNavLink>
+    ),
   },
 ];

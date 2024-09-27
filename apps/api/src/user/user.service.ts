@@ -50,4 +50,21 @@ export class UserService {
   async getAllUsers() {
     return await this.prisma.user.findMany();
   }
+
+  async getAllUsersDeep() {
+    return await this.prisma.user.findMany({
+      include: {
+        authoredPermissions: true,
+        votes: true,
+        managedProposals: true,
+      },
+    });
+  }
+
+  async getUserLogs(userId: string) {
+    return await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { actionLogs: true },
+    });
+  }
 }

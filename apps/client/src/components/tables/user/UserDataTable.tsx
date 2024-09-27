@@ -34,7 +34,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   idKey: keyof TData;
-  selectedRows: TData[];
+  selectedRows?: TData[];
   onEnd?: (selectedRows: Partial<TData>[]) => void;
   rowVisibilityWidths?: Record<string, number>;
 }
@@ -54,7 +54,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   idKey,
-  selectedRows,
+  selectedRows = [],
   onEnd,
   rowVisibilityWidths,
 }: DataTableProps<TData, TValue>) {
@@ -209,7 +209,7 @@ export function DataTable<TData, TValue>({
           Next
         </Button>
       </div>
-      {true && (
+      {onEnd && (
         <div className="flex justify-center py-4">
           <Button
             variant="secondary"
@@ -229,7 +229,7 @@ export function DataTable<TData, TValue>({
                 }),
                   selectedRows.push(selectedRow);
               });
-              onEnd?.(selectedRows);
+              onEnd(selectedRows);
             }}
           >
             Submit

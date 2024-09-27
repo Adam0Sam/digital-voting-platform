@@ -1,21 +1,10 @@
-import { Grades, User } from '@/lib/types';
-import { DataTable } from './DataTable';
-import { columns } from './UserColumns';
+import { User } from '@/lib/types';
+import { DataTable } from './UserDataTable';
+import { userColumns } from './UserColumns';
 import { FilterColumnContextProvider } from './context/FilterColumnContext';
 import { useAllUsers } from '@/lib/context/all-users';
 import { TablifiedUser } from './table.types';
-
-const tablifyUser = (user: User): TablifiedUser => {
-  return {
-    id: user.id,
-    personalNames: user.personalNames.join(' '),
-    familyName: user.familyName,
-    roles: user.roles.join(', '),
-    grade: user.grade || Grades.NONE,
-    email: user.email || '',
-    active: user.active,
-  };
-};
+import { tablifyUser } from './utils/tablify-users';
 
 export default function UserSelectionTable({
   handleSelectionEnd,
@@ -33,7 +22,7 @@ export default function UserSelectionTable({
       <div className="min-w-0 max-w-screen-lg flex-1 px-0 py-10 sm:px-4">
         <FilterColumnContextProvider>
           <DataTable
-            columns={columns}
+            columns={userColumns}
             data={tablifiedUsers}
             idKey="id"
             selectedRows={tablifiedSelectedUsers}

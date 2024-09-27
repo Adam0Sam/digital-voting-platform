@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
 import { User, UserRole } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
@@ -33,14 +33,27 @@ export class UserController {
 
   @Put('deactivate')
   setUserActiveStatus(@GetUser('id') userId: User['id']) {
-    console.log('Deactivating user account');
     return this.userService.setUserActiveStatus(userId, false);
   }
 
   @UseGuards(UserRolesGuard)
   @Roles(UserRole.ADMIN)
-  @Get('admin')
-  getAdmin() {
-    return 'This is an admin route.';
+  @Get('logs/:userId')
+  getUserLogs(@Param('userId') userId: User['id']) {
+    return this.userService.getUserLogs(userId);
+  }
+
+  @UseGuards(UserRolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Put('admin/deactivate')
+  deactivateUser(@Body('userId') userId: User['id']) {
+    return this.userService.setUserActiveStatus(userId, false);
+  }
+
+  @UseGuards(UserRolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/all')
+  getAllUsersDeep() {
+    return this.userService.getAllUsersDeep();
   }
 }

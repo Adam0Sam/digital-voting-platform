@@ -27,3 +27,9 @@ export {
   type ReturnType as ManagerRolesLoaderReturnType,
   LOADER_ID as MANAGER_ROLES_LOADER_ID,
 } from './manager-roles.loader';
+
+export {
+  userLogsLoader,
+  type ReturnType as UserLogsLoaderReturnType,
+  LOADER_ID as USER_LOGS_LOADER_ID,
+} from './logs.loader';
