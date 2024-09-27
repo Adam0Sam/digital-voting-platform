@@ -1,16 +1,36 @@
 export class DelayedFulfill {
   private timeoutId: NodeJS.Timeout | null = null;
   constructor(
-    private callback: () => void | Promise<void>,
     private timeoutDuration: number = 1000,
+    private callback?: () => void | Promise<void>,
   ) {}
 
+  setResolveCallback(callback: () => void | Promise<void>) {
+    this.callback = callback;
+  }
+
   beginResolve() {
-    console.log('beginResolve');
+    if (this.timeoutId) {
+      return;
+    }
+    if (!this.callback) {
+      return;
+    }
     this.timeoutId = setTimeout(() => {
-      this.callback();
+      this.callback!();
       console.log('callback');
     }, this.timeoutDuration);
+  }
+
+  immediateResolve() {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+    if (!this.callback) {
+      return;
+    }
+    this.callback();
   }
 
   reject() {

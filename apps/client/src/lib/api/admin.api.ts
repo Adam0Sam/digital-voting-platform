@@ -1,5 +1,5 @@
 import URI from '../constants/uri-constants';
-import { UserDeep } from '../types';
+import { User, UserDeep } from '../types';
 import { UserActionLog } from '../types/log.type';
 import { HttpClient } from './http-client';
 
@@ -19,7 +19,7 @@ export class AdminApi {
 
   async getUserLogs(userId: string) {
     return (await this.httpClient.get(`user/logs/${userId}`)) as Promise<
-      UserActionLog[]
+      User & { actionLogs: UserActionLog[] }
     >;
   }
 }

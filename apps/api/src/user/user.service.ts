@@ -62,9 +62,13 @@ export class UserService {
   }
 
   async getUserLogs(userId: string) {
-    return await this.prisma.user.findUnique({
+    const res = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { actionLogs: true },
     });
+    return {
+      ...res,
+      actionLogs: res.actionLogs.reverse(),
+    };
   }
 }

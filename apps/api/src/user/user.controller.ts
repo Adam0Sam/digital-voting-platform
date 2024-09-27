@@ -15,6 +15,7 @@ export class UserController {
 
   @Get('')
   getProfile(@GetUser() user: User) {
+    console.log('user', user);
     return user;
   }
 

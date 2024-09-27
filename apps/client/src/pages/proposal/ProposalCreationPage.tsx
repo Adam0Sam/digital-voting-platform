@@ -42,9 +42,9 @@ export function ProposalSummary({
   data: ProposalDto;
   onCancel: () => void;
 }) {
-  const delayedFulfill = new DelayedFulfill(async () => {
+  const delayedFulfill = new DelayedFulfill(3000, async () => {
     await api.proposals.createOne(data);
-  }, 3000);
+  });
 
   return (
     <Card>
