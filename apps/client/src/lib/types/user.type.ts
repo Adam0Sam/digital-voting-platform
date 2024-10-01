@@ -27,6 +27,11 @@ export type User = {
   active: boolean;
 };
 
+export type UserPatternDto = {
+  grades?: Grade[];
+  roles?: UserRole[];
+};
+
 export type StringifiedUser = WithValuesAsStrings<User>;
 
 export function isUser(user: unknown): user is User {

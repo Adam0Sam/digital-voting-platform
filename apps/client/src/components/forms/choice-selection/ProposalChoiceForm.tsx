@@ -128,7 +128,7 @@ function _ProposalChoiceForm(
           </div>
         </SheetContent>
       </Sheet>
-      {props.children ? (
+      {props.children && !props.disableEdit ? (
         props.children
       ) : (
         <FormHandleButtons

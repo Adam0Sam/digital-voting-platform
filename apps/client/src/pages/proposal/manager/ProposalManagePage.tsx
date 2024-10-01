@@ -30,6 +30,10 @@ function getLinks(proposalId: string) {
       title: 'Choices',
       href: `${BASE}/${PROPOSAL_PATHS.CHOICES_OVERVIEW}`,
     },
+    {
+      title: 'Pattern',
+      href: `${BASE}/${PROPOSAL_PATHS.PATTERN_OVERVIEW}`,
+    },
   ];
 }
 
@@ -45,6 +49,7 @@ export default function ProposalManagePage() {
   ) as ManagerProposalsLoaderReturnType;
 
   const proposal = proposals.find(proposal => proposal.id === proposalId);
+
   const { user: signedInUser } = useSignedInUser();
   const permissions = proposal?.managers.find(
     manager => manager.userId === signedInUser.id,
@@ -68,7 +73,7 @@ export default function ProposalManagePage() {
         </div>
         <InnerPageNavLinks
           links={getLinks(proposalId)}
-          forceFirstActive={true}
+          // forceFirstActive={true}
         />
       </div>
       <Outlet context={{ proposal, permissions } satisfies ContextType} />

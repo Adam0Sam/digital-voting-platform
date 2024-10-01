@@ -21,7 +21,7 @@ export default function DesktopNav({ className }: { className?: string }) {
       <NavigationMenu className="ml-auto">
         <NavigationMenuList className="gap-3">
           <NavigationMenuItem>
-            <NavigationMenuTrigger>
+            <NavigationMenuTrigger onClick={e => e.preventDefault()}>
               {PROPOSAL_LINK_COLLECTION.name}
             </NavigationMenuTrigger>
             <NavigationMenuContent>

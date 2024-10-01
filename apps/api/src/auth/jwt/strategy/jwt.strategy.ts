@@ -17,7 +17,6 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     private userService: UserService,
     private logger: LoggerService,
   ) {
-    console.log('JWT AUTH CONFIG', config.get('auth.jwt.publicKey'));
     super({
       // available options: https://github.com/mikenicholson/passport-jwt#configure-strategy
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -34,7 +33,6 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   // passport calls this method even if the token is invalid, why?
   async validate(req: Request, payload: JwtDto) {
-    console.log('verify token', payload);
     const personalNames = splitFirstNames(payload.first_name);
     const user: User | null = await this.userService.findUser({
       personalNames,

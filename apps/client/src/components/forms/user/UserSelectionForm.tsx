@@ -20,6 +20,7 @@ export type UserSelectionFormProps = ExtendedFormProps<FormValues> & {
   initiallySelectedUsers?: User[];
   UserItemUtilComponent?: ReactNode;
   className?: string;
+  enableFormError?: boolean;
 };
 
 const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
@@ -33,6 +34,7 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
   disableSubmit,
   disableCancel,
   className,
+  enableFormError = true,
 }) => {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<User[]>(
@@ -109,7 +111,7 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
         formSubmitLabel="Next"
         formCancelLabel="Cancel"
         handleSubmitClick={() => {
-          if (selectedUsers.length === 0) {
+          if (enableFormError && selectedUsers.length === 0) {
             setError('Please add at least one user to the list');
             return;
           }
