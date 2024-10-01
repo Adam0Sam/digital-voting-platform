@@ -34,6 +34,7 @@ const DEFAULT_PERMISSIONS: ManagerPermissionsDto = {
   canEditVoteChoices: false,
   canEditAvailableChoices: false,
   canEditChoiceCount: false,
+  canEditUserPattern: false,
 };
 
 /**

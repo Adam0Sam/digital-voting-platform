@@ -16,6 +16,7 @@ import { ScrollArea } from './ui/scroll-area';
 
 type MultiSelectDropdownProps<T extends string> = {
   items: Record<string, T> | T[];
+  initiallySelectedItems?: T[];
   triggerText: ReactNode;
 };
 
@@ -35,10 +36,12 @@ const MultiSelectDropdown = forwardRef(_MultiSelectDropdown) as <
 export default MultiSelectDropdown;
 
 function _MultiSelectDropdown<T extends string>(
-  { items, triggerText }: MultiSelectDropdownProps<T>,
+  { items, triggerText, initiallySelectedItems }: MultiSelectDropdownProps<T>,
   ref: React.Ref<MultiSelectDropdownHandle<T>>,
 ) {
-  const [selectedItems, setSelectedItems] = useState<T[]>([]);
+  const [selectedItems, setSelectedItems] = useState<T[]>(
+    initiallySelectedItems ?? [],
+  );
   const allItems = useRef(Array.isArray(items) ? items : Object.values(items));
 
   useImperativeHandle(ref, () => ({

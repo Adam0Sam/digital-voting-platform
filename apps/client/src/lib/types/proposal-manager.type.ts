@@ -33,6 +33,7 @@ export const ManagerPermissionsList = [
   'canEditVoteChoices',
   'canEditAvailableChoices',
   'canEditChoiceCount',
+  'canEditUserPattern',
 ] as const;
 
 export type ManagerPermissionsDto = {

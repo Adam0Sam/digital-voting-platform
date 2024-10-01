@@ -3,6 +3,7 @@ import {
   ManagerPermissions,
   Prisma,
   ProposalChoice,
+  User,
   VoteStatus,
 } from '@prisma/client';
 
@@ -153,6 +154,18 @@ export class ProposalService {
             shouldResetVotes = true;
           }
           break;
+        case 'userPattern':
+          console.log(
+            'userPattern',
+            permissions.canEditUserPattern,
+            proposalDto.userPattern,
+          );
+          if (permissions.canEditUserPattern) {
+            updateInput.userPattern = {
+              update: proposalDto.userPattern,
+            };
+          }
+          break;
       }
     }
 
@@ -170,6 +183,26 @@ export class ProposalService {
     }
 
     return updateInput;
+  }
+
+  private getUserPatternWhereClause(
+    userGrade: User['grade'],
+    userRoles: User['roles'],
+  ): Prisma.UserPatternWhereInput {
+    return {
+      OR: [
+        {
+          grades: {
+            has: userGrade,
+          },
+        },
+        {
+          roles: {
+            hasSome: userRoles,
+          },
+        },
+      ],
+    };
   }
 
   async updateOne(
@@ -215,27 +248,57 @@ export class ProposalService {
       }),
     });
   }
-  async getAllVoterProposals(userId: string) {
-    return this.prisma.proposal.findMany({
+  async getAllVoterProposals(user: User) {
+    const findManyProposalsInput = {
       where: {
-        votes: {
-          some: {
-            userId,
+        OR: [
+          {
+            votes: {
+              some: {
+                userId: user.id,
+              },
+            },
           },
-        },
+          {
+            userPattern: this.getUserPatternWhereClause(user.grade, user.roles),
+          },
+        ],
       },
       include: {
         choices: true,
         votes: {
           where: {
-            userId,
+            userId: user.id,
           },
           include: {
             choices: true,
           },
         },
       },
-    });
+    };
+    const proposals = await this.prisma.proposal.findMany(
+      findManyProposalsInput,
+    );
+
+    const proposalsWithoutVote = proposals.filter(
+      (proposal) => !proposal.votes.some((vote) => vote.userId === user.id),
+    );
+
+    if (proposalsWithoutVote.length > 0) {
+      await this.prisma.$transaction(
+        proposalsWithoutVote.map((proposal) =>
+          this.prisma.vote.create({
+            data: {
+              userId: user.id,
+              proposalId: proposal.id,
+            },
+          }),
+        ),
+      );
+      return this.prisma.proposal.findMany(findManyProposalsInput);
+    }
+
+    return proposals;
   }
 
   async getAllManagerProposals(userId: string) {
@@ -264,6 +327,7 @@ export class ProposalService {
             },
           },
         },
+        userPattern: true,
       },
     });
   }

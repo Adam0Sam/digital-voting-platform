@@ -13,6 +13,7 @@ export const ManagerPermissionsDtoSchema = z.object({
   canEditVoteChoices: z.boolean(),
   canEditAvailableChoices: z.boolean(),
   canEditChoiceCount: z.boolean(),
+  canEditUserPattern: z.boolean(),
 });
 
 export const ProposalManagerRoleSchema = z.object({

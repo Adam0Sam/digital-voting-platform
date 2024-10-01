@@ -32,12 +32,12 @@ export const CreateProposalDtoSchema = z.object({
     .nativeEnum(ProposalVisibility)
     .default(ProposalVisibility.AGENT_ONLY),
   userPattern: z.object({
-    grades: z.array(z.nativeEnum(Grade)).optional().default([]),
-    roles: z.array(z.nativeEnum(UserRole)).optional().default([]),
+    grades: z.array(z.nativeEnum(Grade)).optional(),
+    roles: z.array(z.nativeEnum(UserRole)).optional(),
   }),
 
   managers: z.array(ProposalManagerListDtoSchema).min(1),
-  voters: z.array(UserSchema).min(1),
+  voters: z.array(UserSchema),
 
   choices: ProposalChoicesDtoSchema,
   choiceCount: z.number().int().min(1),

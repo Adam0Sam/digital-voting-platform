@@ -44,7 +44,8 @@ import AdminPage from './pages/admin/AdminPageLayout';
 import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import UserLogsPage from './pages/admin/UserLogsPage';
-import UserPatternForm from './components/forms/user/UserPatternForm';
+import UserPatternForm from './components/forms/user/user-pattern/UserPatternForm';
+import UserPatternPage from './pages/proposal/manager/UserPatternPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -91,6 +92,10 @@ const router = createBrowserRouter(
             <Route
               path={PROPOSAL_PATHS.CHOICES_OVERVIEW}
               element={<ChoicesOverviewPage />}
+            />
+            <Route
+              path={PROPOSAL_PATHS.PATTERN_OVERVIEW}
+              element={<UserPatternPage />}
             />
           </Route>
         </Route>

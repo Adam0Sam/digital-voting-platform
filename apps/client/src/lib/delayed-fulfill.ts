@@ -1,3 +1,4 @@
+const UndefinedCallbackException = new Error('Callback is not defined');
 export class DelayedFulfill {
   private timeoutId: NodeJS.Timeout | null = null;
   constructor(
@@ -10,32 +11,28 @@ export class DelayedFulfill {
   }
 
   beginResolve() {
-    if (this.timeoutId) {
-      return;
-    }
     if (!this.callback) {
+      throw UndefinedCallbackException;
+    }
+    if (this.timeoutId) {
       return;
     }
     this.timeoutId = setTimeout(() => {
       this.callback!();
-      console.log('callback');
+      this.reset();
     }, this.timeoutDuration);
   }
 
-  immediateResolve() {
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
-      this.timeoutId = null;
-    }
+  resolveNow() {
+    this.reset();
     if (!this.callback) {
-      return;
+      throw UndefinedCallbackException;
     }
     this.callback();
   }
 
-  reject() {
+  reset() {
     if (this.timeoutId) {
-      console.log('reject');
       clearTimeout(this.timeoutId);
       this.timeoutId = null;
     }
