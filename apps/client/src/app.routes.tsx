@@ -31,7 +31,6 @@ import AdminPage from './pages/admin/AdminPageLayout';
 import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import UserLogsPage from './pages/admin/UserLogsPage';
-import UserPatternForm from './components/forms/user/user-pattern/UserPatternForm';
 import UserPatternPage from './pages/proposal/manager/UserPatternPage';
 import UserManagePage from './pages/admin/UserManagePage';
 import { LOADER_IDS, LOADER_ID_MAP } from './lib/loaders';
@@ -123,21 +122,12 @@ const router = createBrowserRouter(
           id={LOADER_IDS.EXTERNAL_USER}
           loader={LOADER_ID_MAP[LOADER_IDS.EXTERNAL_USER]}
         >
-          <Route
-            path={ADMIN_PATHS.LOGS}
-            id={LOADER_IDS.USER_LOGS}
-            loader={LOADER_ID_MAP[LOADER_IDS.USER_LOGS]}
-            element={<UserLogsPage />}
-          />
+          <Route path={ADMIN_PATHS.LOGS} element={<UserLogsPage />} />
           <Route path={ADMIN_PATHS.manage} element={<UserManagePage />} />
         </Route>
 
         <Route path={ADMIN_PATHS.PROPOSALS} element={<div>Proposals</div>} />
       </Route>
-      <Route
-        path="test"
-        element={<UserPatternForm onSubmit={val => console.log(val)} />}
-      />
       <Route path="*" element={<div>404</div>} />
     </Route>,
   ),

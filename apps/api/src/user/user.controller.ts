@@ -45,11 +45,6 @@ export class UserController {
 
   @UseGuards(UserRolesGuard)
   @Roles(UserRole.ADMIN)
-  @Get('logs/:userId')
-  getUserLogs(@Param('userId') userId: User['id']) {
-    return this.userService.getUserLogs(userId);
-  }
-
   @UseGuards(UserRolesGuard)
   @Roles(UserRole.ADMIN)
   @Put('admin/deactivate')

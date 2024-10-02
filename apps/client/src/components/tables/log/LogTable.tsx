@@ -1,10 +1,8 @@
 import { UserActionLog, UserActions } from '@/lib/types/log.type';
-import { User } from '@/lib/types';
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import { logColumns } from './LogColumns';
@@ -17,65 +15,37 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import {
+  forwardRef,
+  Suspense,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
 import { Input } from '@/components/ui/input';
-import { DelayedFulfill } from '@/lib/delayed-fulfill';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { User } from '@/lib/types';
+import useUserLogs from '@/lib/hooks/useUserLogs';
+import useMutableRef from '@/lib/hooks/useMutableRef';
+import GenericSpinner from '@/components/forms/GenericSpinner';
+import constructActionFilter, { ActionFilter } from '@/lib/action-filter';
 
-type LogTableProps = {
-  user: User;
-  logs: UserActionLog[];
-};
+const LOGS_PER_PAGE = 10;
+export default function PaginatedLogTable({ user }: { user: User }) {
+  const { setRef: setLogTableRef, mutableRef: logTableRef } =
+    useMutableRef<PaginatedLogTableHandles>(null);
 
-type ColumnFiltersState = [
-  {
-    id: 'action';
-    value: UserActionLog['action'][];
-  },
-  { id: 'time'; value: [string, string] },
-];
-
-export default function LogTable({ user, logs }: LogTableProps) {
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
-    {
-      id: 'action',
-      value: Object.values(UserActions),
-    },
-    {
-      id: 'time',
-      value: [logs[0].time, logs[logs.length - 1].time],
-    },
-  ]);
-
-  const table = useReactTable({
-    data: logs,
-    columns: logColumns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onPaginationChange: setPagination,
-    getRowId: row => row.id,
-    state: {
-      pagination,
-      columnFilters,
-    },
-  });
-
-  const lastPageIndex = Math.floor(
-    table.getFilteredRowModel().rows.length /
-      table.getState().pagination.pageSize,
+  const [actionFilter, setActionFilter] = useState<ActionFilter>(
+    constructActionFilter(),
   );
 
-  const delayedNavigation = new DelayedFulfill(3000);
+  const actionFilterIsEmpty = Object.values(actionFilter).some(value => !value);
+
   return (
     <div className="flex justify-center">
       <div className="flex min-w-0 max-w-screen-lg flex-1 flex-col gap-6 px-0 pb-10 sm:px-4">
@@ -95,19 +65,12 @@ export default function LogTable({ user, logs }: LogTableProps) {
                         onSelect={e => e.preventDefault()}
                         key={action}
                         className="capitalize"
-                        checked={columnFilters[0].value.includes(action)}
+                        checked={actionFilter[action]}
                         onCheckedChange={() => {
-                          const wasChecked =
-                            columnFilters[0].value.includes(action);
-                          setColumnFilters(prev => [
-                            {
-                              id: 'action',
-                              value: wasChecked
-                                ? prev[0].value.filter(v => v !== action)
-                                : [...prev[0].value, action],
-                            },
-                            prev[1],
-                          ]);
+                          setActionFilter(prev => ({
+                            ...prev,
+                            [action]: !prev[action],
+                          }));
                         }}
                       >
                         {action}
@@ -118,147 +81,238 @@ export default function LogTable({ user, logs }: LogTableProps) {
                 <Button
                   size="sm"
                   onClick={() => {
-                    setColumnFilters(prev => [
-                      {
-                        id: 'action',
-                        value:
-                          columnFilters[0].value.length !== 0
-                            ? []
-                            : Object.values(UserActions),
-                      },
-                      prev[1],
-                    ]);
+                    setActionFilter(
+                      actionFilterIsEmpty
+                        ? constructActionFilter(true)
+                        : constructActionFilter(false),
+                    );
                   }}
                 >
-                  {columnFilters[0].value.length !== 0 ? 'Clear' : 'Select All'}
+                  {actionFilterIsEmpty ? 'Select All' : 'Clear All'}
                 </Button>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto hidden md:block">
-                Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter(column => column.getCanHide())
-                .map(column => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={value =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map(header => {
+          {logTableRef && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto hidden md:block">
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {logTableRef
+                  .getTableColumns()
+                  .filter(column => column.getCanHide())
+                  .map(column => {
                     return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={value =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
                     );
                   })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map(row => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                  >
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={logColumns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
-        <div className="flex items-center justify-between space-x-2 py-4">
-          <div className="flex-[2] text-sm text-muted-foreground">
-            Page {table.getState().pagination.pageIndex} of {lastPageIndex}{' '}
-          </div>
-          <div className="flex flex-[4] items-center justify-between gap-12">
-            <Input
-              placeholder="Go to page"
-              className="hidden max-w-sm flex-[3] md:block"
-              type="number"
-              min={0}
-              max={lastPageIndex}
-              onChange={e => {
-                delayedNavigation.reject();
-                delayedNavigation.setResolveCallback(() => {
-                  table.setPageIndex(Number(e.target.value));
-                });
-                delayedNavigation.beginResolve();
-              }}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  delayedNavigation.immediateResolve();
-                }
-              }}
-            />
-            <div className="flex flex-[1] items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="min-w-0 flex-1"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="min-w-0 flex-1"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </div>
+        <Suspense fallback={<_PaginatedLogTableSkeleton />}>
+          <_PaginatedLogTable
+            ref={setLogTableRef}
+            user={user}
+            actionFilter={actionFilter}
+          />
+        </Suspense>
       </div>
     </div>
   );
 }
+
+type PaginatedLogTableHandles = {
+  getTableColumns: () => import('@tanstack/table-core').Column<UserActionLog>[];
+};
+type PaginatedLogTableProps = {
+  user: User;
+  actionFilter: ActionFilter;
+};
+
+const _PaginatedLogTableSkeleton = () => {
+  return (
+    <div className="flex-1 rounded-md border">
+      <Table className="h-[580px]">
+        <TableHeader>
+          <TableRow></TableRow>
+        </TableHeader>
+        <TableBody className="flex h-full items-center justify-center">
+          <TableRow>
+            <TableCell colSpan={logColumns.length}>
+              <GenericSpinner className="h-20 w-20" />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
+const _PaginatedLogTable = forwardRef<
+  PaginatedLogTableHandles,
+  PaginatedLogTableProps
+>(function ({ user, actionFilter }, ref) {
+  const {
+    logs: pageLogs,
+    getPage: getDataPage,
+    pageIndex: dataPageIndex,
+  } = useUserLogs(user.id, LOGS_PER_PAGE, 1, actionFilter);
+
+  const [tablePageIndex, setTablePageIndex] = useState(1);
+
+  useEffect(() => {
+    setTablePageIndex(1);
+  }, [actionFilter]);
+
+  const dataPageIndexBoundary = Math.ceil(
+    (pageLogs.count ?? 0) / LOGS_PER_PAGE,
+  );
+
+  const goToNextTablePage = () => {
+    setTablePageIndex(prev => prev + 1);
+  };
+  const goToPrevTablePage = () => {
+    setTablePageIndex(prev => prev - 1);
+  };
+
+  const table = useReactTable({
+    data: pageLogs.data ?? [],
+    columns: logColumns,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    getFilteredRowModel: getFilteredRowModel(),
+    getRowId: row => row.id,
+  });
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getTableColumns: () => table.getAllColumns(),
+    }),
+    [table],
+  );
+
+  return (
+    <>
+      <div className="flex-1 rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map(row => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={logColumns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="flex-[2] text-sm text-muted-foreground">
+          Page {tablePageIndex} of {dataPageIndexBoundary}{' '}
+        </div>
+        <div className="flex flex-[4] items-center justify-between gap-12">
+          {/* <Input
+              placeholder="Go to page"
+              className="hidden max-w-sm flex-[3] md:block"
+              type="number"
+              min={0}
+              max={lastPossiblePage}
+              onChange={e => {
+                inputValue.current = Number(e.target.value);
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  goToPrevTablePage();
+                }
+              }}
+            /> */}
+          <div className="flex flex-[1] items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="min-w-0 flex-1"
+              onClick={() => {
+                const canGoToPrevPage = tablePageIndex > dataPageIndex;
+
+                if (canGoToPrevPage) {
+                  goToPrevTablePage();
+                } else if (tablePageIndex > 1) {
+                  getDataPage('prev');
+                  goToPrevTablePage();
+                }
+              }}
+              disabled={tablePageIndex === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="min-w-0 flex-1"
+              onClick={() => {
+                const canGoToNextPage = tablePageIndex < dataPageIndex;
+                if (canGoToNextPage) {
+                  goToNextTablePage();
+                } else if (tablePageIndex < dataPageIndexBoundary) {
+                  getDataPage('next');
+                  goToNextTablePage();
+                }
+              }}
+              disabled={tablePageIndex === dataPageIndexBoundary}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+});
