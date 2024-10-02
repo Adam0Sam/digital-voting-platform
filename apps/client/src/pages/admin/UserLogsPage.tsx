@@ -2,7 +2,7 @@ import LogTable from '@/components/tables/log/LogTable';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 
 export default function UserLogsPage() {
-  const user = useLoadedData(LOADER_IDS.USER);
+  const user = useLoadedData(LOADER_IDS.EXTERNAL_USER);
   const userLogs = useLoadedData(LOADER_IDS.USER_LOGS);
   return (
     <div className="flex flex-col gap-4">

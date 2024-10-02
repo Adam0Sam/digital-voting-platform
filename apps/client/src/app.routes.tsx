@@ -118,7 +118,11 @@ const router = createBrowserRouter(
       </Route>
       <Route path={ADMIN_PATHS.BASE} element={<AdminPage />}>
         <Route path={ADMIN_PATHS.USERS} element={<AdminUserPage />} />
-        <Route path={`${ADMIN_PATHS.USER}/${GENERIC_PATHS.ONE}`}>
+        <Route
+          path={`${ADMIN_PATHS.USER}/${GENERIC_PATHS.ONE}`}
+          id={LOADER_IDS.EXTERNAL_USER}
+          loader={LOADER_ID_MAP[LOADER_IDS.EXTERNAL_USER]}
+        >
           <Route
             path={ADMIN_PATHS.LOGS}
             id={LOADER_IDS.USER_LOGS}
