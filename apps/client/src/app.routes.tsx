@@ -33,7 +33,7 @@ import AdminUserPage from './pages/admin/AdminUserPage';
 import UserLogsPage from './pages/admin/UserLogsPage';
 import UserPatternPage from './pages/proposal/manager/UserPatternPage';
 import UserManagePage from './pages/admin/UserManagePage';
-import { LOADER_IDS, LOADER_ID_MAP } from './lib/loaders';
+import { LOADER_IDS, LOADER_ID_MAP, loaderDefer } from './lib/loaders';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -115,13 +115,14 @@ const router = createBrowserRouter(
           />
         </Route>
       </Route>
-      <Route path={ADMIN_PATHS.BASE} element={<AdminPage />}>
+      <Route
+        path={ADMIN_PATHS.BASE}
+        id={LOADER_IDS.USER_DEEP_INFO}
+        loader={() => loaderDefer(LOADER_IDS.USER_DEEP_INFO)}
+        element={<AdminPage />}
+      >
         <Route path={ADMIN_PATHS.USERS} element={<AdminUserPage />} />
-        <Route
-          path={`${ADMIN_PATHS.USER}/${GENERIC_PATHS.ONE}`}
-          id={LOADER_IDS.EXTERNAL_USER}
-          loader={LOADER_ID_MAP[LOADER_IDS.EXTERNAL_USER]}
-        >
+        <Route path={`${ADMIN_PATHS.USER}/${GENERIC_PATHS.ONE}`}>
           <Route path={ADMIN_PATHS.LOGS} element={<UserLogsPage />} />
           <Route path={ADMIN_PATHS.manage} element={<UserManagePage />} />
         </Route>

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
 import { User, UserRole } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
@@ -16,13 +16,6 @@ export class UserController {
   @Get('')
   getProfile(@GetUser() user: User) {
     return user;
-  }
-
-  @UseGuards(UserRolesGuard)
-  @Roles(UserRole.ADMIN)
-  @Get(':id')
-  getExternalUserInfo(@Param('id') userId: User['id']) {
-    return this.userService.getExternalUserInfo(userId);
   }
 
   @Get('all')

@@ -48,7 +48,6 @@ const UserSelectionForm: FC<PropsWithChildren<UserSelectionFormProps>> = ({
 
   const handleSelectionEnd = (selectedUsers: Partial<TablifiedUser>[]) => {
     const normalizedUsers = selectedUsers.map(normalizeUser);
-    console.log('normalizedUsers', normalizedUsers);
     setSelectedUsers(normalizedUsers);
     setSheetIsOpen(false);
     onSelectionEnd?.(normalizedUsers);

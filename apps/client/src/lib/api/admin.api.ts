@@ -1,6 +1,6 @@
 import constructActionFilter, { ActionFilter } from '../action-filter';
 import URI from '../constants/uri-constants';
-import { User, UserDeep } from '../types';
+import { UserDeep } from '../types';
 import { UserActionLog } from '../types/log.type';
 import { HttpClient } from './http-client';
 
@@ -16,10 +16,6 @@ export class AdminApi {
 
   async deactivateUser(userId: string) {
     return await this.httpClient.put('user/admin/deactivate', { userId });
-  }
-
-  async getUserInfo(userId: string) {
-    return (await this.httpClient.get(`user/${userId}`)) as User;
   }
 
   async getUserLogs(

@@ -1,7 +1,13 @@
 import { cn } from '@/lib/utils';
 
-export default function GenericSpinner({ className }: { className?: string }) {
-  return (
+export default function GenericSpinner({
+  className,
+  centered,
+}: {
+  className?: string;
+  centered?: boolean;
+}) {
+  const spinner = (
     <div role="status">
       <svg
         aria-hidden="true"
@@ -25,4 +31,13 @@ export default function GenericSpinner({ className }: { className?: string }) {
       <span className="sr-only">Loading...</span>
     </div>
   );
+  if (centered) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        {spinner}
+      </div>
+    );
+  } else {
+    return spinner;
+  }
 }

@@ -34,30 +34,30 @@ export class HttpClient {
     });
   }
 
-  async get(path: string, options?: AuthClientOptions) {
-    return await this.fetchWithAuth(path, options);
+  async get<T = unknown>(path: string, options?: AuthClientOptions) {
+    return (await this.fetchWithAuth(path, options)) as Promise<T>;
   }
 
   async post<T>(path: string, data: T, options?: AuthClientOptions) {
-    return await this.fetchWithAuth(path, {
+    return (await this.fetchWithAuth(path, {
       ...options,
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    })) as Promise<Partial<T>>;
   }
 
   async put<T>(path: string, data?: T, options?: AuthClientOptions) {
-    return await this.fetchWithAuth(path, {
+    return (await this.fetchWithAuth(path, {
       ...options,
       method: 'PUT',
       body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    })) as Promise<Partial<T>>;
   }
 
   async delete(path: string, options?: AuthClientOptions) {

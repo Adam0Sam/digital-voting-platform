@@ -15,13 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import {
-  forwardRef,
-  Suspense,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from 'react';
+import { FC, Suspense, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -31,20 +25,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { User } from '@/lib/types';
 import useUserLogs from '@/lib/hooks/useUserLogs';
-import useMutableRef from '@/lib/hooks/useMutableRef';
 import GenericSpinner from '@/components/forms/GenericSpinner';
 import constructActionFilter, { ActionFilter } from '@/lib/action-filter';
 
 const LOGS_PER_PAGE = 10;
 export default function PaginatedLogTable({ user }: { user: User }) {
-  const { setRef: setLogTableRef, mutableRef: logTableRef } =
-    useMutableRef<PaginatedLogTableHandles>(null);
-
   const [actionFilter, setActionFilter] = useState<ActionFilter>(
     constructActionFilter(),
   );
 
-  const actionFilterIsEmpty = Object.values(actionFilter).some(value => !value);
+  const actionFilterIsEmpty = Object.values(actionFilter).every(
+    value => !value,
+  );
 
   return (
     <div className="flex justify-center">
@@ -93,50 +85,15 @@ export default function PaginatedLogTable({ user }: { user: User }) {
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
-          {logTableRef && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto hidden md:block">
-                  Columns
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {logTableRef
-                  .getTableColumns()
-                  .filter(column => column.getCanHide())
-                  .map(column => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={value =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </div>
         <Suspense fallback={<_PaginatedLogTableSkeleton />}>
-          <_PaginatedLogTable
-            ref={setLogTableRef}
-            user={user}
-            actionFilter={actionFilter}
-          />
+          <_PaginatedLogTable user={user} actionFilter={actionFilter} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-type PaginatedLogTableHandles = {
-  getTableColumns: () => import('@tanstack/table-core').Column<UserActionLog>[];
-};
 type PaginatedLogTableProps = {
   user: User;
   actionFilter: ActionFilter;
@@ -161,10 +118,10 @@ const _PaginatedLogTableSkeleton = () => {
   );
 };
 
-const _PaginatedLogTable = forwardRef<
-  PaginatedLogTableHandles,
-  PaginatedLogTableProps
->(function ({ user, actionFilter }, ref) {
+const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
+  user,
+  actionFilter,
+}) => {
   const {
     logs: pageLogs,
     getPage: getDataPage,
@@ -196,14 +153,6 @@ const _PaginatedLogTable = forwardRef<
     getFilteredRowModel: getFilteredRowModel(),
     getRowId: row => row.id,
   });
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      getTableColumns: () => table.getAllColumns(),
-    }),
-    [table],
-  );
 
   return (
     <>
@@ -315,4 +264,4 @@ const _PaginatedLogTable = forwardRef<
       </div>
     </>
   );
-});
+};
