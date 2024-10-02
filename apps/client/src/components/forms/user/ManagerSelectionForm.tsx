@@ -1,11 +1,7 @@
 import { User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
 import { FC, useEffect, useState } from 'react';
-import { useRouteLoaderData } from 'react-router-dom';
-import {
-  MANAGER_ROLES_LOADER_ID,
-  ManagerRolesLoaderReturnType,
-} from '@/lib/loaders';
+import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import {
   ProposalManagerListDto,
   ProposalManagerRole,
@@ -79,9 +75,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
     ProposalManagerListDto[]
   >([]);
 
-  const loadedManagerRoles = useRouteLoaderData(
-    MANAGER_ROLES_LOADER_ID,
-  ) as ManagerRolesLoaderReturnType;
+  const loadedManagerRoles = useLoadedData(LOADER_IDS.MANAGER_ROLES);
 
   useEffect(() => {
     setAuthoredManagerRoles(loadedManagerRoles);

@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-import { isUserArray, User, UserPatternDto, UserRoles } from '@/lib/types';
+import { isUserArray, User, UserPatternDto } from '@/lib/types';
 
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
 

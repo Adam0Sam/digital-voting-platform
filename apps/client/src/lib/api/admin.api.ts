@@ -17,9 +17,13 @@ export class AdminApi {
     return await this.httpClient.put('user/admin/deactivate', { userId });
   }
 
+  async getUserInfo(userId: string) {
+    return (await this.httpClient.get(`user/${userId}`)) as User;
+  }
+
   async getUserLogs(userId: string) {
-    return (await this.httpClient.get(`user/logs/${userId}`)) as Promise<
-      User & { actionLogs: UserActionLog[] }
-    >;
+    return (await this.httpClient.get(
+      `user/logs/${userId}`,
+    )) as UserActionLog[];
   }
 }

@@ -51,6 +51,12 @@ export class UserService {
     return await this.prisma.user.findMany();
   }
 
+  async getExternalUserInfo(userId: string) {
+    return await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
+
   async getAllUsersDeep() {
     return await this.prisma.user.findMany({
       include: {
@@ -66,9 +72,6 @@ export class UserService {
       where: { id: userId },
       include: { actionLogs: true },
     });
-    return {
-      ...res,
-      actionLogs: res.actionLogs.reverse(),
-    };
+    return res.actionLogs.reverse();
   }
 }

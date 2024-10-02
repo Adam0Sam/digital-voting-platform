@@ -4,6 +4,7 @@ export const ADMIN_PATHS = {
   USER: 'user',
   PROPOSALS: 'proposals',
   LOGS: 'logs',
+  manage: 'manage',
 };
 
 export const ADMIN_HREFS = {
@@ -12,4 +13,11 @@ export const ADMIN_HREFS = {
   PROPOSALS: `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.PROPOSALS}`,
   LOGS: (id: string) =>
     `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.USER}/${id}/${ADMIN_PATHS.LOGS}`,
+  MANAGE: (id: string) =>
+    `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.USER}/${id}/${ADMIN_PATHS.manage}`,
 };
+
+export function getUserQueryId(url: URL) {
+  const pathname = url.pathname.split('/');
+  return pathname[pathname.length - 2];
+}

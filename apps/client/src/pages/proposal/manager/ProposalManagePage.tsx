@@ -1,19 +1,11 @@
 import InnerPageNavLinks from '@/components/nav/InnerPageNavLinks';
 import ProposalManageDate from '@/components/proposal/manager/ProposalManageDate';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
-import {
-  MANAGER_PROPOSALS_LOADER_ID,
-  ManagerProposalsLoaderReturnType,
-} from '@/lib/loaders';
+import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
 import { Proposal } from '@/lib/types';
 import { ManagerPermissionsDto } from '@/lib/types/proposal-manager.type';
-import {
-  Outlet,
-  useOutletContext,
-  useParams,
-  useRouteLoaderData,
-} from 'react-router-dom';
+import { Outlet, useOutletContext, useParams } from 'react-router-dom';
 
 function getLinks(proposalId: string) {
   const BASE = `${PROPOSAL_HREFS.MANAGE}/${proposalId}`;
@@ -44,9 +36,8 @@ type ContextType = {
 
 export default function ProposalManagePage() {
   const { id: proposalId } = useParams();
-  const proposals = useRouteLoaderData(
-    MANAGER_PROPOSALS_LOADER_ID,
-  ) as ManagerProposalsLoaderReturnType;
+
+  const proposals = useLoadedData(LOADER_IDS.MANAGER_PROPOSALS);
 
   const proposal = proposals.find(proposal => proposal.id === proposalId);
 

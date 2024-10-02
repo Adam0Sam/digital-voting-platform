@@ -15,8 +15,14 @@ export class UserController {
 
   @Get('')
   getProfile(@GetUser() user: User) {
-    console.log('user', user);
     return user;
+  }
+
+  @UseGuards(UserRolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get(':id')
+  getExternalUserInfo(@Param('id') userId: User['id']) {
+    return this.userService.getExternalUserInfo(userId);
   }
 
   @Get('all')

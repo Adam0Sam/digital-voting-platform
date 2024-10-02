@@ -8,12 +8,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, MoreHorizontal, Filter, Eye } from 'lucide-react';
+import {
+  ArrowUpDown,
+  MoreHorizontal,
+  Filter,
+  Eye,
+  UserCog,
+} from 'lucide-react';
 import { UserSelectionColumn } from './column.enum';
 import useFilterColumn from './context/FilterColumnContext';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TablifiedUser, TablifiedUserDeep } from './table.types';
-import DeactivateUserButton from '@/components/admin/DeactivateUserButton';
 import { StandaloneNavLink } from '@/components/nav/NavLinkItem';
 import { ADMIN_HREFS } from '@/lib/routes/admin.routes';
 
@@ -228,20 +233,27 @@ export const userDeepColumns: ColumnDef<TablifiedUserDeep>[] = [
   ...getPrimaryUserInfoColumns<TablifiedUserDeep>(),
   ...getSecondaryUserInfoColumns<TablifiedUserDeep>(),
   {
-    id: 'active',
+    id: 'manage',
     cell: ({ row }) => (
-      <DeactivateUserButton
-        isUserActive={row.original.active}
-        userId={row.original.id}
-      />
+      <StandaloneNavLink
+        to={ADMIN_HREFS.MANAGE(row.original.id)}
+        className="w-full px-0 sm:px-3"
+      >
+        <UserCog />
+      </StandaloneNavLink>
     ),
+    enableHiding: false,
   },
   {
     id: 'logs',
     cell: ({ row }) => (
-      <StandaloneNavLink to={ADMIN_HREFS.LOGS(row.original.id)}>
+      <StandaloneNavLink
+        to={ADMIN_HREFS.LOGS(row.original.id)}
+        className="w-full px-0 sm:px-3"
+      >
         <Eye />
       </StandaloneNavLink>
     ),
+    enableHiding: false,
   },
 ];

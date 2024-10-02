@@ -1,15 +1,8 @@
 import VoterCard from '@/components/proposal/voter/VoterCard';
-import {
-  VOTER_PROPOSALS_LOADER_ID,
-  VoterProposalsLoaderReturnType,
-} from '@/lib/loaders';
-
-import { useRouteLoaderData } from 'react-router-dom';
+import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 
 export default function VoterLandingPage() {
-  const proposals = useRouteLoaderData(
-    VOTER_PROPOSALS_LOADER_ID,
-  ) as VoterProposalsLoaderReturnType;
+  const proposals = useLoadedData(LOADER_IDS.VOTER_PROPOSALS);
 
   return (
     <div className="mx-8 mt-10 flex flex-wrap justify-center gap-12 md:mx-12">
