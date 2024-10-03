@@ -1,14 +1,8 @@
 import ManagerCard from '@/components/proposal/manager/ManagerCard';
-import {
-  MANAGER_PROPOSALS_LOADER_ID,
-  ManagerProposalsLoaderReturnType,
-} from '@/lib/loaders';
-import { useRouteLoaderData } from 'react-router-dom';
+import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 
 export default function ManagerLandingPage() {
-  const proposals = useRouteLoaderData(
-    MANAGER_PROPOSALS_LOADER_ID,
-  ) as ManagerProposalsLoaderReturnType;
+  const proposals = useLoadedData(LOADER_IDS.MANAGER_PROPOSALS);
   return (
     <div className="mx-8 mt-10 flex flex-wrap justify-center gap-12 md:mx-12">
       {proposals.length === 0 && (

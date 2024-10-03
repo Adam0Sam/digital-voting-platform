@@ -8,19 +8,6 @@ import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
 import ManagerLandingPage from './pages/proposal/manager/ManagerLandingPage';
 import ProposalVotePage from './pages/proposal/voter/ProposalVotePage';
-import {
-  authLoader,
-  voterProposalsLoader,
-  VOTER_PROPOSALS_LOADER_ID,
-  managerProposalsLoader,
-  MANAGER_PROPOSALS_LOADER_ID,
-  USER_LOADER_ID,
-  AUTH_LOADER_ID,
-  userLoader,
-  managerRolesLoader,
-  MANAGER_ROLES_LOADER_ID,
-  userLogsLoader,
-} from './lib/loaders';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 import ProfilePageLayout from './pages/profile/ProfilePageLayout';
 import RootErrorBoundary from './components/RootErrorBoundary';
@@ -44,8 +31,9 @@ import AdminPage from './pages/admin/AdminPageLayout';
 import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import UserLogsPage from './pages/admin/UserLogsPage';
-import UserPatternForm from './components/forms/user/user-pattern/UserPatternForm';
 import UserPatternPage from './pages/proposal/manager/UserPatternPage';
+import UserManagePage from './pages/admin/UserManagePage';
+import { LOADER_IDS, LOADER_ID_MAP, loaderDefer } from './lib/loaders';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -57,18 +45,22 @@ const router = createBrowserRouter(
       <Route index element={<GreetingPage />} />
       <Route
         path={AUTH_PATHS.SIGNIN}
-        id={USER_LOADER_ID}
-        loader={userLoader}
+        id={LOADER_IDS.USER}
+        loader={LOADER_ID_MAP[LOADER_IDS.USER]}
         element={<GreetingPage />}
       />
-      <Route path={AUTH_PATHS.SIGNUP} id={AUTH_LOADER_ID} loader={authLoader} />
+      <Route
+        path={AUTH_PATHS.SIGNUP}
+        id={LOADER_IDS.AUTH}
+        loader={LOADER_ID_MAP[LOADER_IDS.AUTH]}
+      />
 
       <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
         <Route index element={<ProposalGreetingPage />} />
         <Route
           path={PROPOSAL_PATHS.VOTE}
-          id={VOTER_PROPOSALS_LOADER_ID}
-          loader={voterProposalsLoader}
+          id={LOADER_IDS.VOTER_PROPOSALS}
+          loader={LOADER_ID_MAP[LOADER_IDS.VOTER_PROPOSALS]}
         >
           <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
           <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
@@ -76,8 +68,8 @@ const router = createBrowserRouter(
 
         <Route
           path={PROPOSAL_PATHS.MANAGE}
-          id={MANAGER_PROPOSALS_LOADER_ID}
-          loader={managerProposalsLoader}
+          id={LOADER_IDS.MANAGER_PROPOSALS}
+          loader={LOADER_ID_MAP[LOADER_IDS.MANAGER_PROPOSALS]}
         >
           <Route path={GENERIC_PATHS.ALL} element={<ManagerLandingPage />} />
           <Route path={GENERIC_PATHS.ONE} element={<ProposalManagePage />}>
@@ -101,8 +93,8 @@ const router = createBrowserRouter(
         </Route>
         <Route
           path={PROPOSAL_PATHS.CREATE}
-          loader={managerRolesLoader}
-          id={MANAGER_ROLES_LOADER_ID}
+          id={LOADER_IDS.MANAGER_ROLES}
+          loader={LOADER_ID_MAP[LOADER_IDS.MANAGER_ROLES]}
           element={<ProposalCreationPage />}
         />
       </Route>
@@ -118,24 +110,25 @@ const router = createBrowserRouter(
         >
           <Route
             path={USER_TEMPLATES_PATHS.MANAGER}
-            loader={managerRolesLoader}
+            loader={LOADER_ID_MAP[LOADER_IDS.MANAGER_ROLES]}
             element={<ManagerRoleTemplates />}
           />
         </Route>
       </Route>
-      <Route path={ADMIN_PATHS.BASE} element={<AdminPage />}>
+      <Route
+        path={ADMIN_PATHS.BASE}
+        id={LOADER_IDS.USER_DEEP_INFO}
+        loader={() => loaderDefer(LOADER_IDS.USER_DEEP_INFO)}
+        element={<AdminPage />}
+      >
         <Route path={ADMIN_PATHS.USERS} element={<AdminUserPage />} />
-        <Route
-          path={`${ADMIN_PATHS.USER}/${GENERIC_PATHS.ONE}/${ADMIN_PATHS.LOGS}`}
-          loader={userLogsLoader}
-          element={<UserLogsPage />}
-        />
+        <Route path={`${ADMIN_PATHS.USER}/${GENERIC_PATHS.ONE}`}>
+          <Route path={ADMIN_PATHS.LOGS} element={<UserLogsPage />} />
+          <Route path={ADMIN_PATHS.manage} element={<UserManagePage />} />
+        </Route>
+
         <Route path={ADMIN_PATHS.PROPOSALS} element={<div>Proposals</div>} />
       </Route>
-      <Route
-        path="test"
-        element={<UserPatternForm onSubmit={val => console.log(val)} />}
-      />
       <Route path="*" element={<div>404</div>} />
     </Route>,
   ),

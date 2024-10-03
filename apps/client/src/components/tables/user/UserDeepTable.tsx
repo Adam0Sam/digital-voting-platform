@@ -18,7 +18,7 @@ export default function UserDeepTable() {
             rowVisibilityWidths={{
               roles: 1280,
               email: 1280,
-              grade: 768,
+              familyName: 768,
             }}
           />
         </FilterColumnContextProvider>

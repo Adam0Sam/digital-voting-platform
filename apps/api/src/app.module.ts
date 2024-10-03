@@ -12,6 +12,7 @@ import { VoteModule } from './vote/vote.module';
 import { ManagerRoleModule } from './manager-role/manager-role.module';
 import appConfig from './config/app.config';
 import { LoggerModule } from './logger/logger.module';
+import { ActionLogModule } from './action-log/action-log.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { LoggerModule } from './logger/logger.module';
     VoteModule,
     ManagerRoleModule,
     LoggerModule,
+    ActionLogModule,
   ],
   providers: [
     AppService,

@@ -11,7 +11,7 @@ export class ManagerRoleApi {
   );
 
   async getAuthoredRoles() {
-    return this.httpClient.get('authored');
+    return this.httpClient.get('authored') as Promise<ProposalManagerRole[]>;
   }
 
   async createRole(managerRole: ProposalManagerRoleDto) {

@@ -10,28 +10,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { api } from '@/lib/api';
-import {
-  VOTER_PROPOSALS_LOADER_ID,
-  VoterProposalsLoaderReturnType,
-} from '@/lib/loaders';
+import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import { ProposalChoice } from '@/lib/types';
 import { DialogDescription } from '@radix-ui/react-dialog';
 import { useState } from 'react';
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useRevalidator,
-  useRouteLoaderData,
-} from 'react-router-dom';
+import { Link, useNavigate, useParams, useRevalidator } from 'react-router-dom';
 
 export default function ProposalVotePage() {
   const { id: proposalId } = useParams();
-  const proposals = useRouteLoaderData(
-    VOTER_PROPOSALS_LOADER_ID,
-  ) as VoterProposalsLoaderReturnType;
 
+  const proposals = useLoadedData(LOADER_IDS.VOTER_PROPOSALS);
   const proposal = proposals.find(proposal => proposal.id === proposalId);
 
   if (!proposal) {

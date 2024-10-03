@@ -1,5 +1,6 @@
+import constructActionFilter, { ActionFilter } from '../action-filter';
 import URI from '../constants/uri-constants';
-import { User, UserDeep } from '../types';
+import { UserDeep } from '../types';
 import { UserActionLog } from '../types/log.type';
 import { HttpClient } from './http-client';
 
@@ -17,9 +18,24 @@ export class AdminApi {
     return await this.httpClient.put('user/admin/deactivate', { userId });
   }
 
-  async getUserLogs(userId: string) {
-    return (await this.httpClient.get(`user/logs/${userId}`)) as Promise<
-      User & { actionLogs: UserActionLog[] }
-    >;
+  async getUserLogs(
+    userId: string,
+    pageSize = 50,
+    page = 1,
+    actionFilter: ActionFilter = constructActionFilter(),
+  ) {
+    console.log('Getting user logs', userId, pageSize, page);
+    return (await this.httpClient.get(
+      `logs/${userId}?pageSize=${pageSize}&page=${page}&actionFilter=${JSON.stringify(actionFilter)}`,
+    )) as UserActionLog[];
+  }
+
+  async getUserLogsCount(
+    userId: string,
+    actionFilter: ActionFilter = constructActionFilter(),
+  ) {
+    return (await this.httpClient.get(
+      `logs/${userId}/count?actionFilter=${JSON.stringify(actionFilter)}`,
+    )) as number;
   }
 }
