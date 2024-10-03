@@ -36,6 +36,7 @@ import { DelayedFulfill } from '@/lib/delayed-fulfill';
 import UserPatternForm from '@/components/forms/user/user-pattern/UserPatternForm';
 import { useNavigate } from 'react-router-dom';
 import { PROPOSAL_HREFS } from '@/lib/routes';
+import { cn } from '@/lib/utils';
 
 // TODO: Make a prettier proposal summary component
 export function ProposalSummary({
@@ -296,86 +297,118 @@ export default function ProposalCreationPage() {
 
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+
   const carouselApi = {
     scrollNext: () => {
       if (carouselRef.current) {
         carouselRef.current.scrollNext();
+        setCurrentCardIndex(prevIndex => prevIndex + 1);
       }
     },
     scrollPrev: () => {
       if (carouselRef.current) {
         carouselRef.current.scrollPrev();
+        setCurrentCardIndex(prevIndex => prevIndex - 1);
       }
     },
   };
 
   return (
     <AllUsersProvider>
-      <main className="flex flex-1 items-center justify-center">
-        <CardCarousel ref={carouselRef}>
-          <TitleDescriptionCard
-            carouselApi={carouselApi}
-            handleSubmit={(title, description) => {
-              setProposalTitle(title);
-              setProposalDescription(description);
-            }}
-            defaultValues={{
-              title: proposalTitle,
-              description: proposalDescription,
-            }}
-          />
-          <ResolutionValueCard
-            carouselApi={carouselApi}
-            handleSubmit={({ choices, choiceCount }) => {
-              setProposalChoices(choices);
-              setProposalChoiceCount(choiceCount);
-            }}
-          />
-          <DateCard
-            carouselApi={carouselApi}
-            handleSubmit={(startDate, endDate) => {
-              setProposalStartDate(startDate);
-              setProposalEndDate(endDate);
-            }}
-            defaultValues={{
-              startDate: proposalStartDate,
-              endDate: proposalEndDate,
-            }}
-          />
-          <ManagerSelectionCard
-            carouselApi={carouselApi}
-            handleSubmit={managers => {
-              setProposalManagers(managers);
-            }}
-          />
-          <VoterSelectionCard
-            carouselApi={carouselApi}
-            handleSubmit={(users, proposalVisibility) => {
-              setProposalVoters(users);
-              setProposalVisibility(proposalVisibility);
-            }}
-            handlePatternSubmit={pattern => setProposalUserPattern(pattern)}
-          />
+      <div className="flex h-full flex-col justify-center gap-5">
+        <div className="flex justify-center gap-2">
+          {Array.from({ length: 5 }).map((_, index) => {
+            const isInteractive = index <= currentCardIndex;
+            return (
+              <button
+                key={index}
+                className={cn(
+                  'h-2 w-2 rounded-full bg-primary opacity-35 transition-all',
+                  {
+                    'opacity-100': isInteractive,
+                    'scale-[1.4] opacity-100': index === currentCardIndex,
+                  },
+                )}
+                disabled={!isInteractive}
+                onClick={() => {
+                  if (carouselRef.current) {
+                    carouselRef.current.scrollTo?.(index);
+                    setCurrentCardIndex(index);
+                  }
+                }}
+              >
+                {}
+              </button>
+            );
+          })}
+        </div>
+        <main className="flex items-center justify-center">
+          <CardCarousel ref={carouselRef}>
+            <TitleDescriptionCard
+              carouselApi={carouselApi}
+              handleSubmit={(title, description) => {
+                setProposalTitle(title);
+                setProposalDescription(description);
+              }}
+              defaultValues={{
+                title: proposalTitle,
+                description: proposalDescription,
+              }}
+            />
+            <ResolutionValueCard
+              carouselApi={carouselApi}
+              handleSubmit={({ choices, choiceCount }) => {
+                setProposalChoices(choices);
+                setProposalChoiceCount(choiceCount);
+              }}
+            />
+            <DateCard
+              carouselApi={carouselApi}
+              handleSubmit={(startDate, endDate) => {
+                setProposalStartDate(startDate);
+                setProposalEndDate(endDate);
+              }}
+              defaultValues={{
+                startDate: proposalStartDate,
+                endDate: proposalEndDate,
+              }}
+            />
+            <ManagerSelectionCard
+              carouselApi={carouselApi}
+              handleSubmit={managers => {
+                setProposalManagers(managers);
+              }}
+            />
+            <VoterSelectionCard
+              carouselApi={carouselApi}
+              handleSubmit={(users, proposalVisibility) => {
+                setProposalVoters(users);
+                setProposalVisibility(proposalVisibility);
+              }}
+              handlePatternSubmit={pattern => setProposalUserPattern(pattern)}
+            />
 
-          <ProposalSummary
-            data={{
-              title: proposalTitle,
-              description: proposalDescription,
-              startDate: proposalStartDate,
-              endDate: proposalEndDate,
-              status: ProposalStatusOptions.DRAFT,
-              visibility:
-                proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
-              userPattern: proposalUserPattern ?? {},
-              voters: proposalVoters,
-              managers: proposalManagers,
-              choices: proposalChoices,
-              choiceCount: proposalChoiceCount,
-            }}
-            onCancel={carouselApi.scrollPrev}
-          />
-        </CardCarousel>
-      </main>
+            <ProposalSummary
+              data={{
+                title: proposalTitle,
+                description: proposalDescription,
+                startDate: proposalStartDate,
+                endDate: proposalEndDate,
+                status: ProposalStatusOptions.DRAFT,
+                visibility:
+                  proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
+                userPattern: proposalUserPattern ?? {},
+                voters: proposalVoters,
+                managers: proposalManagers,
+                choices: proposalChoices,
+                choiceCount: proposalChoiceCount,
+              }}
+              onCancel={carouselApi.scrollPrev}
+            />
+          </CardCarousel>
+        </main>
+      </div>
     </AllUsersProvider>
   );
 }
