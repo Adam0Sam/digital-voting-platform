@@ -40,10 +40,11 @@ function useCarousel() {
   return context;
 }
 
-export interface CarouselScrollHandles {
+export type CarouselScrollHandles = {
   scrollPrev: () => void;
   scrollNext: () => void;
-}
+  scrollTo?: (index: number) => void;
+};
 
 const Carousel = React.forwardRef<
   CarouselScrollHandles,
@@ -87,12 +88,20 @@ const Carousel = React.forwardRef<
       api?.scrollNext();
     }, [api]);
 
+    const scrollTo = React.useCallback(
+      (index: number) => {
+        api?.scrollTo(index);
+      },
+      [api],
+    );
+
     React.useImperativeHandle(ref, () => {
       return {
         scrollPrev,
         scrollNext,
+        scrollTo,
       };
-    }, [scrollPrev, scrollNext]);
+    }, [scrollPrev, scrollNext, scrollTo]);
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
