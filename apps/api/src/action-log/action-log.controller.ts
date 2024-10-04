@@ -7,13 +7,14 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { User, UserRole } from '@prisma/client';
+import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
 import { UserRolesGuard } from 'src/auth/rbac/guard';
 import { ActionLogService } from './action-log.service';
 import { ZodValidationPipe } from 'src/pipes';
 import { ActionFilterDto, ActionFilterDtoSchema } from './dto';
+import { UserRole } from '@ambassador/user';
 
 @UseGuards(JwtAuthGuard)
 @Controller('logs')

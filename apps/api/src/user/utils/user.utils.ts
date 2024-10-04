@@ -1,4 +1,4 @@
-import { Grade, UserRole } from '@prisma/client';
+import { Grade } from '@prisma/client';
 
 /**
  * @description
@@ -24,14 +24,4 @@ export function mapGrade(gradeString: string): Grade {
     return Grade.NONE;
   }
   return grade;
-}
-
-export function mapUserRoles(roles: string[]): UserRole[] {
-  return roles.map((roleString) => {
-    const role: UserRole | undefined = UserRole[roleString.toUpperCase()];
-    if (!role) {
-      throw new Error(`Invalid role:${role}`);
-    }
-    return role;
-  });
 }

@@ -1,7 +1,8 @@
 import { useManagerProposal } from './ProposalManagePage';
 import { UserPatternFormContent } from '@/components/forms/user/user-pattern/UserPatternFormContent';
 import FormHandleButtons from '@/components/forms/FormHandleButtons';
-import { Grade, UserRole } from '@/lib/types';
+import { Grade } from '@/lib/types';
+import { UserRole } from '@ambassador/user';
 import { MultiSelectDropdownHandle } from '@/components/MultiSelectDropdown';
 import { useRef } from 'react';
 import { api } from '@/lib/api';

@@ -7,7 +7,7 @@ import {
   isKeyOfStringLiteralObj,
   isType,
   isTypeArray,
-} from './utils/type-validators';
+} from '../../../../../packages/ambassador/src/utils/type-validators';
 import { Vote } from './vote.type';
 
 export type ProposalChoice = ProposalChoiceDto & { id: string };

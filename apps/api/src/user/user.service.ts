@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserQueryDto } from './dto';
 import { JwtDto } from 'src/auth/jwt/dto';
-import { mapUserRoles } from './utils';
+import { toUserRole } from '@ambassador/user';
 
 @Injectable()
 export class UserService {
@@ -26,7 +26,7 @@ export class UserService {
       personalNames: userPayload.personalNames,
       familyName: userPayload.familyName,
       grade: userPayload.grade,
-      roles: mapUserRoles(userPayload.roles),
+      roles: userPayload.roles.map(toUserRole),
     };
     return await this.prisma.user.create({
       data: user,

@@ -24,6 +24,10 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isFetchingUser, setIsFetchingUser] = useState(true);
 
+  useEffect(() => {
+    // const a = test();
+  }, []);
+
   const mutate = (newUserData: Partial<User>) => {
     setUser(prevUserData => {
       if (!prevUserData) return null;

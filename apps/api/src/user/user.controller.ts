@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
-import { User, UserRole } from '@prisma/client';
+import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
 import { UserRolesGuard } from 'src/auth/rbac/guard';
@@ -7,6 +7,7 @@ import { UserService } from './user.service';
 import { GetUser } from './decorator';
 import { ZodValidationPipe } from 'src/pipes';
 import { UserEmailSchema } from './dto';
+import { UserRole } from '@ambassador/user';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
@@ -36,8 +37,6 @@ export class UserController {
     return this.userService.setUserActiveStatus(userId, false);
   }
 
-  @UseGuards(UserRolesGuard)
-  @Roles(UserRole.ADMIN)
   @UseGuards(UserRolesGuard)
   @Roles(UserRole.ADMIN)
   @Put('admin/deactivate')

@@ -7,8 +7,8 @@ import {
   isKeyOfStringLiteralObj,
   isKeyOfStringLiteralObjArray,
   isTypeArray,
-} from './utils/type-validators';
-import { WithValuesAsStrings } from './utils/util-types';
+} from '../../../../../packages/ambassador/src/utils/type-validators';
+import { WithValuesAsStrings } from '../../../../../packages/ambassador/src/utils/util-types';
 import { VoteStatus } from './vote.type';
 
 export type UserDeep = User & {

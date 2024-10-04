@@ -1,5 +1,6 @@
-import { isGrade, isUserRoleArray, User } from '@/lib/types';
+import { isGrade, User } from '@/lib/types';
 import { TablifiedUser } from '../table.types';
+import { isUserRole } from '@ambassador/user';
 
 export function normalizeUser(user: Partial<TablifiedUser>): User {
   if (!user.id || !user.personalNames || !user.familyName || !user.roles) {
@@ -16,7 +17,7 @@ export function normalizeUser(user: Partial<TablifiedUser>): User {
 
   const stringifiedRoles =
     user.roles.indexOf(' ') > -1 ? user.roles.split(', ') : [user.roles];
-  if (!isUserRoleArray(stringifiedRoles)) {
+  if (!stringifiedRoles.every(isUserRole)) {
     throw new Error(
       `Invalid ${user.familyName} user roles: ${JSON.stringify(user.roles)}`,
     );

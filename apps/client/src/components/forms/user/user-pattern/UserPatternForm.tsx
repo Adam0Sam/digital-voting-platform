@@ -1,10 +1,10 @@
-import { Grade, UserPatternDto, UserRole } from '@/lib/types';
+import { Grade, UserPatternDto } from '@/lib/types';
 import { ExtendedFormProps, WithRequiredSubmit } from '../../interface';
 import { useRef, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { SquareAsterisk } from 'lucide-react';
-
+import { UserRole } from '@ambassador/user';
 import { MultiSelectDropdownHandle } from '@/components/MultiSelectDropdown';
 import FormHandleButtons from '../../FormHandleButtons';
 import { UserPatternFormContent } from './UserPatternFormContent';
