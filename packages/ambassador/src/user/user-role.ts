@@ -23,12 +23,16 @@ export type UserRole = (typeof UserRoles)[number];
 const UserRoleSchema = z.enum(UserRoles);
 
 export const isUserRole = (value: unknown): value is UserRole => {
+  if (typeof value !== "string") {
+    return false;
+  }
   return UserRoleSchema.safeParse(value).success;
 };
 
 export const toUserRole = (value: string): UserRole => {
-  if (isUserRole(value)) {
-    return value;
+  const upperValue = value.toUpperCase();
+  if (isUserRole(upperValue)) {
+    return upperValue;
   }
   throw new Error(`Invalid user role: ${value}`);
 };

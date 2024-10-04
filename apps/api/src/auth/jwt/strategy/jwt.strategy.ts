@@ -47,6 +47,8 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   // passport calls this method even if the token is invalid, why?
   async validate(req: Request, payload: JwtDto) {
     const personalNames = splitFirstNames(payload.first_name);
+    console.log('GRADE:', payload.grade);
+    console.log('transformed grade:', toGrade(payload.grade));
     const user: User | null = await this.userService.findUser({
       personalNames,
       familyName: payload.last_name,

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserQueryDto } from './dto';
 import { JwtDto } from 'src/auth/jwt/dto';
-import { toUserRole, User } from '@ambassador/user';
+import { toUserRole, User, UserRole } from '@ambassador';
 
 @Injectable()
 export class UserService {
@@ -25,7 +25,7 @@ export class UserService {
       personalNames: userPayload.personalNames,
       familyName: userPayload.familyName,
       grade: userPayload.grade,
-      roles: userPayload.roles.map(toUserRole),
+      roles: [UserRole.STUDENT],
     };
     return await this.prisma.user.create({
       data: user,

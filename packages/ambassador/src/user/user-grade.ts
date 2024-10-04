@@ -34,6 +34,8 @@ export const isGrade = (value: unknown): value is Grade => {
 };
 
 export const toGrade = (gradeString: string): Grade => {
-  const grade = Grades.find((grade) => grade === gradeString.toUpperCase());
+  const upperGrade = gradeString.toUpperCase();
+  const slicedGrade = upperGrade.slice(0, 3);
+  const grade = Grades.find((grade) => grade === slicedGrade);
   return grade ?? NIL_GRADE;
 };
