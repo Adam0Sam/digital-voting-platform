@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { BarChartBigIcon, CalendarClock } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { getTimeLeft } from '@/lib/time';
-import { Proposal } from '@/lib/types';
+import { Proposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
 import { getChoiceData } from '@/lib/proposal-data';
 import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
@@ -40,7 +40,7 @@ export default function ManagerCard({
   );
 
   const { choiceChartData, resolvedVoteCount } = getChoiceData(
-    proposalData.choices,
+    proposalData.candidates,
     proposalData.votes,
   );
 

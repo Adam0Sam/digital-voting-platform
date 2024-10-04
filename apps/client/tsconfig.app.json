@@ -29,6 +29,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@ambassador": [
+        "../../packages/ambassador/dist/index"
+      ],
       "@ambassador/*": [
         "../../packages/ambassador/dist/*"
       ]

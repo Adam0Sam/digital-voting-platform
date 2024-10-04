@@ -6,13 +6,37 @@
         "build": "tsc"
     },
     "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
         "./user": {
             "types": "./dist/user/index.d.ts",
             "default": "./dist/user/index.js"
         },
+        "./vote": {
+            "types": "./dist/vote/index.d.ts",
+            "default": "./dist/vote/index.js"
+        },
         "./utils": {
             "types": "./dist/utils/index.d.ts",
             "default": "./dist/utils/index.js"
+        },
+        "./proposal": {
+            "types": "./dist/proposal/index.d.ts",
+            "default": "./dist/proposal/index.js"
+        },
+        "./manager": {
+            "types": "./dist/manager/index.d.ts",
+            "default": "./dist/manager/index.js"
+        },
+        "candidate": {
+            "types": "./dist/candidate/index.d.ts",
+            "default": "./dist/candidate/index.js"
+        },
+        "./action-log": {
+            "types": "./dist/action-log/index.d.ts",
+            "default": "./dist/action-log/index.js"
         }
     },
     "devDependencies": {

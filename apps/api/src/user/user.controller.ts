@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { User } from '@ambassador/user';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
 import { UserRolesGuard } from 'src/auth/rbac/guard';

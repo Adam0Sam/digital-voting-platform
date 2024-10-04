@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserActions } from '@prisma/client';
+import { Action } from '@ambassador/action-log';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -7,7 +7,7 @@ export class LoggerService {
   constructor(private prisma: PrismaService) {}
 
   async logAction(
-    action: UserActions,
+    action: Action,
     info: {
       userId?: string;
       userAgent: string;

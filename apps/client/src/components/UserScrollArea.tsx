@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User } from '@/lib/types';
+import { User } from '@ambassador';
 import { UserMinus } from 'lucide-react';
 import { FC, PropsWithChildren } from 'react';
 

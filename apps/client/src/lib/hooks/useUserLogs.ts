@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { createCachedAsyncResource } from '../async-resource';
-import { UserActionLog } from '../types/log.type';
+import { ActionLogEntry } from '@ambassador';
 import constructActionFilter, { ActionFilter } from '../action-filter';
 
 const userLogResourceCache = new Map();
@@ -16,7 +16,7 @@ export default function useUserLogs(
   useEffect(() => {
     setPage(initialPage);
   }, [actionFilter, initialPage]);
-  const userLogResource = createCachedAsyncResource<UserActionLog[]>(
+  const userLogResource = createCachedAsyncResource<ActionLogEntry[]>(
     userLogResourceCache,
     `${userId}-${pageSize}-${page}-${JSON.stringify(actionFilter)}`,
   );

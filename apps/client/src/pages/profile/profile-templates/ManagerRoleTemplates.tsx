@@ -7,11 +7,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { api } from '@/lib/api';
 import useWindowSize from '@/lib/hooks/useWindowSize';
 import { LOADER_IDS, useLoadedDataLocal } from '@/lib/loaders';
-import {
-  ProposalManagerRole,
-  ProposalManagerRoleDto,
-} from '@/lib/types/proposal-manager.type';
-
+import { CreateManagerRoleDto, ManagerRole } from '@ambassador';
 import { ListPlus, Settings2, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRevalidator } from 'react-router-dom';
@@ -26,7 +22,7 @@ function ManagertRoleItem({
   handleCheckedChange,
   handleSettingsClick,
 }: {
-  template: ProposalManagerRole;
+  template: ManagerRole;
   handleCheckedChange?: (isChecked: boolean) => void;
   handleSettingsClick?: () => void;
 }) {
@@ -49,12 +45,13 @@ function ManagertRoleItem({
 }
 
 export default function ManagerRoleTemplates() {
-  const authoredRoles = useLoadedDataLocal<LOADER_IDS.MANAGER_ROLES>();
+  const authoredRoles = useLoadedDataLocal<typeof LOADER_IDS.MANAGER_ROLES>();
   const revalidator = useRevalidator();
 
   const [templates, setTemplates] = useState(authoredRoles);
-  const [openedTemplate, setOpenedTemplates] =
-    useState<ProposalManagerRole | null>(null);
+  const [openedTemplate, setOpenedTemplates] = useState<ManagerRole | null>(
+    null,
+  );
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
 
@@ -64,7 +61,7 @@ export default function ManagerRoleTemplates() {
 
   const { width: windowWidth } = useWindowSize();
 
-  const handleOpenedTemplate = (template: ProposalManagerRole | null) => {
+  const handleOpenedTemplate = (template: ManagerRole | null) => {
     setOpenedTemplates(template);
     /**
      * TODO:
@@ -77,12 +74,12 @@ export default function ManagerRoleTemplates() {
     }
   };
 
-  const createTemplate = async (roleTemplateDto: ProposalManagerRoleDto) => {
+  const createTemplate = async (roleTemplateDto: CreateManagerRoleDto) => {
     await api.managerRole.createRole(roleTemplateDto);
     revalidator.revalidate();
   };
 
-  const editTemplate = async (roleTemplate: ProposalManagerRole) => {
+  const editTemplate = async (roleTemplate: ManagerRole) => {
     setTemplates(prevTemplates =>
       prevTemplates.map(template =>
         template.id === roleTemplate.id ? roleTemplate : template,
@@ -92,7 +89,7 @@ export default function ManagerRoleTemplates() {
     await api.managerRole.updateRole(roleTemplate);
   };
 
-  const deleteTemplate = async (roleTemplate: ProposalManagerRole) => {
+  const deleteTemplate = async (roleTemplate: ManagerRole) => {
     setTemplates(prevTemplates =>
       prevTemplates.filter(template => template.id !== roleTemplate.id),
     );

@@ -1,7 +1,7 @@
+import { UserWithRelations } from '@ambassador';
 import constructActionFilter, { ActionFilter } from '../action-filter';
 import URI from '../constants/uri-constants';
-import { UserDeep } from '../types';
-import { UserActionLog } from '../types/log.type';
+import { ActionLogEntry } from '@ambassador';
 import { HttpClient } from './http-client';
 
 export class AdminApi {
@@ -10,7 +10,7 @@ export class AdminApi {
   async getAllUsersDeep() {
     const allUsers = (await this.httpClient.get(
       'user/admin/all',
-    )) as UserDeep[];
+    )) as UserWithRelations[];
     return allUsers;
   }
 
@@ -24,10 +24,9 @@ export class AdminApi {
     page = 1,
     actionFilter: ActionFilter = constructActionFilter(),
   ) {
-    console.log('Getting user logs', userId, pageSize, page);
     return (await this.httpClient.get(
       `logs/${userId}?pageSize=${pageSize}&page=${page}&actionFilter=${JSON.stringify(actionFilter)}`,
-    )) as UserActionLog[];
+    )) as ActionLogEntry[];
   }
 
   async getUserLogsCount(

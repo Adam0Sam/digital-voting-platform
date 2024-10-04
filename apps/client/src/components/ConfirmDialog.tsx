@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
-import { WithRequired } from '@/lib/types/utils/util-types';
+import { WithRequired } from '@ambassador';
 
 type CustomButtonProps = {
   text?: ReactNode;

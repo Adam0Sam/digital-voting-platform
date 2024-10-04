@@ -7,14 +7,12 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { Roles } from 'src/auth/rbac/decorator';
 import { UserRolesGuard } from 'src/auth/rbac/guard';
 import { ActionLogService } from './action-log.service';
 import { ZodValidationPipe } from 'src/pipes';
-import { ActionFilterDto, ActionFilterDtoSchema } from './dto';
-import { UserRole } from '@ambassador/user';
+import { UserRole, User, ActionFilter, ActionFilterSchema } from '@ambassador';
 
 @UseGuards(JwtAuthGuard)
 @Controller('logs')
@@ -33,8 +31,8 @@ export class ActionLogController {
     @Param('userId') userId: User['id'],
     @Query('pageSize') pageSize: number,
     @Query('page') page: number,
-    @Query('actionFilter', new ZodValidationPipe(ActionFilterDtoSchema, true))
-    actionFilter: ActionFilterDto,
+    @Query('actionFilter', new ZodValidationPipe(ActionFilterSchema, true))
+    actionFilter: ActionFilter,
   ) {
     return this.actionLogService.getUserLogs(
       userId,
@@ -49,8 +47,8 @@ export class ActionLogController {
   @Get(':userId/count')
   getUserLogsCount(
     @Param('userId') userId: User['id'],
-    @Query('actionFilter', new ZodValidationPipe(ActionFilterDtoSchema, true))
-    actionFilter: ActionFilterDto,
+    @Query('actionFilter', new ZodValidationPipe(ActionFilterSchema, true))
+    actionFilter: ActionFilter,
   ) {
     return this.actionLogService.getUserLogsCount(userId, actionFilter);
   }

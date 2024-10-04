@@ -1,4 +1,3 @@
-import { UserActionLog, UserActions } from '@/lib/types/log.type';
 import {
   flexRender,
   getCoreRowModel,
@@ -23,7 +22,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User } from '@/lib/types';
+import { Actions, User } from '@ambassador';
 import useUserLogs from '@/lib/hooks/useUserLogs';
 import GenericSpinner from '@/components/forms/GenericSpinner';
 import constructActionFilter, { ActionFilter } from '@/lib/action-filter';
@@ -51,7 +50,7 @@ export default function PaginatedLogTable({ user }: { user: User }) {
             <DropdownMenuContent align="end">
               <div className="flex flex-col gap-4">
                 <div>
-                  {Object.values(UserActions).map(action => {
+                  {Actions.map(action => {
                     return (
                       <DropdownMenuCheckboxItem
                         onSelect={e => e.preventDefault()}

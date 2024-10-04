@@ -15,40 +15,40 @@ import { ScrollArea } from '../../ui/scroll-area';
 import ChoiceCountPopover from './ChoiceCountPopover';
 
 import { cn } from '@/lib/utils';
-import { ProposalChoiceDto } from '@/lib/types/proposal.type';
+import { CreateCandidateDto } from '@ambassador';
 
 type FormValues = {
-  choices: ProposalChoiceDto[];
+  candidates: CreateCandidateDto[];
   choiceCount: number;
 };
-export type ProposalChoiceFormProps = ExtendedFormProps<FormValues> & {
-  initialChoices?: ProposalChoiceDto[];
+export type CandidateFormProps = ExtendedFormProps<FormValues> & {
+  initialCandidates?: CreateCandidateDto[];
   initialChoiceCount?: number;
   disableEdit?: boolean;
   children?: React.JSX.Element;
 };
 
-export type ProposalChoiceFormHandle = {
-  getChoices: () => ProposalChoiceDto[];
+export type CandidateFormHandles = {
+  getChoices: () => CreateCandidateDto[];
   getChoiceCount: () => number;
 };
 
-const ProposalChoiceForm = forwardRef(_ProposalChoiceForm);
-export default ProposalChoiceForm;
+const CandidateForm = forwardRef(_ProposalChoiceForm);
+export default CandidateForm;
 
 function _ProposalChoiceForm(
-  props: ProposalChoiceFormProps,
-  ref: React.Ref<ProposalChoiceFormHandle>,
+  props: CandidateFormProps,
+  ref: React.Ref<CandidateFormHandles>,
 ) {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
-  const [proposalChoices, setProposalChoices] = useState<ProposalChoiceDto[]>(
-    props.initialChoices ?? [],
+  const [candidates, setCandidates] = useState<CreateCandidateDto[]>(
+    props.initialCandidates ?? [],
   );
   const choiceCount = useRef(props.initialChoiceCount ?? 1);
   const [error, setError] = useState<string | null>(null);
 
   useImperativeHandle(ref, () => ({
-    getChoices: () => proposalChoices,
+    getChoices: () => candidates,
     getChoiceCount: () => choiceCount.current,
   }));
 
@@ -74,7 +74,7 @@ function _ProposalChoiceForm(
             </SheetTrigger>
             <ScrollArea className="h-48">
               {error && <p className="text-md text-destructive">{error}</p>}
-              {proposalChoices.map(resolution => (
+              {candidates.map(resolution => (
                 <div
                   className="mb-4 flex items-center justify-between rounded-md border px-2 py-2"
                   key={resolution.value}
@@ -84,7 +84,7 @@ function _ProposalChoiceForm(
                     <Button
                       variant="ghost"
                       onClick={() =>
-                        setProposalChoices(prev =>
+                        setCandidates(prev =>
                           prev.filter(res => res.value !== resolution.value),
                         )
                       }
@@ -97,9 +97,7 @@ function _ProposalChoiceForm(
             </ScrollArea>
           </div>
           <ChoiceCountPopover
-            maxChoiceCount={
-              proposalChoices.length !== 0 ? proposalChoices.length : 1
-            }
+            maxChoiceCount={candidates.length !== 0 ? candidates.length : 1}
             defaultChoiceCount={choiceCount.current}
             handleSelect={value => {
               if (props.disableEdit) return;
@@ -114,7 +112,7 @@ function _ProposalChoiceForm(
           <div className="flex h-full w-full items-center justify-center">
             <TitleDescriptionForm
               onSubmit={({ title, description }) => {
-                setProposalChoices(prevResolutions => [
+                setCandidates(prevResolutions => [
                   ...prevResolutions,
                   { value: title, description },
                 ]);
@@ -135,13 +133,13 @@ function _ProposalChoiceForm(
           formSubmitLabel={props.formSubmitLabel}
           formCancelLabel={props.formCancelLabel}
           handleSubmitClick={() => {
-            if (proposalChoices.length === 0) {
+            if (candidates.length === 0) {
               setError('Please add at least one resolution value');
               return;
             }
             setError(null);
             props.onSubmit?.({
-              choices: proposalChoices,
+              candidates: candidates,
               choiceCount: choiceCount.current,
             });
           }}

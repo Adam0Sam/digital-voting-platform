@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserQueryDto } from './dto';
 import { JwtDto } from 'src/auth/jwt/dto';
-import { toUserRole } from '@ambassador/user';
+import { toUserRole, User } from '@ambassador/user';
 
 @Injectable()
 export class UserService {

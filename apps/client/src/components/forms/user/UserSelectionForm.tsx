@@ -1,7 +1,6 @@
-import { User } from '@/lib/types';
+import { User } from '@ambassador';
 import { ExtendedFormProps } from '../interface';
 import { FC, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
-
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

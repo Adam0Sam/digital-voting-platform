@@ -1,6 +1,6 @@
-import { StringifiedUser } from '@/lib/types';
+import { WithValuesAsStrings, User } from '@ambassador';
 
-export type TablifiedUser = Omit<StringifiedUser, 'active'> & {
+export type TablifiedUser = Omit<WithValuesAsStrings<User>, 'active'> & {
   active: boolean;
 };
 

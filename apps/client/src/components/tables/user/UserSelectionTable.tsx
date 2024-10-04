@@ -1,4 +1,4 @@
-import { User } from '@/lib/types';
+import { User } from '@ambassador';
 import { DataTable } from './UserDataTable';
 import { userColumns } from './UserColumns';
 import { FilterColumnContextProvider } from './context/FilterColumnContext';

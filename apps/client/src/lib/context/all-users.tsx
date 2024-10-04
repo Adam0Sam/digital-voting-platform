@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { User, UserDeep } from '../types';
+import { User, UserWithRelations } from '@ambassador';
 import { api } from '../api';
 
 type AllUsersContextType = User[] | null;
@@ -33,7 +33,7 @@ export const useAllUsers = () => {
   return context;
 };
 
-type AllUsersDeepContextType = UserDeep[] | null;
+type AllUsersDeepContextType = UserWithRelations[] | null;
 
 export const AllUsersDeepContext = createContext<AllUsersDeepContextType>(null);
 

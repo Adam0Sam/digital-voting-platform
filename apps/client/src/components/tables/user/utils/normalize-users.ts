@@ -1,4 +1,4 @@
-import { isGrade, User } from '@/lib/types';
+import { isGrade, User } from '@ambassador';
 import { TablifiedUser } from '../table.types';
 import { isUserRole } from '@ambassador/user';
 

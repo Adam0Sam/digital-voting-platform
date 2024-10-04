@@ -16,9 +16,8 @@ import {
 import { PROPOSAL_HREFS } from '@/lib/routes';
 
 import { getTimeLeft } from '@/lib/time';
-import { Proposal, Vote, VoteStatusOptions } from '@/lib/types';
+import { Proposal, Vote, VoteStatus } from '@ambassador';
 import { cn } from '@/lib/utils';
-import { time } from 'console';
 
 import { CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -87,7 +86,7 @@ export default function VoterCard({
               </PopoverContent>
             </Popover>
             <p>
-              {voteData.status === VoteStatusOptions.PENDING
+              {voteData.status === VoteStatus.PENDING
                 ? 'submit a vote'
                 : 'review your vote'}
             </p>

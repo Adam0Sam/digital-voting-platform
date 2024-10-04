@@ -1,15 +1,14 @@
-import { Grade, UserPatternDto } from '@/lib/types';
+import { Grade, UserPattern, UserRole } from '@ambassador';
 import { ExtendedFormProps, WithRequiredSubmit } from '../../interface';
 import { useRef, useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { SquareAsterisk } from 'lucide-react';
-import { UserRole } from '@ambassador/user';
 import { MultiSelectDropdownHandle } from '@/components/MultiSelectDropdown';
 import FormHandleButtons from '../../FormHandleButtons';
 import { UserPatternFormContent } from './UserPatternFormContent';
 
-type FormValues = UserPatternDto;
+type FormValues = UserPattern;
 export type UserPatternFormProps = WithRequiredSubmit<
   ExtendedFormProps<FormValues>
 >;
@@ -46,8 +45,8 @@ export default function UserPatternForm({ onSubmit }: UserPatternFormProps) {
             handleSubmitClick={() => {
               setSheetIsOpen(false);
               onSubmit({
-                grades: gradesDropdownRef.current?.getSelectedItems(),
-                roles: rolesDropdownRef.current?.getSelectedItems(),
+                grades: gradesDropdownRef.current?.getSelectedItems() ?? [],
+                roles: rolesDropdownRef.current?.getSelectedItems() ?? [],
               });
             }}
           />

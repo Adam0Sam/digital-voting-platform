@@ -3,8 +3,7 @@ import ProposalManageDate from '@/components/proposal/manager/ProposalManageDate
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
-import { Proposal } from '@/lib/types';
-import { ManagerPermissionsDto } from '@/lib/types/proposal-manager.type';
+import { ManagerPermissions, Proposal } from '@ambassador';
 import { Outlet, useOutletContext, useParams } from 'react-router-dom';
 
 function getLinks(proposalId: string) {
@@ -31,15 +30,17 @@ function getLinks(proposalId: string) {
 
 type ContextType = {
   proposal: Proposal;
-  permissions: ManagerPermissionsDto;
+  permissions: ManagerPermissions;
 };
 
 export default function ProposalManagePage() {
   const { id: proposalId } = useParams();
-
   const proposals = useLoadedData(LOADER_IDS.MANAGER_PROPOSALS);
-
   const proposal = proposals.find(proposal => proposal.id === proposalId);
+
+  if (!proposal) {
+    throw new Response('Proposal not found', { status: 404 });
+  }
 
   const { user: signedInUser } = useSignedInUser();
   const permissions = proposal?.managers.find(

@@ -1,33 +1,31 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Candidate } from '@ambassador/candidate';
 import {
+  ManagerListDto,
   ManagerPermissions,
-  Prisma,
-  ProposalChoice,
+  CreateProposalDto,
+  UpdateProposalDto,
   User,
-  VoteStatus,
-} from '@prisma/client';
-
+} from '@ambassador';
+import { VoteStatus } from '@ambassador/vote';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateProposalDto, UpdateProposalDto } from './dto';
-import { z } from 'zod';
-import { ProposalManagerListDtoSchema } from 'src/manager-role/dto/manager-role.dto';
 
 @Injectable()
 export class ProposalService {
   constructor(private prisma: PrismaService) {}
 
   private getCreateManagersInput(
-    managerLists: z.infer<typeof ProposalManagerListDtoSchema>[],
-  ): Prisma.ProposalManagerUncheckedCreateNestedManyWithoutProposalInput {
-    const createManagersInput: Prisma.ProposalManagerCreateManyProposalInput[] =
-      [];
+    managerLists: ManagerListDto[],
+  ): Prisma.ManagerUncheckedCreateNestedManyWithoutProposalInput {
+    const createManagersInput: Prisma.ManagerCreateManyProposalInput[] = [];
 
     for (const managerList of managerLists) {
       const roleId = managerList.role.id;
       for (const user of managerList.users) {
         createManagersInput.push({
           userId: user.id,
-          proposalManagerRoleId: roleId,
+          managerRoleId: roleId,
         });
       }
     }
@@ -40,7 +38,7 @@ export class ProposalService {
   async createOne(proposal: CreateProposalDto) {
     const voteUserIds =
       proposal.voters?.map((voter) => ({ userId: voter.id })) ?? [];
-    const choices = proposal.choices.map((choice) => ({
+    const candidates = proposal.candidates.map((choice) => ({
       value: choice.value,
       description: choice.description,
     }));
@@ -53,8 +51,8 @@ export class ProposalService {
         endDate: proposal.endDate,
         status: proposal.status,
         visibility: proposal.visibility,
-        choices: {
-          create: choices,
+        candidates: {
+          create: candidates,
         },
         userPattern: {
           create: proposal.userPattern,
@@ -72,12 +70,12 @@ export class ProposalService {
     proposalId,
     proposalDto,
     permissions,
-    prevChoices,
+    prevCandidates,
   }: {
     proposalId?: string;
     proposalDto: UpdateProposalDto;
     permissions: ManagerPermissions;
-    prevChoices: ProposalChoice[];
+    prevCandidates: Candidate[];
   }): Prisma.ProposalUpdateInput {
     const updateInput: Prisma.ProposalUpdateInput = {};
     let shouldResetVotes = false;
@@ -114,18 +112,18 @@ export class ProposalService {
           }
           break;
         case 'choices':
-          if (permissions.canEditAvailableChoices) {
-            const choiceIdsForDeletion: string[] = prevChoices
+          if (permissions.canEditCandidates) {
+            const candidateIdsForDeletion: string[] = prevCandidates
               .filter(
                 (prevChoice) =>
-                  !proposalDto.choices.some(
+                  !proposalDto.candidates.some(
                     (newChoice) => newChoice.id === prevChoice.id,
                   ),
               )
               .map((choice) => choice.id);
 
-            updateInput.choices = {
-              upsert: proposalDto.choices.map((choice) => ({
+            updateInput.candidates = {
+              upsert: proposalDto.candidates.map((choice) => ({
                 where: {
                   id: choice.id ?? '',
                 },
@@ -140,7 +138,7 @@ export class ProposalService {
               })),
               deleteMany: {
                 id: {
-                  in: choiceIdsForDeletion,
+                  in: candidateIdsForDeletion,
                 },
               },
             };
@@ -210,12 +208,12 @@ export class ProposalService {
     proposalDto: UpdateProposalDto,
     userId: string,
   ) {
-    const { managers, choices } = await this.prisma.proposal.findUnique({
+    const { managers, candidates } = await this.prisma.proposal.findUnique({
       where: {
         id: proposalId,
       },
       select: {
-        choices: true,
+        candidates: true,
         managers: {
           where: {
             userId,
@@ -244,7 +242,7 @@ export class ProposalService {
         proposalId,
         proposalDto,
         permissions,
-        prevChoices: choices,
+        prevCandidates: candidates,
       }),
     });
   }
@@ -265,13 +263,13 @@ export class ProposalService {
         ],
       },
       include: {
-        choices: true,
+        candidates: true,
         votes: {
           where: {
             userId: user.id,
           },
           include: {
-            choices: true,
+            candidates: true,
           },
         },
       },
@@ -313,11 +311,11 @@ export class ProposalService {
       include: {
         votes: {
           include: {
-            choices: true,
+            candidates: true,
             user: true,
           },
         },
-        choices: true,
+        candidates: true,
         managers: {
           include: {
             role: {
