@@ -28,11 +28,18 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@ambassador": [
+        "../../packages/ambassador/dist/index"
+      ],
+      "@ambassador/*": [
+        "../../packages/ambassador/dist/*"
       ]
     },
   },
   "include": [
     "src",
-    "src/worker/proposal-worker.js"
+    "../../packages/ambassador/dist/**/*.ts",
+    "../../packages/ambassador/src/utils"
   ]
 }

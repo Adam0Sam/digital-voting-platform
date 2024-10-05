@@ -1,9 +1,11 @@
+import { Candidate } from '@ambassador/candidate';
+import { VoteStatus } from '@ambassador/vote';
 import {
   BadRequestException,
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { ProposalChoice, VoteStatus } from '@prisma/client';
+
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -13,7 +15,7 @@ export class VoteService {
   async voteForProposal(
     userId: string,
     proposalId: string,
-    choices: ProposalChoice[],
+    candidates: Candidate[],
   ) {
     const proposal = await this.prisma.proposal.findUnique({
       where: {
@@ -25,7 +27,7 @@ export class VoteService {
         },
       },
       include: {
-        choices: true,
+        candidates: true,
         votes: true,
       },
     });
@@ -33,8 +35,9 @@ export class VoteService {
     if (!proposal) {
       throw new BadRequestException('Proposal not found');
     }
-    if (proposal.choices.length < choices.length) {
-      throw new BadRequestException('Invalid number of choices');
+    console.log('VOTE SERVICE', proposal.candidates.length, candidates?.length);
+    if (proposal.candidates.length < candidates.length) {
+      throw new BadRequestException('Invalid number of candidates');
     }
     const userVote = proposal.votes.find((vote) => vote.userId === userId);
 
@@ -43,10 +46,10 @@ export class VoteService {
     }
 
     const availableChoiceIdSet = new Set(
-      proposal.choices.map((choice) => choice.id),
+      proposal.candidates.map((choice) => choice.id),
     );
 
-    if (!choices.every((choice) => availableChoiceIdSet.has(choice.id))) {
+    if (!candidates.every((choice) => availableChoiceIdSet.has(choice.id))) {
       throw new BadRequestException('Invalid choice id');
     }
 
@@ -58,8 +61,8 @@ export class VoteService {
         },
       },
       data: {
-        choices: {
-          set: choices.map((choice) => ({
+        candidates: {
+          set: candidates.map((choice) => ({
             id: choice.id,
           })),
         },
@@ -72,7 +75,7 @@ export class VoteService {
     userId: string,
     proposalId: string,
     voteId: string,
-    choices: ProposalChoice[],
+    candidates: Candidate[],
     voteStatus: VoteStatus,
   ) {
     const proposal = await this.prisma.proposal.findUnique({
@@ -85,7 +88,7 @@ export class VoteService {
         },
       },
       include: {
-        choices: true,
+        candidates: true,
         votes: true,
         managers: {
           include: {
@@ -103,15 +106,15 @@ export class VoteService {
       throw new BadRequestException('Proposal not found');
     }
 
-    if (proposal.choices.length < choices.length) {
-      throw new BadRequestException('Invalid number of choices');
+    if (proposal.candidates.length < candidates.length) {
+      throw new BadRequestException('Invalid number of candidates');
     }
 
     const manager = proposal.managers.find(
       (manager) => manager.userId === userId,
     );
 
-    if (!manager.role.permissions.canEditVoteChoices) {
+    if (!manager.role.permissions.canEditVotes) {
       throw new ConflictException(
         'User does not have permission to edit votes',
       );
@@ -122,8 +125,8 @@ export class VoteService {
         id: voteId,
       },
       data: {
-        choices: {
-          set: choices.map((choice) => ({
+        candidates: {
+          set: candidates.map((choice) => ({
             id: choice.id,
           })),
         },

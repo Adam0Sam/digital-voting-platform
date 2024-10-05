@@ -1,11 +1,6 @@
-import { User } from '@/lib/types';
 import { ExtendedFormProps } from '../interface';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
-import {
-  ProposalManagerListDto,
-  ProposalManagerRole,
-} from '@/lib/types/proposal-manager.type';
 import UserSelectionForm from './UserSelectionForm';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -25,12 +20,13 @@ import FormHandleButtons from '../FormHandleButtons';
 import ManagerRoleForm from '../ManagerRoleForm';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { ManagerListDto, ManagerRole, User } from '@ambassador';
 
-type FormValues = ProposalManagerListDto[];
+type FormValues = ManagerListDto[];
 export type ManagerSelectionFormProps = ExtendedFormProps<FormValues>;
 
 type RoleCardProps = {
-  role: ProposalManagerRole;
+  role: ManagerRole;
   isSelected: boolean;
   handleClick: () => void;
 };
@@ -64,25 +60,14 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [authoredManagerRoles, setAuthoredManagerRoles] = useState<
-    ProposalManagerRole[]
-  >([]);
-
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [roleFormIsOpen, setRoleFormIsOpen] = useState(false);
 
-  const [mappedManagers, setMappedManagers] = useState<
-    ProposalManagerListDto[]
-  >([]);
+  const [mappedManagers, setMappedManagers] = useState<ManagerListDto[]>([]);
 
   const loadedManagerRoles = useLoadedData(LOADER_IDS.MANAGER_ROLES);
-
-  useEffect(() => {
-    setAuthoredManagerRoles(loadedManagerRoles);
-    if (loadedManagerRoles.length === 0) {
-      setSheetIsOpen(true);
-    }
-  }, [loadedManagerRoles]);
+  const [authoredManagerRoles, setAuthoredManagerRoles] =
+    useState<ManagerRole[]>(loadedManagerRoles);
 
   const handleUserRemove = (targetUser: User) => {
     setMappedManagers(prevManagers =>
@@ -114,7 +99,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
 
   const handleUserSelectionEnd = (
     selectedUsers: User[],
-    assignedRole: ProposalManagerRole,
+    assignedRole: ManagerRole,
   ) => {
     setMappedManagers(prevManagers => {
       const updatedManagers = prevManagers.map(manager => {
@@ -132,7 +117,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
     });
   };
 
-  const handleRoleAddition = (role: ProposalManagerRole) => {
+  const handleRoleAddition = (role: ManagerRole) => {
     setMappedManagers(prevManagers => {
       return [
         ...prevManagers,
@@ -144,7 +129,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
     });
   };
 
-  const handleRoleRemoval = (role: ProposalManagerRole) => {
+  const handleRoleRemoval = (role: ManagerRole) => {
     setMappedManagers(prevManagers =>
       prevManagers.filter(manager => manager.role.id !== role.id),
     );
@@ -210,7 +195,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                     <ManagerRoleForm
                       handleCreateSubmit={templateDto => {
                         api.managerRole.createRole(templateDto).then(role => {
-                          const newRole: ProposalManagerRole = {
+                          const newRole: ManagerRole = {
                             ...role,
                             permissions: templateDto.permissions,
                           };

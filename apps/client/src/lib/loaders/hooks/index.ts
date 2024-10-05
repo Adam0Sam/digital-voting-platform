@@ -16,7 +16,7 @@ export const useDeferredLoadedData = <T extends keyof typeof LOADER_IDS>(
 };
 
 export const useLoadedDataLocal = <T extends keyof typeof LOADER_IDS>() => {
-  return useLoaderData as LoaderReturnType<T>;
+  return useLoaderData() as LoaderReturnType<T>;
 };
 
 export const useAsyncLoaderValue = <T extends keyof typeof LOADER_IDS>(

@@ -3,22 +3,20 @@ import { Pencil, Settings2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import {
-  ProposalChoice,
-  Vote,
-  VoteStatus,
-  VoteStatusOptions,
-} from '@/lib/types';
+
 import { useRef, useState } from 'react';
 import Combobox, { ComboboxHandle, ComboboxItem } from './Combobox';
 import ConfirmDialog from './ConfirmDialog';
+import { Candidate, Vote, VoteStatus } from '@ambassador';
 
 function getSelectedChoices(
-  selectedChoices: ProposalChoice[],
-  allChoices: ProposalChoice[],
+  selectedCandidates: Candidate[],
+  allCandidates: Candidate[],
 ) {
-  const selectedChoiceIdSet = new Set(selectedChoices.map(choice => choice.id));
-  return allChoices.map(choice => ({
+  const selectedChoiceIdSet = new Set(
+    selectedCandidates.map(choice => choice.id),
+  );
+  return allCandidates.map(choice => ({
     ...choice,
     selected: selectedChoiceIdSet.has(choice.id),
   }));
@@ -27,17 +25,17 @@ function getSelectedChoices(
 const comboboxVoteStatusItems: ComboboxItem<VoteStatus>[] = [
   {
     label: 'Resolved',
-    value: VoteStatusOptions.RESOLVED,
+    value: VoteStatus.RESOLVED,
   },
   {
     label: 'Pending',
-    value: VoteStatusOptions.PENDING,
+    value: VoteStatus.PENDING,
   },
 ];
 
 const comboboxItemsMap: Record<VoteStatus, ComboboxItem<VoteStatus>> = {
-  [VoteStatusOptions.RESOLVED]: comboboxVoteStatusItems[0],
-  [VoteStatusOptions.PENDING]: comboboxVoteStatusItems[1],
+  [VoteStatus.RESOLVED]: comboboxVoteStatusItems[0],
+  [VoteStatus.PENDING]: comboboxVoteStatusItems[1],
 };
 
 /**
@@ -47,7 +45,7 @@ export default function UserVoteItem({
   vote,
   onFocus,
   onBlur,
-  canEditVoteChoices,
+  canEditVotes,
   canCreateVotes,
   canDeleteVotes,
   canEditChoiceCount,
@@ -58,28 +56,28 @@ export default function UserVoteItem({
   vote: Vote;
   onFocus?: (vote: Vote) => void;
   onBlur?: () => void;
-  canEditVoteChoices?: boolean;
+  canEditVotes?: boolean;
   canCreateVotes?: boolean;
   canDeleteVotes?: boolean;
   canEditChoiceCount?: boolean;
-  allChoices: ProposalChoice[];
+  allChoices: Candidate[];
   maxChoiceCount: number;
   saveVoteEdit?: (
     voteId: string,
-    choices: ProposalChoice[],
+    choices: Candidate[],
     status: VoteStatus,
   ) => void;
 }) {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
-  const [choices, setChoices] = useState<
-    (ProposalChoice & { selected: boolean })[]
-  >(getSelectedChoices(vote.choices, allChoices));
+  const [choices, setChoices] = useState<(Candidate & { selected: boolean })[]>(
+    getSelectedChoices(vote.candidates, allChoices),
+  );
   const [choiceOverflow, setChoiceOverflow] = useState(false);
   const [voteStatus, setVoteStatus] = useState(vote.status);
   const comboboxRef = useRef<ComboboxHandle<VoteStatus>>(null);
 
-  const handleChoiceClick = (choice: ProposalChoice) => {
-    if (!canEditVoteChoices) return;
+  const handleChoiceClick = (choice: Candidate) => {
+    if (!canEditVotes) return;
     setChoiceOverflow(false);
     setChoices(prevChoices => {
       let selectedChoicesCount = 0;
@@ -100,14 +98,14 @@ export default function UserVoteItem({
       });
       if (selectedChoicesCount === 0) {
         comboboxRef.current?.setSelectedItem(
-          comboboxItemsMap[VoteStatusOptions.PENDING],
+          comboboxItemsMap[VoteStatus.PENDING],
         );
-        setVoteStatus(VoteStatusOptions.PENDING);
+        setVoteStatus(VoteStatus.PENDING);
       } else {
         comboboxRef.current?.setSelectedItem(
-          comboboxItemsMap[VoteStatusOptions.RESOLVED],
+          comboboxItemsMap[VoteStatus.RESOLVED],
         );
-        setVoteStatus(VoteStatusOptions.RESOLVED);
+        setVoteStatus(VoteStatus.RESOLVED);
       }
       if (selectedChoicesCount > maxChoiceCount) {
         setChoiceOverflow(true);
@@ -151,10 +149,10 @@ export default function UserVoteItem({
         <div className="hidden flex-1 sm:block">
           <p>{voteStatus}</p>
           <p className="text-muted-foreground">
-            {vote.choices.map(choice => choice.value).join(', ')}
+            {vote.candidates.map(candidate => candidate.value).join(', ')}
           </p>
         </div>
-        {canEditVoteChoices && (
+        {canEditVotes && (
           <div className="flex flex-col justify-center">
             <SheetTrigger asChild>
               <Button variant="outline">
@@ -199,12 +197,12 @@ export default function UserVoteItem({
               </div>
             </div>
             <div className="flex flex-[1] flex-col items-center gap-12">
-              {canEditVoteChoices && (
+              {canEditVotes && (
                 <Combobox
                   items={comboboxVoteStatusItems}
                   defaultItem={comboboxItemsMap[voteStatus]}
                   handleSelectedValue={(voteStatus: VoteStatus) => {
-                    if (voteStatus === VoteStatusOptions.PENDING) {
+                    if (voteStatus === VoteStatus.PENDING) {
                       setChoices(prevChoices =>
                         prevChoices.map(choice => ({
                           ...choice,
@@ -219,7 +217,7 @@ export default function UserVoteItem({
             </div>
           </div>
           <div className="flex w-full justify-center gap-8">
-            {canEditVoteChoices && (
+            {canEditVotes && (
               <Button onClick={handleVoteEdit} className="flex-[2]">
                 <span>Save</span>
               </Button>

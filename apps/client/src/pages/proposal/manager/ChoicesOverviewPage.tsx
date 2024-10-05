@@ -1,6 +1,6 @@
-import ProposalChoiceForm, {
-  ProposalChoiceFormHandle,
-} from '@/components/forms/choice-selection/ProposalChoiceForm';
+import CandidateForm, {
+  CandidateFormHandles,
+} from '@/components/forms/candidate-selection/CandidateForm';
 import { useManagerProposal } from './ProposalManagePage';
 import { PenBoxIcon } from 'lucide-react';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -9,11 +9,11 @@ import { api } from '@/lib/api';
 
 export default function ChoicesOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
-  const choiceFormRef = useRef<ProposalChoiceFormHandle>(null);
+  const choiceFormRef = useRef<CandidateFormHandles>(null);
   return (
     <div className="mt-20 flex items-center justify-center">
-      <ProposalChoiceForm
-        initialChoices={proposal.choices}
+      <CandidateForm
+        initialCandidates={proposal.choices}
         formSubmitLabel="Edit Choices"
         disableEdit={!permissions.canEditAvailableChoices}
         disableSubmit={!permissions.canEditAvailableChoices}
@@ -46,7 +46,7 @@ export default function ChoicesOverviewPage() {
             });
           }}
         />
-      </ProposalChoiceForm>
+      </CandidateForm>
     </div>
   );
 }

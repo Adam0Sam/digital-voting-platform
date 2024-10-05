@@ -1,6 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from './components/theme-provider';
-import { User } from './lib/types';
+import { User } from '@ambassador';
 import { createContext, useContext, useEffect, useState } from 'react';
 import router from './app.routes';
 import './App.css';
@@ -23,6 +23,10 @@ export const useUser = () => {
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isFetchingUser, setIsFetchingUser] = useState(true);
+
+  useEffect(() => {
+    // const a = test();
+  }, []);
 
   const mutate = (newUserData: Partial<User>) => {
     setUser(prevUserData => {

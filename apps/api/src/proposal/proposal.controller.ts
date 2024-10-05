@@ -14,17 +14,17 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
-
 import { ZodValidationPipe } from 'src/pipes';
+import { GetUser } from 'src/user/decorator';
+import { LoggerService } from 'src/logger/logger.service';
 import {
   CreateProposalDto,
   CreateProposalDtoSchema,
   UpdateProposalDto,
-} from './dto';
-
-import { User, UserActions } from '@prisma/client';
-import { GetUser } from 'src/user/decorator';
-import { LoggerService } from 'src/logger/logger.service';
+  UpdateProposalDtoSchema,
+} from '@ambassador/proposal';
+import { User } from '@ambassador/user';
+import { Action } from '@ambassador/action-log';
 
 @UsePipes(new ValidationPipe({ transform: true }))
 @UseGuards(JwtAuthGuard)
@@ -45,7 +45,7 @@ export class ProposalController {
     @GetUser('id')
     userId: User['id'],
   ) {
-    this.logger.logAction(UserActions.CREATE_PROPOSAL, {
+    this.logger.logAction(Action.CREATE_PROPOSAL, {
       userId,
       userAgent,
     });
@@ -56,11 +56,11 @@ export class ProposalController {
   async updateOne(
     @Param('id') proposalId: string,
     @Headers('user-agent') userAgent: string,
-    @Body('proposal')
+    @Body('proposal', new ZodValidationPipe(UpdateProposalDtoSchema))
     proposalDto: UpdateProposalDto,
     @GetUser('id') userId: User['id'],
   ) {
-    this.logger.logAction(UserActions.EDIT_PROPOSAL, {
+    this.logger.logAction(Action.EDIT_PROPOSAL, {
       userId,
       userAgent,
       message: JSON.stringify(proposalDto),
@@ -74,7 +74,7 @@ export class ProposalController {
     @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
-    this.logger.logAction(UserActions.DELETE_PROPOSAL, {
+    this.logger.logAction(Action.DELETE_PROPOSAL, {
       userId,
       userAgent,
     });

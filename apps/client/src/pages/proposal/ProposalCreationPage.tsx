@@ -5,14 +5,6 @@ import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  isProposalChoiceDtoArray,
-  ProposalChoiceDto,
-  ProposalDto,
-  ProposalStatusOptions,
-  ProposalVisibility,
-  ProposalVisibilityOptions,
-} from '@/lib/types/proposal.type';
 import { api } from '@/lib/api';
 import {
   Card,
@@ -22,14 +14,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-import { isUserArray, User, UserPatternDto } from '@/lib/types';
-
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
-
 import Combobox from '@/components/Combobox';
-import ProposalChoiceForm from '@/components/forms/choice-selection/ProposalChoiceForm';
-import { ProposalManagerListDto } from '@/lib/types/proposal-manager.type';
+import CandidateForm from '@/components/forms/candidate-selection/CandidateForm';
 import ManagerSelectionForm from '@/components/forms/user/ManagerSelectionForm';
 import { AllUsersProvider } from '@/lib/context/all-users';
 import { DelayedFulfill } from '@/lib/delayed-fulfill';
@@ -37,13 +24,22 @@ import UserPatternForm from '@/components/forms/user/user-pattern/UserPatternFor
 import { useNavigate } from 'react-router-dom';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import { cn } from '@/lib/utils';
+import {
+  CreateCandidateDto,
+  CreateProposalDto,
+  ManagerListDto,
+  ProposalStatus,
+  ProposalVisibility,
+  User,
+  UserPattern,
+} from '@ambassador';
 
 // TODO: Make a prettier proposal summary component
 export function ProposalSummary({
   data,
   onCancel,
 }: {
-  data: ProposalDto;
+  data: CreateProposalDto;
   onCancel: () => void;
 }) {
   const DELAY_DURATION = 4000;
@@ -73,29 +69,7 @@ export function ProposalSummary({
         <CardHeader>
           <CardTitle>Proposal Summary</CardTitle>
         </CardHeader>
-        <CardContent>
-          {Object.entries(data).map(([key, value]) => {
-            let outputString: string;
-
-            if (isUserArray(value)) {
-              outputString = value
-                .map(
-                  user => `${user.personalNames.join(' ')} ${user.familyName}`,
-                )
-                .join(', ');
-            } else if (isProposalChoiceDtoArray(value)) {
-              outputString = value.map(choice => choice.value).join(', ');
-            } else {
-              outputString = String(value);
-            }
-
-            return (
-              <div key={key}>
-                <span className="italic">{key}:</span> {outputString ?? ''}
-              </div>
-            );
-          })}
-        </CardContent>
+        <CardContent>Proposal Summary Placeholder</CardContent>
         <CardFooter>
           <div className="flex gap-10">
             <Button type="button" variant="secondary" onClick={onCancel}>
@@ -164,10 +138,10 @@ const DateCard: FC<{
 const ResolutionValueCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: ({
-    choices,
+    candidates,
     choiceCount,
   }: {
-    choices: ProposalChoiceDto[];
+    candidates: CreateCandidateDto[];
     choiceCount: number;
   }) => void;
 }> = ({ carouselApi, handleSubmit }) => {
@@ -176,7 +150,7 @@ const ResolutionValueCard: FC<{
       cardTitle="Set Resolution Values"
       cardDescription="Set the possible resolution values for this proposal"
     >
-      <ProposalChoiceForm
+      <CandidateForm
         onSubmit={values => {
           handleSubmit(values);
           carouselApi.scrollNext();
@@ -190,7 +164,7 @@ const ResolutionValueCard: FC<{
 
 const ManagerSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
-  handleSubmit: (managers: ProposalManagerListDto[]) => void;
+  handleSubmit: (managers: ManagerListDto[]) => void;
 }> = ({ carouselApi, handleSubmit }) => {
   return (
     <CardWrapper
@@ -210,28 +184,28 @@ const ManagerSelectionCard: FC<{
 
 const proposalVisibilityChoices = [
   {
-    value: ProposalVisibilityOptions.PUBLIC,
+    value: ProposalVisibility.PUBLIC,
     label: 'Public',
     description: 'Visible to all users',
   },
   {
-    value: ProposalVisibilityOptions.AGENT_ONLY,
+    value: ProposalVisibility.AGENT_ONLY,
     label: 'Agent Only',
     description: 'Only visible to selected agents: voters and managers',
   },
   {
-    value: ProposalVisibilityOptions.MANAGER_ONLY,
+    value: ProposalVisibility.MANAGER_ONLY,
     label: 'Manager Only',
     description: 'Only visible to managers',
   },
 ];
 
-const DEFAULT_PROPOSAL_VISIBILITY = ProposalVisibilityOptions.AGENT_ONLY;
+const DEFAULT_PROPOSAL_VISIBILITY = ProposalVisibility.AGENT_ONLY;
 
 const VoterSelectionCard: FC<{
   carouselApi: CarouselScrollHandles;
   handleSubmit: (users: User[], proposalVisibility: ProposalVisibility) => void;
-  handlePatternSubmit: (pattern: UserPatternDto) => void;
+  handlePatternSubmit: (pattern: UserPattern) => void;
 }> = ({ carouselApi, handleSubmit, handlePatternSubmit }) => {
   const [proposalVisibility, setProposalVisibility] =
     useState<ProposalVisibility>(DEFAULT_PROPOSAL_VISIBILITY);
@@ -282,18 +256,15 @@ export default function ProposalCreationPage() {
   const [proposalVisibility, setProposalVisibility] =
     useState<ProposalVisibility>();
 
-  const [proposalManagers, setProposalManagers] = useState<
-    ProposalManagerListDto[]
-  >([]);
+  const [proposalManagers, setProposalManagers] = useState<ManagerListDto[]>(
+    [],
+  );
 
   const [proposalVoters, setProposalVoters] = useState<User[]>([]);
 
-  const [proposalChoices, setProposalChoices] = useState<ProposalChoiceDto[]>(
-    [],
-  );
+  const [candidates, setCandidates] = useState<CreateCandidateDto[]>([]);
   const [proposalChoiceCount, setProposalChoiceCount] = useState(1);
-  const [proposalUserPattern, setProposalUserPattern] =
-    useState<UserPatternDto>();
+  const [proposalUserPattern, setProposalUserPattern] = useState<UserPattern>();
 
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
@@ -358,8 +329,8 @@ export default function ProposalCreationPage() {
             />
             <ResolutionValueCard
               carouselApi={carouselApi}
-              handleSubmit={({ choices, choiceCount }) => {
-                setProposalChoices(choices);
+              handleSubmit={({ candidates, choiceCount }) => {
+                setCandidates(candidates);
                 setProposalChoiceCount(choiceCount);
               }}
             />
@@ -395,13 +366,15 @@ export default function ProposalCreationPage() {
                 description: proposalDescription,
                 startDate: proposalStartDate,
                 endDate: proposalEndDate,
-                status: ProposalStatusOptions.DRAFT,
-                visibility:
-                  proposalVisibility ?? ProposalVisibilityOptions.AGENT_ONLY,
-                userPattern: proposalUserPattern ?? {},
+                status: ProposalStatus.DRAFT,
+                visibility: proposalVisibility ?? ProposalVisibility.AGENT_ONLY,
+                userPattern: proposalUserPattern ?? {
+                  grades: [],
+                  roles: [],
+                },
                 voters: proposalVoters,
                 managers: proposalManagers,
-                choices: proposalChoices,
+                candidates: candidates,
                 choiceCount: proposalChoiceCount,
               }}
               onCancel={carouselApi.scrollPrev}

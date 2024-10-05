@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+    // directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -52,7 +52,7 @@ model User {
     actionLogs UserActionLog[]
 
     votes            Vote[]
-    managedProposals ProposalManager[]
+    managedProposals Manager[]
 
     authoredPermissions ManagerPermissions[]
 
@@ -94,14 +94,14 @@ model Proposal {
     userPattern UserPattern?
 
     votes    Vote[]
-    managers ProposalManager[]
+    managers Manager[]
 
-    choices       ProposalChoice[]
+    candidates    Candidate[]
     choiceCount   Int
     userPatternId String?
 }
 
-model ProposalChoice {
+model Candidate {
     id          String  @id @default(uuid())
     value       String
     description String?
@@ -114,41 +114,41 @@ model ProposalChoice {
     @@unique([value, proposalId])
 }
 
-model ProposalManagerRole {
+model ManagerRole {
     id          String  @id @default(uuid())
     roleName    String
     description String?
 
-    managers ProposalManager[]
+    managers Manager[]
 
     permissionsId String
     permissions   ManagerPermissions @relation(fields: [permissionsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model ManagerPermissions {
-    id                      String                @id @default(uuid())
-    managerRoles            ProposalManagerRole[]
-    author                  User                  @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    authorId                String
-    canEditTitle            Boolean               @default(false)
-    canEditDescription      Boolean               @default(false)
-    canEditDates            Boolean               @default(false)
-    canEditStatus           Boolean               @default(false)
-    canEditVisibility       Boolean               @default(false)
-    canDeleteVotes          Boolean               @default(false)
-    canCreateVotes          Boolean               @default(false)
-    canEditManagers         Boolean               @default(false)
-    canEditVoteChoices      Boolean               @default(false)
-    canEditAvailableChoices Boolean               @default(false)
-    canEditChoiceCount      Boolean               @default(false)
-    canEditUserPattern      Boolean               @default(false)
+    id                 String        @id @default(uuid())
+    managerRoles       ManagerRole[]
+    author             User          @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    authorId           String
+    canEditTitle       Boolean       @default(false)
+    canEditDescription Boolean       @default(false)
+    canEditDates       Boolean       @default(false)
+    canEditStatus      Boolean       @default(false)
+    canEditVisibility  Boolean       @default(false)
+    canDeleteVotes     Boolean       @default(false)
+    canCreateVotes     Boolean       @default(false)
+    canEditVotes       Boolean       @default(false)
+    canEditManagers    Boolean       @default(false)
+    canEditCandidates  Boolean       @default(false)
+    canEditChoiceCount Boolean       @default(false)
+    canEditUserPattern Boolean       @default(false)
 }
 
-model ProposalManager {
+model Manager {
     id String @id @default(uuid())
 
-    role                  ProposalManagerRole @relation(fields: [proposalManagerRoleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    proposalManagerRoleId String
+    role          ManagerRole @relation(fields: [managerRoleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    managerRoleId String
 
     proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
@@ -166,11 +166,11 @@ model Vote {
     id     String     @id @default(uuid())
     status VoteStatus @default(PENDING)
 
-    user       User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    user       User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId     String
-    proposal   Proposal         @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposal   Proposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
-    choices    ProposalChoice[]
+    candidates Candidate[]
 
     @@unique([userId, proposalId])
 }

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -13,10 +13,23 @@
     "incremental": true,
     "skipLibCheck": true,
     // TODO: enable later?
+    "strict": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@ambassador": [
+        "../../packages/ambassador/dist/index"
+      ],
+      "@ambassador/*": [
+        "../../packages/ambassador/dist/*"
+      ]
+    },
+  },
+  "include": [
+    "src",
+    "../../packages/ambassador/dist/**/*.ts"
+  ],
 }

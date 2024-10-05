@@ -1,11 +1,5 @@
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import {
-  ManagerPermissionsDto,
-  ManagerPermissionsList,
-  ProposalManagerRole,
-  ProposalManagerRoleDto,
-} from '@/lib/types/proposal-manager.type';
 import FormHandleButtons from './FormHandleButtons';
 import { useEffect, useState } from 'react';
 import { SquarePen, Trash2 } from 'lucide-react';
@@ -13,16 +7,22 @@ import { Checkbox } from '../ui/checkbox';
 import { FormItem } from '../ui/form';
 import { cn } from '@/lib/utils';
 import { Separator } from '../ui/separator';
+import {
+  CreateManagerRoleDto,
+  ManagerPermissionNames,
+  ManagerPermissions,
+  ManagerRole,
+} from '@ambassador';
 
 export type ManageRoleFormProps = {
-  defaultRoleTemplate?: ProposalManagerRole;
-  handleEditSubmit?: (roleData: ProposalManagerRole) => void;
-  handleCreateSubmit: (roleData: ProposalManagerRoleDto) => void;
-  handleCancel?: (roleData: ProposalManagerRole) => void;
+  defaultRoleTemplate?: ManagerRole;
+  handleEditSubmit?: (roleData: ManagerRole) => void;
+  handleCreateSubmit: (roleData: CreateManagerRoleDto) => void;
+  handleCancel?: (roleData: ManagerRole) => void;
   className?: string;
 };
 
-const DEFAULT_PERMISSIONS: ManagerPermissionsDto = {
+const DEFAULT_PERMISSIONS: ManagerPermissions = {
   canEditTitle: false,
   canEditDescription: false,
   canEditDates: false,
@@ -31,8 +31,8 @@ const DEFAULT_PERMISSIONS: ManagerPermissionsDto = {
   canDeleteVotes: false,
   canCreateVotes: false,
   canEditManagers: false,
-  canEditVoteChoices: false,
-  canEditAvailableChoices: false,
+  canEditVotes: false,
+  canEditCandidates: false,
   canEditChoiceCount: false,
   canEditUserPattern: false,
 };
@@ -67,12 +67,12 @@ export default function ManagerRoleForm({
       setRoleName(defaultRoleTemplate.roleName);
       setDescription(defaultRoleTemplate.description || '');
 
-      const permissions = ManagerPermissionsList.reduce(
+      const permissions = ManagerPermissionNames.reduce(
         (acc, permName) => ({
           ...acc,
           [permName]: defaultRoleTemplate.permissions[permName],
         }),
-        {} as typeof DEFAULT_PERMISSIONS,
+        {} as ManagerPermissions,
       );
 
       setPermissions(permissions);

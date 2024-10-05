@@ -1,14 +1,14 @@
-import { UserActionLog, UserActions } from './types/log.type';
+import { ActionLogEntry, Actions } from '@ambassador';
 
-export type ActionFilter = Record<UserActionLog['action'], boolean>;
+export type ActionFilter = Record<ActionLogEntry['action'], boolean>;
 export default function constructActionFilter(
   defaultState = true,
 ): ActionFilter {
-  return Object.values(UserActions).reduce(
+  return Actions.reduce(
     (acc, action) => {
       acc[action] = defaultState;
       return acc;
     },
-    {} as Record<UserActionLog['action'], boolean>,
+    {} as Record<ActionLogEntry['action'], boolean>,
   );
 }

@@ -1,4 +1,4 @@
-import ChoiceCard from '@/components/proposal/ChoiceCard';
+import CandidateCard from '@/components/proposal/ChoiceCard';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,7 +12,8 @@ import {
 import { api } from '@/lib/api';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS } from '@/lib/routes';
-import { ProposalChoice } from '@/lib/types';
+import { Candidate } from '@ambassador';
+
 import { DialogDescription } from '@radix-ui/react-dialog';
 import { useState } from 'react';
 import { Link, useNavigate, useParams, useRevalidator } from 'react-router-dom';
@@ -30,8 +31,8 @@ export default function ProposalVotePage() {
   const revalidator = useRevalidator();
   const navigate = useNavigate();
 
-  const [selectedChoices, setSelectedChoices] = useState<ProposalChoice[]>(
-    proposal.votes[0].choices,
+  const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>(
+    proposal.votes[0].candidates,
   );
 
   const canVote = proposal.votes[0].status === 'PENDING';
@@ -40,7 +41,7 @@ export default function ProposalVotePage() {
     'proposal',
     proposal,
     'selectedChoices',
-    selectedChoices,
+    selectedCandidates,
     'canVote',
     canVote,
   );
@@ -62,38 +63,38 @@ export default function ProposalVotePage() {
         <div className="flex w-full flex-col items-center gap-8">
           <h4 className="text-2xl">
             {canVote
-              ? `Votes left: ${proposal.choiceCount - selectedChoices.length}`
+              ? `Votes left: ${proposal.choiceCount - selectedCandidates.length}`
               : 'Your submitted votes'}
           </h4>
           <div className="flex w-full flex-wrap justify-center gap-14">
-            {proposal.choices?.map(choice => (
-              <ChoiceCard
-                choiceData={choice}
-                isSelected={selectedChoices.some(
-                  selectedChoice => selectedChoice.value === choice.value,
+            {proposal.candidates?.map(candidate => (
+              <CandidateCard
+                candidate={candidate}
+                isSelected={selectedCandidates.some(
+                  selectedChoice => selectedChoice.value === candidate.value,
                 )}
                 className="max-w-52 flex-1"
                 handleClick={() => {
                   if (!canVote) {
                     return;
                   }
-                  setSelectedChoices(prevChoices => {
+                  setSelectedCandidates(prevCandidates => {
                     if (
-                      prevChoices.some(
-                        prevChoice => prevChoice.value === choice.value,
+                      prevCandidates.some(
+                        prevChoice => prevChoice.value === candidate.value,
                       )
                     ) {
-                      return prevChoices.filter(
-                        prevChoice => prevChoice.value !== choice.value,
+                      return prevCandidates.filter(
+                        prevChoice => prevChoice.value !== candidate.value,
                       );
                     }
-                    if (proposal!.choiceCount <= prevChoices.length) {
-                      return [choice];
+                    if (proposal!.choiceCount <= prevCandidates.length) {
+                      return [candidate];
                     }
-                    return [...prevChoices, choice];
+                    return [...prevCandidates, candidate];
                   });
                 }}
-                key={choice.id}
+                key={candidate.id}
               />
             ))}
           </div>
@@ -104,7 +105,7 @@ export default function ProposalVotePage() {
               <DialogTrigger asChild>
                 <Button
                   className="flex-1 py-2 sm:max-w-60"
-                  disabled={selectedChoices.length <= 0}
+                  disabled={selectedCandidates.length <= 0}
                 >
                   Submit
                 </Button>
@@ -117,13 +118,13 @@ export default function ProposalVotePage() {
                 </DialogHeader>
                 <div className="mt-8 flex flex-col items-center">
                   <DialogDescription>
-                    {selectedChoices.length === proposal.choiceCount
+                    {selectedCandidates.length === proposal.choiceCount
                       ? 'You have exhausted all your votes.'
-                      : `You have selected ${selectedChoices.length} choices out of ${proposal.choiceCount}.`}
+                      : `You have selected ${selectedCandidates.length} choices out of ${proposal.choiceCount}.`}
                   </DialogDescription>
                   <DialogDescription>
                     Selected:{' '}
-                    {selectedChoices
+                    {selectedCandidates
                       .map(selectedChoice => selectedChoice.value)
                       .join(', ')}
                   </DialogDescription>
@@ -133,7 +134,7 @@ export default function ProposalVotePage() {
                     onClick={async () => {
                       await api.vote.voteForProposal(
                         proposal.id,
-                        selectedChoices,
+                        selectedCandidates,
                       );
                       revalidator.revalidate();
                       navigate(`${PROPOSAL_HREFS.VOTE_ALL}`);

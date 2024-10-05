@@ -1,4 +1,4 @@
-import { Proposal, ProposalChoice, VoteStatusOptions } from '../types';
+import { Proposal, Candidate, VoteStatus } from '@ambassador';
 
 export type choiceChartItem = {
   choiceValue: string;
@@ -6,27 +6,27 @@ export type choiceChartItem = {
 };
 
 export function getChoiceData(
-  proposalChoices: ProposalChoice[],
+  candidates: Candidate[],
   proposalVotes: Proposal['votes'],
 ) {
   const choiceChartDataMap = new Map<string, choiceChartItem>();
   let resolvedVoteCount = 0;
 
-  for (const availableChoice of proposalChoices) {
-    choiceChartDataMap.set(availableChoice.id, {
-      choiceValue: availableChoice.value,
+  for (const availableCandidate of candidates) {
+    choiceChartDataMap.set(availableCandidate.id, {
+      choiceValue: availableCandidate.value,
       choiceVotes: 0,
     });
   }
 
   for (const vote of proposalVotes) {
-    if (vote.status !== VoteStatusOptions.RESOLVED) continue;
+    if (vote.status !== VoteStatus.RESOLVED) continue;
     resolvedVoteCount++;
-    for (const voteChoice of vote.choices) {
-      if (!choiceChartDataMap.has(voteChoice.id)) continue;
-      choiceChartDataMap.set(voteChoice.id, {
-        ...choiceChartDataMap.get(voteChoice.id)!,
-        choiceVotes: choiceChartDataMap.get(voteChoice.id)!.choiceVotes + 1,
+    for (const voteCandidate of vote.candidates) {
+      if (!choiceChartDataMap.has(voteCandidate.id)) continue;
+      choiceChartDataMap.set(voteCandidate.id, {
+        ...choiceChartDataMap.get(voteCandidate.id)!,
+        choiceVotes: choiceChartDataMap.get(voteCandidate.id)!.choiceVotes + 1,
       });
     }
   }

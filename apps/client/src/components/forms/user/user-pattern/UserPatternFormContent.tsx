@@ -1,8 +1,9 @@
 import MultiSelectDropdown, {
   MultiSelectDropdownHandle,
 } from '@/components/MultiSelectDropdown';
-import { Grade, Grades, UserRole, UserRoles } from '@/lib/types';
+import { Grade, Grades } from '@ambassador';
 import { FC, PropsWithChildren } from 'react';
+import { UserRole } from '@ambassador/user';
 
 type UserPatternFormContentProps = {
   gradesDropdownRef?: React.RefObject<MultiSelectDropdownHandle<Grade>>;
@@ -32,13 +33,13 @@ export const UserPatternFormContent: FC<
         <div className="flex items-center justify-between">
           <MultiSelectDropdown
             triggerText="Select Grades"
-            items={Grades}
+            items={[...Grades]}
             ref={gradesDropdownRef}
             initiallySelectedItems={selectedGrades}
           />
           <MultiSelectDropdown
             triggerText="Select Roles"
-            items={UserRoles}
+            items={UserRole}
             ref={rolesDropdownRef}
             initiallySelectedItems={selectedRoles}
           />

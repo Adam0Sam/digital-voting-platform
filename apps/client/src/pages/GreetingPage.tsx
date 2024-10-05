@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { PROPOSAL_HREFS } from '@/lib/routes';
-import { UserRoles } from '@/lib/types';
+import { UserRole } from '@ambassador/user';
 import { ADMIN_HREFS } from '@/lib/routes/admin.routes';
 
 export default function GreetingPage() {
@@ -25,7 +25,7 @@ export default function GreetingPage() {
         >
           {t('Explore the user app')}
         </Button>
-        {user.roles.includes(UserRoles.ADMIN) && (
+        {user.roles.includes(UserRole.ADMIN) && (
           <Button
             variant="default"
             size="lg"

@@ -3,33 +3,33 @@ import { useManagerProposal } from './ProposalManagePage';
 import { getChoiceData } from '@/lib/proposal-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ProposalChoice, Vote, VoteStatus } from '@/lib/types';
 import { useMemo, useState } from 'react';
 
 import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
+import { Candidate, Vote, VoteStatus } from '@ambassador';
 
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
   const [proposalVotes, setProposalVotes] = useState<Vote[]>(proposal.votes);
   const { choiceChartData } = useMemo(
-    () => getChoiceData(proposal.choices, proposalVotes),
-    [proposalVotes, proposal.choices],
+    () => getChoiceData(proposal.candidates, proposalVotes),
+    [proposalVotes, proposal.candidates],
   );
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
 
   const handleVoteSave = (
     voteId: string,
-    choices: ProposalChoice[],
+    candidates: Candidate[],
     status: VoteStatus,
   ) => {
-    api.vote.editVote(proposal.id, voteId, choices, status);
+    api.vote.editVote(proposal.id, voteId, candidates, status);
     setProposalVotes(prevVotes =>
       prevVotes.map(prevVote => {
         if (prevVote.id === voteId) {
           return {
             ...prevVote,
-            choices,
+            choices: candidates,
           };
         }
         return prevVote;
@@ -58,15 +58,15 @@ export default function VoteOverviewPage() {
             {proposalVotes.map(vote => (
               <UserVoteItem
                 vote={vote}
-                allChoices={proposal.choices}
+                allChoices={proposal.candidates}
                 onFocus={vote => {
                   setHighlightedChoices(
-                    vote.choices.map(choice => choice.value),
+                    vote.candidates.map(candidate => candidate.value),
                   );
                 }}
                 maxChoiceCount={proposal.choiceCount}
                 onBlur={() => setHighlightedChoices([])}
-                canEditVoteChoices={permissions.canEditVoteChoices}
+                canEditVotes={permissions.canEditVotes}
                 canCreateVotes={permissions.canCreateVotes}
                 canDeleteVotes={permissions.canDeleteVotes}
                 canEditChoiceCount={permissions.canEditChoiceCount}

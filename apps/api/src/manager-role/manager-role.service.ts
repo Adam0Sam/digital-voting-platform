@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { ProposalManagerDto } from './dto/manager-role.dto';
+
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
+import { User } from '@ambassador/user';
+import {
+  CreateManagerRoleDto,
+  UpdateManagerRoleDto,
+} from '@ambassador/manager';
 
 @Injectable()
 export class ManagerRoleService {
   constructor(private prisma: PrismaService) {}
 
   async getAuthoredRoles(user: User) {
-    return await this.prisma.proposalManagerRole.findMany({
+    return await this.prisma.managerRole.findMany({
       where: {
         permissions: {
           authorId: user.id,
@@ -20,8 +24,8 @@ export class ManagerRoleService {
     });
   }
 
-  async updateRole(roleId: string, roleDto: ProposalManagerDto, user: User) {
-    return await this.prisma.proposalManagerRole.update({
+  async updateRole(roleId: string, roleDto: UpdateManagerRoleDto, user: User) {
+    return await this.prisma.managerRole.update({
       where: {
         id: roleId,
         permissions: {
@@ -38,8 +42,8 @@ export class ManagerRoleService {
     });
   }
 
-  async createRole(roleDto: ProposalManagerDto, user: User) {
-    return await this.prisma.proposalManagerRole.create({
+  async createRole(roleDto: CreateManagerRoleDto, user: User) {
+    return await this.prisma.managerRole.create({
       data: {
         roleName: roleDto.roleName,
         description: roleDto.description,
@@ -51,7 +55,7 @@ export class ManagerRoleService {
   }
 
   async deleteRole(roleId: string, userId: string) {
-    return await this.prisma.proposalManagerRole.delete({
+    return await this.prisma.managerRole.delete({
       where: {
         id: roleId,
         permissions: {

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { api } from '@/lib/api';
-import { Proposal } from '@/lib/types';
+import { Proposal } from '@ambassador';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';

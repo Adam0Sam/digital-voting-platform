@@ -1,6 +1,6 @@
 import { api } from './api';
 import JWTController from './auth/jwt-controller';
-import { User } from './types';
+import { User } from '@ambassador';
 
 export const fetchUser: (idToken?: string | null) => Promise<User> = async (
   idToken = JWTController.getItem(),

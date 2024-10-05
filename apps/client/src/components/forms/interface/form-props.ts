@@ -1,4 +1,4 @@
-import { WithRequired } from '@/lib/types/utils/util-types';
+import { WithRequired } from '@ambassador';
 
 export interface FormProps<T> {
   formSubmitLabel?: string;

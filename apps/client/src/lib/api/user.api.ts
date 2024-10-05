@@ -1,6 +1,6 @@
-import { User } from '@/lib/types';
 import { HttpClient } from './http-client';
 import URI from '../constants/uri-constants';
+import { User } from '@ambassador';
 
 export class UserApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/user`);
