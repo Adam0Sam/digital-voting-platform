@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserQueryDto } from './dto';
-import { JwtDto } from 'src/auth/jwt/dto';
-import { toUserRole, User, UserRole } from '@ambassador';
+import { CreateUserDto } from '@ambassador';
 
 @Injectable()
 export class UserService {
@@ -20,15 +19,9 @@ export class UserService {
     });
   }
 
-  async createUser(userPayload: JwtDto & UserQueryDto) {
-    const user: Omit<User, 'id' | 'email' | 'active'> = {
-      personalNames: userPayload.personalNames,
-      familyName: userPayload.familyName,
-      grade: userPayload.grade,
-      roles: [UserRole.STUDENT],
-    };
+  async createUser(userDto: CreateUserDto) {
     return await this.prisma.user.create({
-      data: user,
+      data: userDto,
     });
   }
 

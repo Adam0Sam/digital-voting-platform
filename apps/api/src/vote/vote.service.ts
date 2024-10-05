@@ -35,6 +35,7 @@ export class VoteService {
     if (!proposal) {
       throw new BadRequestException('Proposal not found');
     }
+    console.log('VOTE SERVICE', proposal.candidates.length, candidates?.length);
     if (proposal.candidates.length < candidates.length) {
       throw new BadRequestException('Invalid number of candidates');
     }

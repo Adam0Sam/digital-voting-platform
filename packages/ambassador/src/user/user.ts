@@ -12,12 +12,13 @@ export const UserSchema = z.object({
   email: z.string().nullable(),
   active: z.boolean(),
 });
-
 export type User = z.infer<typeof UserSchema>;
-
 export const isUser = (value: unknown): value is User => {
   return UserSchema.safeParse(value).success;
 };
+
+const CreateUserDtoSchema = UserSchema.omit({ id: true });
+export type CreateUserDto = z.infer<typeof CreateUserDtoSchema>;
 
 export type UserRelations = {
   managedProposals: { id: string }[];

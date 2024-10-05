@@ -1,7 +1,3 @@
-/**
- * TODO
- * If class-validator is installed by default, use it here
- */
 export class JwtDto {
   iss: string;
   aud: string;

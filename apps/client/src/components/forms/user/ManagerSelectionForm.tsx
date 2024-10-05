@@ -1,5 +1,5 @@
 import { ExtendedFormProps } from '../interface';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import UserSelectionForm from './UserSelectionForm';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -60,23 +60,14 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [authoredManagerRoles, setAuthoredManagerRoles] = useState<
-    ManagerRole[]
-  >([]);
-
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [roleFormIsOpen, setRoleFormIsOpen] = useState(false);
 
   const [mappedManagers, setMappedManagers] = useState<ManagerListDto[]>([]);
 
   const loadedManagerRoles = useLoadedData(LOADER_IDS.MANAGER_ROLES);
-
-  useEffect(() => {
-    setAuthoredManagerRoles(loadedManagerRoles);
-    if (loadedManagerRoles.length === 0) {
-      setSheetIsOpen(true);
-    }
-  }, [loadedManagerRoles]);
+  const [authoredManagerRoles, setAuthoredManagerRoles] =
+    useState<ManagerRole[]>(loadedManagerRoles);
 
   const handleUserRemove = (targetUser: User) => {
     setMappedManagers(prevManagers =>

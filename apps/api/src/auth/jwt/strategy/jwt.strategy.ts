@@ -7,7 +7,7 @@ import { JwtDto } from '../dto';
 import { UserService } from 'src/user/user.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { Request } from 'express';
-import { User } from '@ambassador/user';
+import { toUserRole, User } from '@ambassador/user';
 import { Action } from '@ambassador/action-log';
 import { toGrade } from '@ambassador/user/user-grade';
 
@@ -39,33 +39,27 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
       // },
       secretOrKey: config.get('auth.jwt.publicKey'),
       // issuer: config.get('auth.jwt.issuer'),
-
       passReqToCallback: true,
     });
   }
 
-  // passport calls this method even if the token is invalid, why?
   async validate(req: Request, payload: JwtDto) {
     const personalNames = splitFirstNames(payload.first_name);
-    console.log('GRADE:', payload.grade);
-    console.log('transformed grade:', toGrade(payload.grade));
+
     const user: User | null = await this.userService.findUser({
       personalNames,
       familyName: payload.last_name,
       grade: toGrade(payload.grade),
     });
 
-    this.logger.logAction(Action.AUTH_ATTEMPT, {
-      userId: user?.id,
-      userAgent: req.headers['user-agent'],
-    });
-
     if (!user) {
       const newUser = await this.userService.createUser({
-        ...payload,
         personalNames,
         familyName: payload.last_name,
         grade: toGrade(payload.grade),
+        roles: payload.roles.map(toUserRole),
+        email: null,
+        active: true,
       });
 
       this.logger.logAction(Action.SIGNUP, {

@@ -20,6 +20,7 @@ import { ActionLogModule } from './action-log/action-log.module';
       rootPath: join(__dirname, '../..', 'client', 'dist'),
     }),
     ConfigModule.forRoot({
+      expandVariables: true,
       isGlobal: true,
       envFilePath: ['.env'],
       load: [appConfig],

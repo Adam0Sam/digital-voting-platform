@@ -28,7 +28,7 @@ export class VoteController {
   @Post(':id')
   async castUserVote(
     @Param('id') proposalId: string,
-    @Body('choices') candidates: Candidate[],
+    @Body('candidates') candidates: Candidate[],
     @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
@@ -40,7 +40,7 @@ export class VoteController {
   async editVote(
     @Param('proposalId') proposalId: string,
     @Param('voteId') voteId: string,
-    @Body('choices') candidates: Candidate[],
+    @Body('candidates') candidates: Candidate[],
     @Body('status', new ParseStringLiteral(Object.values(VoteStatus)))
     voteStatus: VoteStatus,
     @Headers('user-agent') userAgent: string,
