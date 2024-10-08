@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -13,13 +12,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 import { PROPOSAL_HREFS } from '@/lib/routes';
-
 import { getTimeLeft } from '@/lib/time';
 import { Proposal, Vote, VoteStatus } from '@ambassador';
 import { cn } from '@/lib/utils';
-
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock, ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function VoterCard({
@@ -42,64 +40,70 @@ export default function VoterCard({
   );
 
   let timeLeftText: string;
+  let badgeStatus: StatusBadgeProps['status'];
+  let StatusIcon: typeof Clock;
+
   if (!hasStarted) {
-    timeLeftText = `Starts in ${daysLeft}d. ${hoursLeft}h.`;
+    timeLeftText = `Starts in ${daysLeft}d ${hoursLeft}h`;
+    badgeStatus = 'pending';
+    StatusIcon = Clock;
   } else if (!hasEnded) {
-    timeLeftText = `Ends in ${daysLeft}d. ${hoursLeft}h.`;
+    timeLeftText = `Ends in ${daysLeft}d ${hoursLeft}h`;
+    badgeStatus = 'active';
+    StatusIcon = CalendarClock;
   } else {
     timeLeftText = 'Has Ended';
+    badgeStatus = 'ended';
+    StatusIcon = CheckCircle;
   }
 
   return (
-    <Card className={cn('flex flex-col justify-between', className)}>
-      <div>
-        <CardHeader className="flex flex-col items-center">
-          <CardTitle className="text-xl">{proposalData.title}</CardTitle>
-          <CardDescription>{proposalData.description}</CardDescription>
-        </CardHeader>
-
-        <CardContent className="flex flex-col items-center gap-12 p-0">
-          <div className="flex flex-col items-center gap-1">
-            <Popover>
-              <div className="flex items-center gap-2">
-                <p>{timeLeftText}</p>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost">
-                    <CalendarClock size={24} />
-                  </Button>
-                </PopoverTrigger>
-              </div>
-              <PopoverContent className="w-min">
-                <Calendar
-                  mode="single"
-                  selected={
-                    !hasStarted
-                      ? new Date(proposalData.startDate)
-                      : new Date(proposalData.endDate)
-                  }
-                  defaultMonth={
-                    !hasStarted
-                      ? new Date(proposalData.startDate)
-                      : new Date(proposalData.endDate)
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-            <p>
-              {voteData.status === VoteStatus.PENDING
-                ? 'submit a vote'
-                : 'review your vote'}
-            </p>
-          </div>
-        </CardContent>
-      </div>
+    <Card className={cn('flex flex-col justify-between shadow-lg', className)}>
+      <CardHeader className="space-y-2">
+        <div className="flex items-center justify-between">
+          <StatusBadge status={badgeStatus}>{timeLeftText}</StatusBadge>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <StatusIcon className="h-4 w-4" />
+                <span className="sr-only">View calendar</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={
+                  !hasStarted
+                    ? new Date(proposalData.startDate)
+                    : new Date(proposalData.endDate)
+                }
+                defaultMonth={
+                  !hasStarted
+                    ? new Date(proposalData.startDate)
+                    : new Date(proposalData.endDate)
+                }
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <CardTitle className="line-clamp-2 text-xl">
+          {proposalData.title}
+        </CardTitle>
+        <CardDescription className="line-clamp-3">
+          {proposalData.description || (
+            <p className="italic">No description provided</p>
+          )}
+        </CardDescription>
+      </CardHeader>
       <CardFooter>
-        <Button className="w-full p-0">
+        <Button asChild className="w-full">
           <Link
-            className="flex h-full w-full items-center justify-center"
             to={`${PROPOSAL_HREFS.VOTE}/${proposalData.id}`}
+            className="flex items-center justify-center gap-2"
           >
-            View
+            {voteData.status === VoteStatus.PENDING ? 'Vote Now' : 'View Vote'}
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
       </CardFooter>

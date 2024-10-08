@@ -80,7 +80,8 @@ export class ProposalService {
   }): Prisma.ProposalUpdateInput {
     const updateInput: Prisma.ProposalUpdateInput = {};
     let shouldResetVotes = false;
-    for (const key in proposalDto) {
+    for (const _key in proposalDto) {
+      const key = _key as keyof UpdateProposalDto;
       switch (key) {
         case 'title':
           if (permissions.canEditTitle) {
@@ -112,13 +113,15 @@ export class ProposalService {
             updateInput.visibility = proposalDto.visibility;
           }
           break;
-        case 'choices':
+        case 'candidates':
           if (permissions.canEditCandidates) {
             const candidateIdsForDeletion: string[] = prevCandidates
               .filter(
                 (prevChoice) =>
                   !proposalDto.candidates.some(
-                    (newChoice) => newChoice.id === prevChoice.id,
+                    (newChoice) =>
+                      newChoice.id !== undefined &&
+                      newChoice.id === prevChoice.id,
                   ),
               )
               .map((choice) => choice.id);

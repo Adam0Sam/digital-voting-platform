@@ -10,13 +10,14 @@ import { api } from '@/lib/api';
 export default function ChoicesOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
   const choiceFormRef = useRef<CandidateFormHandles>(null);
+
   return (
     <div className="mt-20 flex items-center justify-center">
       <CandidateForm
-        initialCandidates={proposal.choices}
+        initialCandidates={proposal.candidates}
         formSubmitLabel="Edit Choices"
-        disableEdit={!permissions.canEditAvailableChoices}
-        disableSubmit={!permissions.canEditAvailableChoices}
+        disableEdit={!permissions.canEditCandidates}
+        disableSubmit={!permissions.canEditCandidates}
         ref={choiceFormRef}
       >
         <ConfirmDialog
@@ -41,7 +42,7 @@ export default function ChoicesOverviewPage() {
           handleConfirm={() => {
             console.log('choices', choiceFormRef.current?.getChoices());
             api.proposals.updateOne(proposal.id, {
-              choices: choiceFormRef.current?.getChoices() ?? [],
+              candidates: choiceFormRef.current?.getChoices() ?? [],
               choiceCount: choiceFormRef.current?.getChoiceCount() ?? 1,
             });
           }}

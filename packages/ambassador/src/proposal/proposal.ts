@@ -52,7 +52,21 @@ export const ProposalSchema = CreateProposalDtoSchema.omit({
 });
 export type Proposal = WithDatesAsStrings<z.infer<typeof ProposalSchema>>;
 
-export const UpdateProposalDtoSchema = ProposalSchema.partial();
+export const UpdateProposalDtoSchema = ProposalSchema.omit({
+  candidates: true,
+})
+  .extend({
+    candidates: z
+      .array(
+        CandidateSchema.omit({
+          id: true,
+        }).extend({
+          id: z.string().optional(),
+        })
+      )
+      .min(1),
+  })
+  .partial();
 export type UpdateProposalDto = WithDatesAsStrings<
   z.infer<typeof UpdateProposalDtoSchema>
 >;

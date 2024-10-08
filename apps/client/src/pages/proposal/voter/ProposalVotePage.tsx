@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate, useParams, useRevalidator } from 'react-router-dom';
 import CandidateCard from '@/components/proposal/ChoiceCard';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,19 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { api } from '@/lib/api';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import { Candidate } from '@ambassador';
-
-import { DialogDescription } from '@radix-ui/react-dialog';
-import { useState } from 'react';
-import { Link, useNavigate, useParams, useRevalidator } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 export default function ProposalVotePage() {
   const { id: proposalId } = useParams();
-
   const proposals = useLoadedData(LOADER_IDS.VOTER_PROPOSALS);
   const proposal = proposals.find(proposal => proposal.id === proposalId);
 
@@ -36,48 +37,50 @@ export default function ProposalVotePage() {
   );
 
   const canVote = proposal.votes[0].status === 'PENDING';
+  const votesLeft = proposal.choiceCount - selectedCandidates.length;
+  const progressPercentage =
+    (selectedCandidates.length / proposal.choiceCount) * 100;
 
-  console.log(
-    'proposal',
-    proposal,
-    'selectedChoices',
-    selectedCandidates,
-    'canVote',
-    canVote,
-  );
-
-  /**
-   * @Question
-   * Why is proposal.current possibly undefined
-   * in functions defined within the render?
-   */
   return (
-    <div className="mt-12 flex justify-center">
-      <div className="flex max-w-screen-lg flex-1 flex-col items-center gap-36">
-        <div className="flex flex-col gap-6 text-center">
-          <h3 className="text-6xl">{proposal!.title}</h3>
-          <p className="text-2xl text-muted-foreground">
-            {proposal.description || 'Empty'}
+    <div className="container mx-auto px-4 py-8">
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold">{proposal.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-lg text-muted-foreground">
+            {proposal.description || 'No description provided'}
           </p>
-        </div>
-        <div className="flex w-full flex-col items-center gap-8">
-          <h4 className="text-2xl">
-            {canVote
-              ? `Votes left: ${proposal.choiceCount - selectedCandidates.length}`
-              : 'Your submitted votes'}
-          </h4>
-          <div className="flex w-full flex-wrap justify-center gap-14">
+        </CardContent>
+      </Card>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-xl">
+            {canVote ? 'Select Your Candidates' : 'Your Submitted Votes'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {canVote ? `Votes left: ${votesLeft}` : 'Votes submitted'}
+            </span>
+            <span className="text-sm font-medium">
+              {selectedCandidates.length}/{proposal.choiceCount}
+            </span>
+          </div>
+          <Progress value={progressPercentage} className="h-2" />
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {proposal.candidates?.map(candidate => (
               <CandidateCard
+                key={candidate.id}
                 candidate={candidate}
                 isSelected={selectedCandidates.some(
                   selectedChoice => selectedChoice.value === candidate.value,
                 )}
-                className="max-w-52 flex-1"
                 handleClick={() => {
-                  if (!canVote) {
-                    return;
-                  }
+                  if (!canVote) return;
                   setSelectedCandidates(prevCandidates => {
                     if (
                       prevCandidates.some(
@@ -88,73 +91,74 @@ export default function ProposalVotePage() {
                         prevChoice => prevChoice.value !== candidate.value,
                       );
                     }
-                    if (proposal!.choiceCount <= prevCandidates.length) {
+                    if (proposal.choiceCount <= prevCandidates.length) {
                       return [candidate];
                     }
                     return [...prevCandidates, candidate];
                   });
                 }}
-                key={candidate.id}
               />
             ))}
           </div>
-        </div>
-        <div className="flex w-full flex-col justify-center gap-8 sm:flex-row sm:gap-12">
-          {canVote && (
-            <Dialog>
-              <DialogTrigger asChild>
+        </CardContent>
+      </Card>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+        <Button
+          variant="outline"
+          className="w-full sm:w-auto"
+          onClick={() => navigate(PROPOSAL_HREFS.VOTE_ALL)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+        </Button>
+
+        {canVote && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                className="w-full sm:w-auto"
+                disabled={selectedCandidates.length <= 0}
+              >
+                Submit Vote
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Your Vote</DialogTitle>
+                <DialogDescription>
+                  {selectedCandidates.length === proposal.choiceCount
+                    ? 'You have used all your available votes.'
+                    : `You have selected ${selectedCandidates.length} out of ${proposal.choiceCount} possible choices.`}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="my-4">
+                <h4 className="mb-2 font-semibold">Selected Candidates:</h4>
+                <ul className="list-inside list-disc">
+                  {selectedCandidates.map(candidate => (
+                    <li key={candidate.id}>{candidate.value}</li>
+                  ))}
+                </ul>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
                 <Button
-                  className="flex-1 py-2 sm:max-w-60"
-                  disabled={selectedCandidates.length <= 0}
+                  onClick={async () => {
+                    await api.vote.voteForProposal(
+                      proposal.id,
+                      selectedCandidates,
+                    );
+                    revalidator.revalidate();
+                    navigate(PROPOSAL_HREFS.VOTE_ALL);
+                  }}
                 >
-                  Submit
+                  Confirm Vote
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    Are you sure you want to submit your vote?
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="mt-8 flex flex-col items-center">
-                  <DialogDescription>
-                    {selectedCandidates.length === proposal.choiceCount
-                      ? 'You have exhausted all your votes.'
-                      : `You have selected ${selectedCandidates.length} choices out of ${proposal.choiceCount}.`}
-                  </DialogDescription>
-                  <DialogDescription>
-                    Selected:{' '}
-                    {selectedCandidates
-                      .map(selectedChoice => selectedChoice.value)
-                      .join(', ')}
-                  </DialogDescription>
-                </div>
-                <DialogFooter className="mt-10 sm:justify-around">
-                  <Button
-                    onClick={async () => {
-                      await api.vote.voteForProposal(
-                        proposal.id,
-                        selectedCandidates,
-                      );
-                      revalidator.revalidate();
-                      navigate(`${PROPOSAL_HREFS.VOTE_ALL}`);
-                    }}
-                  >
-                    Submit
-                  </Button>
-                  <DialogClose asChild>
-                    <Button variant="secondary">Cancel</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-          <Button variant="secondary" className="flex-1 p-0 sm:max-w-60">
-            <Link to={'../all'} className="w-full py-2">
-              Go Back
-            </Link>
-          </Button>
-        </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
