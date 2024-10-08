@@ -54,6 +54,7 @@ export class ProposalService {
         candidates: {
           create: candidates,
         },
+        votingSystem: proposal.votingSystem,
         userPattern: {
           create: proposal.userPattern,
         },

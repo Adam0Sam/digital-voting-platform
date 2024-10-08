@@ -9,7 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form';
-import { ExtendedFormProps } from './interface';
+import { ExtendedFormProps, WithRequiredSubmit } from './interface';
 import { Input } from '../ui/input';
 import { FC } from 'react';
 import FormHandleButtons from './FormHandleButtons';
@@ -18,22 +18,23 @@ import { cn } from '@/lib/utils';
 
 const zodFormSchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }),
-  // description: z.string().min(1, { message: 'Description is required' }),
   description: z.string().optional(),
 });
 type FormValues = z.infer<typeof zodFormSchema>;
 
-export type TitleDescriptionFormProps = ExtendedFormProps<
-  FormValues,
-  {
-    titleLabel?: string;
-    titleEditDisabled?: boolean;
-    descriptionLabel?: string;
-    descriptionEditDisabled?: boolean;
-    defaultTitle?: string;
-    defaultDescription?: string;
-    className?: string;
-  }
+export type TitleDescriptionFormProps = WithRequiredSubmit<
+  ExtendedFormProps<
+    FormValues,
+    {
+      titleLabel?: string;
+      titleEditDisabled?: boolean;
+      descriptionLabel?: string;
+      descriptionEditDisabled?: boolean;
+      defaultTitle?: string;
+      defaultDescription?: string;
+      className?: string;
+    }
+  >
 >;
 
 const TitleDescriptionForm: FC<TitleDescriptionFormProps> = ({

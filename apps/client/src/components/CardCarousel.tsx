@@ -6,6 +6,11 @@ import {
   CarouselScrollHandles,
 } from './ui/carousel';
 
+export type CardCarouselApi = Pick<
+  CarouselScrollHandles,
+  'scrollNext' | 'scrollPrev'
+>;
+
 const CardCarousel = forwardRef<
   CarouselScrollHandles,
   { children: ReactNode[] }

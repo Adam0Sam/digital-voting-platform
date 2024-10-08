@@ -43,7 +43,8 @@ function useCarousel() {
 export type CarouselScrollHandles = {
   scrollPrev: () => void;
   scrollNext: () => void;
-  scrollTo?: (index: number) => void;
+  scrollTo: (index: number) => void;
+  getCarouselLength: () => number;
 };
 
 const Carousel = React.forwardRef<
@@ -95,13 +96,18 @@ const Carousel = React.forwardRef<
       [api],
     );
 
+    const getCarouselLength = React.useCallback(() => {
+      return api?.scrollSnapList().length ?? 0;
+    }, [api]);
+
     React.useImperativeHandle(ref, () => {
       return {
         scrollPrev,
         scrollNext,
         scrollTo,
+        getCarouselLength,
       };
-    }, [scrollPrev, scrollNext, scrollTo]);
+    }, [scrollPrev, scrollNext, scrollTo, getCarouselLength]);
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {

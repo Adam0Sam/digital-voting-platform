@@ -34,6 +34,7 @@ import UserLogsPage from './pages/admin/UserLogsPage';
 import UserPatternPage from './pages/proposal/manager/UserPatternPage';
 import UserManagePage from './pages/admin/UserManagePage';
 import { LOADER_IDS, LOADER_ID_MAP, loaderDefer } from './lib/loaders';
+import VotingSystemForm from './components/forms/VotingSystemForm';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -129,6 +130,7 @@ const router = createBrowserRouter(
 
         <Route path={ADMIN_PATHS.PROPOSALS} element={<div>Proposals</div>} />
       </Route>
+      <Route path="test" element={<VotingSystemForm />} />
       <Route path="*" element={<div>404</div>} />
     </Route>,
   ),

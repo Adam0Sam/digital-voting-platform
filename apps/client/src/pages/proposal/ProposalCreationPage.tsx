@@ -1,4 +1,4 @@
-import CardCarousel from '@/components/CardCarousel';
+import CardCarousel, { CardCarouselApi } from '@/components/CardCarousel';
 import CardWrapper from '@/components/CardWrapper';
 import DateForm from '@/components/forms/DateForm';
 import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
@@ -33,6 +33,8 @@ import {
   User,
   UserPattern,
 } from '@ambassador';
+import VotingSystemForm from '@/components/forms/VotingSystemForm';
+import { VotingSystem } from '@ambassador/voting-system';
 
 // TODO: Make a prettier proposal summary component
 export function ProposalSummary({
@@ -84,7 +86,7 @@ export function ProposalSummary({
 }
 
 const TitleDescriptionCard: FC<{
-  carouselApi: CarouselScrollHandles;
+  carouselApi: CardCarouselApi;
   handleSubmit: (title: string, description: string) => void;
   defaultValues: { title: string; description: string };
 }> = ({ carouselApi, handleSubmit, defaultValues }) => (
@@ -106,8 +108,28 @@ const TitleDescriptionCard: FC<{
   </CardWrapper>
 );
 
+const VotingSystemCard: FC<{
+  carouselApi: CardCarouselApi;
+  handleSubmit: (votingSystem: VotingSystem) => void;
+}> = ({ carouselApi, handleSubmit }) => {
+  return (
+    <CardWrapper
+      cardTitle="Select Voting System"
+      cardDescription="Select the voting system for this proposal"
+    >
+      <VotingSystemForm
+        onSubmit={values => {
+          handleSubmit(values.system);
+          carouselApi.scrollNext();
+        }}
+        onCancel={carouselApi.scrollPrev}
+      />
+    </CardWrapper>
+  );
+};
+
 const DateCard: FC<{
-  carouselApi: CarouselScrollHandles;
+  carouselApi: CardCarouselApi;
   handleSubmit: (startDate: string, endDate: string) => void;
   defaultValues: { startDate: string; endDate: string };
 }> = ({ carouselApi, handleSubmit, defaultValues }) => (
@@ -136,7 +158,7 @@ const DateCard: FC<{
 );
 
 const ResolutionValueCard: FC<{
-  carouselApi: CarouselScrollHandles;
+  carouselApi: CardCarouselApi;
   handleSubmit: ({
     candidates,
     choiceCount,
@@ -163,7 +185,7 @@ const ResolutionValueCard: FC<{
 };
 
 const ManagerSelectionCard: FC<{
-  carouselApi: CarouselScrollHandles;
+  carouselApi: CardCarouselApi;
   handleSubmit: (managers: ManagerListDto[]) => void;
 }> = ({ carouselApi, handleSubmit }) => {
   return (
@@ -203,7 +225,7 @@ const proposalVisibilityChoices = [
 const DEFAULT_PROPOSAL_VISIBILITY = ProposalVisibility.AGENT_ONLY;
 
 const VoterSelectionCard: FC<{
-  carouselApi: CarouselScrollHandles;
+  carouselApi: CardCarouselApi;
   handleSubmit: (users: User[], proposalVisibility: ProposalVisibility) => void;
   handlePatternSubmit: (pattern: UserPattern) => void;
 }> = ({ carouselApi, handleSubmit, handlePatternSubmit }) => {
@@ -266,6 +288,8 @@ export default function ProposalCreationPage() {
   const [proposalChoiceCount, setProposalChoiceCount] = useState(1);
   const [proposalUserPattern, setProposalUserPattern] = useState<UserPattern>();
 
+  const [votingSystem, setVotingSystem] = useState<VotingSystem>();
+
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -289,7 +313,9 @@ export default function ProposalCreationPage() {
     <AllUsersProvider>
       <div className="flex h-full flex-col justify-center gap-5">
         <div className="flex justify-center gap-2">
-          {Array.from({ length: 5 }).map((_, index) => {
+          {Array.from({
+            length: carouselRef.current?.getCarouselLength() ?? 0,
+          }).map((_, index) => {
             const isInteractive = index <= currentCardIndex;
             return (
               <button
@@ -326,6 +352,10 @@ export default function ProposalCreationPage() {
                 title: proposalTitle,
                 description: proposalDescription,
               }}
+            />
+            <VotingSystemCard
+              carouselApi={carouselApi}
+              handleSubmit={system => setVotingSystem(system)}
             />
             <ResolutionValueCard
               carouselApi={carouselApi}
@@ -372,6 +402,7 @@ export default function ProposalCreationPage() {
                   grades: [],
                   roles: [],
                 },
+                votingSystem: votingSystem ?? VotingSystem.FIRST_PAST_THE_POST,
                 voters: proposalVoters,
                 managers: proposalManagers,
                 candidates: candidates,

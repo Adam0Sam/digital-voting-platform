@@ -14,6 +14,7 @@ import { UserPatternSchema } from "./user-pattern.js";
 import { WithDatesAsStrings } from "../utils/util-types.js";
 import { VoteSchema } from "../vote/vote.js";
 import { ManagerSchema } from "../manager/manager.js";
+import { VotingSystems } from "../voting-system/voting-system.js";
 
 export const CreateProposalDtoSchema = z.object({
   title: z.string().min(1),
@@ -27,7 +28,7 @@ export const CreateProposalDtoSchema = z.object({
   userPattern: UserPatternSchema,
   managers: z.array(ManagerListDtoSchema).min(1),
   voters: z.array(UserSchema),
-
+  votingSystem: z.enum(VotingSystems),
   candidates: z.array(CreateCandidateDtoSchema).min(1),
   choiceCount: z.number().int().min(1),
 });

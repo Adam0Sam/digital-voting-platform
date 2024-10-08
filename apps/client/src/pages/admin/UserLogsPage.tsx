@@ -1,4 +1,4 @@
-import GenericSpinner from '@/components/forms/GenericSpinner';
+import GenericSpinner from '@/components/GenericSpinner';
 import LogTable from '@/components/tables/log/LogTable';
 import {
   LOADER_IDS,
