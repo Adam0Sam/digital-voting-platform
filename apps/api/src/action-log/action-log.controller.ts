@@ -2,7 +2,9 @@ import {
   Controller,
   Get,
   Param,
+  Post,
   Query,
+  Req,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -12,12 +14,23 @@ import { Roles } from 'src/auth/rbac/decorator';
 import { UserRolesGuard } from 'src/auth/rbac/guard';
 import { ActionLogService } from './action-log.service';
 import { ZodValidationPipe } from 'src/pipes';
-import { UserRole, User, ActionFilter, ActionFilterSchema } from '@ambassador';
+import {
+  UserRole,
+  User,
+  ActionFilter,
+  ActionFilterSchema,
+  Action,
+} from '@ambassador';
+import { GetUser } from 'src/user/decorator';
+import { LoggerService } from 'src/logger/logger.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('logs')
 export class ActionLogController {
-  constructor(private actionLogService: ActionLogService) {}
+  constructor(
+    private actionLogService: ActionLogService,
+    private logger: LoggerService,
+  ) {}
   @UseGuards(UserRolesGuard)
   @Roles(UserRole.ADMIN)
   @Get(':userId')
@@ -51,5 +64,13 @@ export class ActionLogController {
     actionFilter: ActionFilter,
   ) {
     return this.actionLogService.getUserLogsCount(userId, actionFilter);
+  }
+
+  @Post('signin')
+  registerSigninLog(@GetUser('id') userId: User['id'], @Req() req: Request) {
+    return this.logger.logAction(Action.SIGNIN, {
+      userId: userId,
+      userAgent: req.headers['user-agent'],
+    });
   }
 }

@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { FC, Suspense, useEffect, useState } from 'react';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
