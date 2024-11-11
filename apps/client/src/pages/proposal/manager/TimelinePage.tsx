@@ -10,56 +10,13 @@ import {
 } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import Timeline from '@/components/Timeline';
-import { Proposal, ProposalStatus } from '@ambassador';
+import { cn, getProgressBetweenDates } from '@/lib/utils';
+import Timeline, { constructMarkerArray } from '@/components/Timeline';
+import { ProposalStatus } from '@ambassador';
 import { api } from '@/lib/api';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { triggerButtonStyleVariants } from '@/components/ui/dialog';
 import { useRevalidator } from 'react-router-dom';
-
-function constructMarkerArray(proposal: Proposal) {
-  const getPercentage = getPercentageGenerator(
-    new Date(proposal.startDate),
-    new Date(proposal.endDate),
-  );
-
-  const markers = [
-    {
-      label: `Proposal Start`,
-      positionPercentage: getPercentage(new Date(proposal.startDate)),
-      tooltipNode: <p>{format(proposal.startDate, 'MMM d, yyyy')}</p>,
-    },
-    {
-      label: 'Resolution Date',
-      positionPercentage: getPercentage(new Date(proposal.resolutionDate)),
-      tooltipNode: <p>{format(proposal.resolutionDate, 'MMM d, yyyy')}</p>,
-    },
-  ];
-
-  if (
-    new Date(proposal.resolutionDate).getTime() ===
-    new Date(proposal.endDate).getTime()
-  ) {
-    return markers;
-  }
-  return [
-    ...markers,
-    {
-      label: 'Proposal End',
-      positionPercentage: getPercentage(new Date(proposal.endDate)),
-      tooltipNode: <p>{format(proposal.endDate, 'MMM d, yyyy')}</p>,
-    },
-  ];
-}
-
-function getPercentageGenerator(startDate: Date, endDate: Date) {
-  return function (date: Date) {
-    const total = endDate.getTime() - startDate.getTime();
-    const current = date.getTime() - startDate.getTime();
-    return (current / total) * 100;
-  };
-}
 
 export default function TimelinePage() {
   const { proposal, permissions } = useManagerProposal();
@@ -88,7 +45,7 @@ export default function TimelinePage() {
       </CardHeader>
       <CardContent>
         <Timeline
-          progressPercentage={getPercentageGenerator(
+          progressPercentage={getProgressBetweenDates(
             startDate,
             endDate,
           )(new Date())}

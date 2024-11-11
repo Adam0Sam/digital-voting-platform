@@ -7,6 +7,7 @@ import { PROPOSAL_HREFS } from '@/lib/routes';
 import { UserRole } from '@ambassador/user';
 import { ADMIN_HREFS } from '@/lib/routes/admin.routes';
 import { ArrowRight, UserCircle, ShieldCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function GreetingPage() {
   const { user } = useSignedInUser();
@@ -27,7 +28,12 @@ export default function GreetingPage() {
           <p className="text-center text-lg text-muted-foreground">
             {t('What would you like to do today?')}
           </p>
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div
+            className={cn('grid gap-6', {
+              'sm:grid-cols-1': !isAdmin,
+              'sm:grid-cols-2': isAdmin,
+            })}
+          >
             <Button
               variant="default"
               size="lg"

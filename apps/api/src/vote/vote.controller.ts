@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Headers,
   Param,
   Post,
@@ -14,7 +15,6 @@ import { LoggerService } from 'src/logger/logger.service';
 import { ParseStringLiteral } from 'src/pipes';
 import { Candidate } from '@ambassador/candidate';
 import { User } from '@ambassador/user';
-import { Action } from '@ambassador/action-log';
 import { VoteStatus } from '@ambassador/vote';
 
 @UseGuards(JwtAuthGuard)
@@ -32,7 +32,6 @@ export class VoteController {
     @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
-    this.logger.logAction(Action.VOTE, { userId, userAgent });
     return this.voteService.voteForProposal(userId, proposalId, candidates);
   }
 
@@ -46,8 +45,6 @@ export class VoteController {
     @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
-    this.logger.logAction(Action.EDIT_VOTE, { userId, userAgent });
-
     return this.voteService.editVote(
       userId,
       proposalId,
@@ -55,5 +52,13 @@ export class VoteController {
       candidates,
       voteStatus,
     );
+  }
+
+  @Get('anon/:proposalId')
+  async getAnonVotes(
+    @Param('proposalId') proposalId: string,
+    @GetUser('id') userId: User['id'],
+  ) {
+    return this.voteService.getAnonVotes(proposalId, userId);
   }
 }

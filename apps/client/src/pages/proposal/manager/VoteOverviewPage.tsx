@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
-import { Candidate, Vote, VoteStatus } from '@ambassador';
-import { BarChart2, Users, CheckCircle } from 'lucide-react';
+import { Candidate, VoteStatus, Vote } from '@ambassador';
+import { BarChart2, Users, CheckCircle, Vote as VoteIcon } from 'lucide-react';
 import { getCachedFunction } from '@/lib/utils';
+import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
 
 const getCachedChoiceData = getCachedFunction(getChoiceData);
 
@@ -58,12 +59,12 @@ export default function VoteOverviewPage() {
       <Tabs defaultValue="votes" className="space-y-4">
         <TabsList>
           <TabsTrigger value="votes">
-            <Users className="mr-2 h-4 w-4" />
+            <VoteIcon className="mr-2 h-4 w-4" />
             Votes
           </TabsTrigger>
           <TabsTrigger value="results">
             <CheckCircle className="mr-2 h-4 w-4" />
-            Resolution Results
+            Results
           </TabsTrigger>
         </TabsList>
         <TabsContent value="votes">
@@ -122,20 +123,12 @@ export default function VoteOverviewPage() {
             </Card>
           </div>
         </TabsContent>
-        <TabsContent value="results">
-          <Card>
-            <CardHeader>
-              <CardTitle>Resolution Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Placeholder for resolution results */}
-              <p>
-                Resolution results will be displayed here once the proposal is
-                resolved.
-              </p>
-              {/* You can add more detailed resolution results here based on your requirements */}
-            </CardContent>
-          </Card>
+        <TabsContent value="results" className="flex justify-center">
+          <ResolutionDisplayCard
+            proposal={proposal}
+            className="max-w-2xl flex-1 pt-5"
+            showHeader={false}
+          />
         </TabsContent>
       </Tabs>
     </div>

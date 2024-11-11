@@ -24,3 +24,11 @@ export function getCachedFunction<TArgs extends unknown[], TResult>(
     return cache[key];
   };
 }
+
+export function getProgressBetweenDates(startDate: Date, endDate: Date) {
+  return function (date: Date) {
+    const total = endDate.getTime() - startDate.getTime();
+    const current = date.getTime() - startDate.getTime();
+    return (current / total) * 100;
+  };
+}

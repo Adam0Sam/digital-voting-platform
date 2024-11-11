@@ -1,13 +1,26 @@
-import { Proposal, Candidate, VoteStatus } from '@ambassador';
+import { Candidate, VoteStatus, Vote, isVote } from '@ambassador';
 
 export type choiceChartItem = {
   choiceValue: string;
   choiceVotes: number;
 };
 
+function accumulateCandidateVotes(
+  candidates: Candidate[],
+  acc: Map<string, choiceChartItem>,
+) {
+  for (const candidate of candidates) {
+    if (!acc.has(candidate.id)) continue;
+    acc.set(candidate.id, {
+      ...acc.get(candidate.id)!,
+      choiceVotes: acc.get(candidate.id)!.choiceVotes + 1,
+    });
+  }
+}
+
 export function getChoiceData(
   candidates: Candidate[],
-  proposalVotes: Proposal['votes'],
+  proposalVotes: Vote[] | Candidate[][],
 ) {
   const choiceChartDataMap = new Map<string, choiceChartItem>();
   let resolvedVoteCount = 0;
@@ -20,15 +33,13 @@ export function getChoiceData(
   }
 
   for (const vote of proposalVotes) {
-    if (vote.status !== VoteStatus.RESOLVED) continue;
-    resolvedVoteCount++;
-    for (const voteCandidate of vote.candidates) {
-      if (!choiceChartDataMap.has(voteCandidate.id)) continue;
-      choiceChartDataMap.set(voteCandidate.id, {
-        ...choiceChartDataMap.get(voteCandidate.id)!,
-        choiceVotes: choiceChartDataMap.get(voteCandidate.id)!.choiceVotes + 1,
-      });
+    if (isVote(vote)) {
+      if (vote.status !== VoteStatus.RESOLVED) continue;
+      accumulateCandidateVotes(vote.candidates, choiceChartDataMap);
+    } else {
+      accumulateCandidateVotes(vote, choiceChartDataMap);
     }
+    resolvedVoteCount++;
   }
 
   const choiceChartData = Array.from(choiceChartDataMap.values());

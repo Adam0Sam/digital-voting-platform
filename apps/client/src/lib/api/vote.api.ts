@@ -20,4 +20,8 @@ export class VoteApi {
       status,
     });
   }
+
+  async getAnonVoteResults(proposalId: string) {
+    return (await this.httpClient.get(`anon/${proposalId}`)) as Candidate[][];
+  }
 }

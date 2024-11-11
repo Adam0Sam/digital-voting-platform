@@ -16,8 +16,3 @@ export const ADMIN_HREFS = {
   MANAGE: (id: string) =>
     `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.USER}/${id}/${ADMIN_PATHS.manage}`,
 };
-
-export function getUserQueryId(url: URL) {
-  const pathname = url.pathname.split('/');
-  return pathname[pathname.length - 2];
-}

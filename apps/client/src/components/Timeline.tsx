@@ -1,10 +1,12 @@
-import { cn } from '@/lib/utils';
+import { cn, getProgressBetweenDates } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
+import { format } from 'date-fns';
+import { Proposal } from '@ambassador';
 
 export type TimelineMarker = {
   positionPercentage: number;
@@ -16,6 +18,43 @@ type TimelineProps = {
   progressPercentage: number;
   markers?: TimelineMarker[];
 };
+
+export function constructMarkerArray(
+  proposal: Pick<Proposal, 'startDate' | 'endDate' | 'resolutionDate'>,
+) {
+  const getProgress = getProgressBetweenDates(
+    new Date(proposal.startDate),
+    new Date(proposal.endDate),
+  );
+
+  const markers = [
+    {
+      label: `Proposal Start`,
+      positionPercentage: getProgress(new Date(proposal.startDate)),
+      tooltipNode: <p>{format(proposal.startDate, 'MMM d, yyyy')}</p>,
+    },
+    {
+      label: 'Resolution Date',
+      positionPercentage: getProgress(new Date(proposal.resolutionDate)),
+      tooltipNode: <p>{format(proposal.resolutionDate, 'MMM d, yyyy')}</p>,
+    },
+  ];
+
+  if (
+    new Date(proposal.resolutionDate).getTime() ===
+    new Date(proposal.endDate).getTime()
+  ) {
+    return markers;
+  }
+  return [
+    ...markers,
+    {
+      label: 'Proposal End',
+      positionPercentage: getProgress(new Date(proposal.endDate)),
+      tooltipNode: <p>{format(proposal.endDate, 'MMM d, yyyy')}</p>,
+    },
+  ];
+}
 
 export default function Timeline(props: TimelineProps) {
   return (

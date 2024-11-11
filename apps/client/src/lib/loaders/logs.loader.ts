@@ -1,5 +1,9 @@
 import { api } from '../api';
-import { getUserQueryId } from '../routes/admin.routes';
+
+function getUserQueryId(url: URL) {
+  const pathname = url.pathname.split('/');
+  return pathname[pathname.length - 2];
+}
 
 export async function userLogsLoader({ request }: { request: Request }) {
   const userId = getUserQueryId(new URL(request.url));
