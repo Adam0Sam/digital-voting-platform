@@ -1,87 +1,4 @@
-// import { SingularLabeledBarChart } from '@/components/bar-chart';
-// import { useManagerProposal } from './ProposalManagePage';
-// import { getChoiceData } from '@/lib/proposal-data';
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { ScrollArea } from '@/components/ui/scroll-area';
-// import { useMemo, useState } from 'react';
-
-// import { api } from '@/lib/api';
-// import UserVoteItem from '@/components/UserVoteItem';
-// import { Candidate, Vote, VoteStatus } from '@ambassador';
-
-// export default function VoteOverviewPage() {
-//   const { proposal, permissions } = useManagerProposal();
-//   const [proposalVotes, setProposalVotes] = useState<Vote[]>(proposal.votes);
-//   const { choiceChartData } = useMemo(
-//     () => getChoiceData(proposal.candidates, proposalVotes),
-//     [proposalVotes, proposal.candidates],
-//   );
-//   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
-
-//   const handleVoteSave = (
-//     voteId: string,
-//     candidates: Candidate[],
-//     status: VoteStatus,
-//   ) => {
-//     api.vote.editVote(proposal.id, voteId, candidates, status);
-//     setProposalVotes(prevVotes =>
-//       prevVotes.map(prevVote => {
-//         if (prevVote.id === voteId) {
-//           return {
-//             ...prevVote,
-//             choices: candidates,
-//           };
-//         }
-//         return prevVote;
-//       }),
-//     );
-//   };
-
-//   return (
-//     <div className="flex flex-col gap-12 md:flex-row">
-//       <div className="flex flex-1 flex-col gap-12">
-//         <h2 className="text-2xl">Votes</h2>
-//         <SingularLabeledBarChart
-//           chartData={choiceChartData}
-//           selectedCells={highlightedChoices}
-//           dataLabelKey="choiceValue"
-//           dataValueKey="choiceVotes"
-//           className="min-h-1 flex-1"
-//         />
-//       </div>
-//       <Card className="flex flex-1 flex-col">
-//         <CardHeader>
-//           <CardTitle>Voters</CardTitle>
-//         </CardHeader>
-//         <CardContent>
-//           <ScrollArea className="h-96">
-//             {proposalVotes.map(vote => (
-//               <UserVoteItem
-//                 vote={vote}
-//                 allChoices={proposal.candidates}
-//                 onFocus={vote => {
-//                   setHighlightedChoices(
-//                     vote.candidates.map(candidate => candidate.value),
-//                   );
-//                 }}
-//                 maxChoiceCount={proposal.choiceCount}
-//                 onBlur={() => setHighlightedChoices([])}
-//                 canEditVotes={permissions.canEditVotes}
-//                 canCreateVotes={permissions.canCreateVotes}
-//                 canDeleteVotes={permissions.canDeleteVotes}
-//                 canEditChoiceCount={permissions.canEditChoiceCount}
-//                 key={vote.id}
-//                 saveVoteEdit={handleVoteSave}
-//               />
-//             ))}
-//           </ScrollArea>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   );
-// }
-
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { SingularLabeledBarChart } from '@/components/bar-chart';
 import { useManagerProposal } from './ProposalManagePage';
 import { getChoiceData } from '@/lib/proposal-data';
@@ -92,15 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
 import { Candidate, Vote, VoteStatus } from '@ambassador';
-import { BarChart2, Users } from 'lucide-react';
+import { BarChart2, Users, CheckCircle } from 'lucide-react';
+import { getCachedFunction } from '@/lib/utils';
+
+const getCachedChoiceData = getCachedFunction(getChoiceData);
 
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
   const [proposalVotes, setProposalVotes] = useState<Vote[]>(proposal.votes);
-  const { choiceChartData, resolvedVoteCount } = useMemo(
-    () => getChoiceData(proposal.candidates, proposalVotes),
-    [proposalVotes, proposal.candidates],
-  );
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
 
   const handleVoteSave = (
@@ -109,17 +25,19 @@ export default function VoteOverviewPage() {
     status: VoteStatus,
   ) => {
     api.vote.editVote(proposal.id, voteId, candidates, status);
-    setProposalVotes(prevVotes =>
-      prevVotes.map(prevVote => {
+    setProposalVotes(prevVotes => {
+      const a = prevVotes.map(prevVote => {
         if (prevVote.id === voteId) {
           return {
             ...prevVote,
-            choices: candidates,
+            status: status,
+            candidates: candidates,
           };
         }
         return prevVote;
-      }),
-    );
+      });
+      return a;
+    });
   };
 
   return (
@@ -128,66 +46,94 @@ export default function VoteOverviewPage() {
         <h2 className="text-3xl font-bold">Vote Overview</h2>
         <div className="flex items-center gap-2">
           <Badge variant="secondary">Total Votes: {proposalVotes.length}</Badge>
-          <Badge variant="secondary">Resolved Votes: {resolvedVoteCount}</Badge>
+          <Badge variant="secondary">
+            Resolved Votes:{' '}
+            {
+              getCachedChoiceData(proposal.candidates, proposalVotes)
+                .resolvedVoteCount
+            }
+          </Badge>
         </div>
       </div>
-
-      <Tabs defaultValue="chart" className="space-y-4">
+      <Tabs defaultValue="votes" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="chart">
-            <BarChart2 className="mr-2 h-4 w-4" />
-            Vote Distribution
-          </TabsTrigger>
-          <TabsTrigger value="voters">
+          <TabsTrigger value="votes">
             <Users className="mr-2 h-4 w-4" />
-            Voter List
+            Votes
+          </TabsTrigger>
+          <TabsTrigger value="results">
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Resolution Results
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="votes">
+          <div className="grid gap-8 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart2 className="mr-2 h-5 w-5" />
+                  Vote Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SingularLabeledBarChart
+                  chartData={
+                    getCachedChoiceData(proposal.candidates, proposalVotes)
+                      .choiceChartData
+                  }
+                  selectedCells={highlightedChoices}
+                  dataLabelKey="choiceValue"
+                  dataValueKey="choiceVotes"
+                  className="h-[400px] w-full"
+                />
+              </CardContent>
+            </Card>
 
-        <TabsContent value="chart" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Vote Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SingularLabeledBarChart
-                chartData={choiceChartData}
-                selectedCells={highlightedChoices}
-                dataLabelKey="choiceValue"
-                dataValueKey="choiceVotes"
-                className="h-[400px] w-full"
-              />
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="mr-2 h-5 w-5" />
+                  Voter List
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px] pr-4">
+                  {proposalVotes.map(vote => (
+                    <UserVoteItem
+                      key={vote.id}
+                      vote={vote}
+                      allChoices={proposal.candidates}
+                      onFocus={vote => {
+                        setHighlightedChoices(
+                          vote.candidates.map(candidate => candidate.value),
+                        );
+                      }}
+                      maxChoiceCount={proposal.choiceCount}
+                      onBlur={() => setHighlightedChoices([])}
+                      canEditVotes={permissions.canEditVotes}
+                      canCreateVotes={permissions.canCreateVotes}
+                      canDeleteVotes={permissions.canDeleteVotes}
+                      canEditChoiceCount={permissions.canEditChoiceCount}
+                      saveVoteEdit={handleVoteSave}
+                    />
+                  ))}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
-
-        <TabsContent value="voters">
+        <TabsContent value="results">
           <Card>
             <CardHeader>
-              <CardTitle>Voter List</CardTitle>
+              <CardTitle>Resolution Results</CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
-                {proposalVotes.map(vote => (
-                  <UserVoteItem
-                    key={vote.id}
-                    vote={vote}
-                    allChoices={proposal.candidates}
-                    onFocus={vote => {
-                      setHighlightedChoices(
-                        vote.candidates.map(candidate => candidate.value),
-                      );
-                    }}
-                    maxChoiceCount={proposal.choiceCount}
-                    onBlur={() => setHighlightedChoices([])}
-                    canEditVotes={permissions.canEditVotes}
-                    canCreateVotes={permissions.canCreateVotes}
-                    canDeleteVotes={permissions.canDeleteVotes}
-                    canEditChoiceCount={permissions.canEditChoiceCount}
-                    saveVoteEdit={handleVoteSave}
-                  />
-                ))}
-              </ScrollArea>
+              {/* Placeholder for resolution results */}
+              <p>
+                Resolution results will be displayed here once the proposal is
+                resolved.
+              </p>
+              {/* You can add more detailed resolution results here based on your requirements */}
             </CardContent>
           </Card>
         </TabsContent>

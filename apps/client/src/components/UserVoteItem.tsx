@@ -46,7 +46,6 @@ export default function UserVoteItem({
   onFocus,
   onBlur,
   canEditVotes,
-  canCreateVotes,
   canDeleteVotes,
   canEditChoiceCount,
   allChoices,
@@ -149,7 +148,10 @@ export default function UserVoteItem({
         <div className="hidden flex-1 sm:block">
           <p>{voteStatus}</p>
           <p className="text-muted-foreground">
-            {vote.candidates.map(candidate => candidate.value).join(', ')}
+            {choices
+              .filter(choice => choice.selected)
+              .map(choice => choice.value)
+              .join(', ')}
           </p>
         </div>
         {canEditVotes && (

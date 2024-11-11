@@ -40,7 +40,6 @@ export default function ChoicesOverviewPage() {
           }}
           dialogDescription="Editing choices will reset all votes."
           handleConfirm={() => {
-            console.log('choices', choiceFormRef.current?.getChoices());
             api.proposals.updateOne(proposal.id, {
               candidates: choiceFormRef.current?.getChoices() ?? [],
               choiceCount: choiceFormRef.current?.getChoiceCount() ?? 1,
