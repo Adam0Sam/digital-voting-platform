@@ -161,7 +161,6 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                 <UserSelectionForm
                   initiallySelectedUsers={users}
                   onSelectionEnd={selectedUsers => {
-                    console.log('selectedUsers', selectedUsers);
                     handleUserSelectionEnd(selectedUsers, role);
                   }}
                   onUserRemove={handleUserRemove}
@@ -205,6 +204,7 @@ const ManagerSelectionForm: FC<ManagerSelectionFormProps> = ({
                           ]);
                           handleRoleAddition(newRole);
                           setSheetIsOpen(false);
+                          setRoleFormIsOpen(false);
                         });
                       }}
                       className="mt-12 w-full max-w-sm"

@@ -21,7 +21,7 @@ import { getTimeLeft } from '@/lib/time';
 import { Proposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
 import { getChoiceData } from '@/lib/proposal-data';
-import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
+import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 
 export default function ManagerCard({
@@ -129,7 +129,10 @@ export default function ManagerCard({
       <CardFooter>
         <Button asChild className="w-full">
           <Link
-            to={`${PROPOSAL_HREFS.MANAGE}/${proposalData.id}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`}
+            to={PROPOSAL_HREFS.MANAGER_OVERVIEW(
+              PROPOSAL_OVERVIEW_PATHS.VOTES,
+              proposalData.id,
+            )}
             className="flex items-center justify-center"
           >
             Manage Proposal

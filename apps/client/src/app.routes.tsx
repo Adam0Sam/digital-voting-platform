@@ -11,10 +11,10 @@ import ProposalVotePage from './pages/proposal/voter/ProposalVotePage';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 import ProfilePageLayout from './pages/profile/ProfilePageLayout';
 import RootErrorBoundary from './components/RootErrorBoundary';
-import ProposalsLayout from './pages/ProposalsLayout';
 import ProfileTemplatesPage from './pages/profile/profile-templates/ProfileTemplatesPage';
 import {
   AUTH_PATHS,
+  PROPOSAL_OVERVIEW_PATHS,
   PROPOSAL_PATHS,
   USER_PROFILE_PATHS,
   USER_TEMPLATES_PATHS,
@@ -34,6 +34,7 @@ import UserLogsPage from './pages/admin/UserLogsPage';
 import UserPatternPage from './pages/proposal/manager/UserPatternPage';
 import UserManagePage from './pages/admin/UserManagePage';
 import { LOADER_IDS, LOADER_ID_MAP, loaderDefer } from './lib/loaders';
+import TimelinePage from './pages/proposal/manager/TimelinePage';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
@@ -54,7 +55,7 @@ const router = createBrowserRouter(
         loader={LOADER_ID_MAP[LOADER_IDS.AUTH]}
       />
 
-      <Route path={PROPOSAL_PATHS.BASE} element={<ProposalsLayout />}>
+      <Route path={PROPOSAL_PATHS.BASE}>
         <Route index element={<ProposalGreetingPage />} />
         <Route
           path={PROPOSAL_PATHS.VOTE}
@@ -73,20 +74,24 @@ const router = createBrowserRouter(
           <Route path={GENERIC_PATHS.ALL} element={<ManagerLandingPage />} />
           <Route path={GENERIC_PATHS.ONE} element={<ProposalManagePage />}>
             <Route
-              path={PROPOSAL_PATHS.VOTES_OVERVIEW}
+              path={PROPOSAL_OVERVIEW_PATHS.VOTES}
               element={<VoteOverviewPage />}
             />
             <Route
-              path={PROPOSAL_PATHS.CONTENT_OVERVIEW}
+              path={PROPOSAL_OVERVIEW_PATHS.CONTENT}
               element={<ContentOverviewPage />}
             />
             <Route
-              path={PROPOSAL_PATHS.CHOICES_OVERVIEW}
+              path={PROPOSAL_OVERVIEW_PATHS.CHOICES}
               element={<ChoicesOverviewPage />}
             />
             <Route
-              path={PROPOSAL_PATHS.PATTERN_OVERVIEW}
+              path={PROPOSAL_OVERVIEW_PATHS.PATTERN}
               element={<UserPatternPage />}
+            />
+            <Route
+              path={PROPOSAL_OVERVIEW_PATHS.TIMELINE}
+              element={<TimelinePage />}
             />
           </Route>
         </Route>

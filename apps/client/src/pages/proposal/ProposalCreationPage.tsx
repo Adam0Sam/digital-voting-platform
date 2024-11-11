@@ -292,6 +292,7 @@ export default function ProposalCreationPage() {
 
   const carouselRef = useRef<CarouselScrollHandles>(null);
 
+  const [filledCards, setFilledCards] = useState<number[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
   const carouselApi = {
@@ -311,12 +312,13 @@ export default function ProposalCreationPage() {
 
   return (
     <AllUsersProvider>
-      <div className="flex h-full flex-col justify-center gap-5">
+      {/* Why does h-full not work? */}
+      <div className="flex h-screen flex-col justify-center gap-5">
         <div className="flex justify-center gap-2">
           {Array.from({
             length: carouselRef.current?.getCarouselLength() ?? 0,
           }).map((_, index) => {
-            const isInteractive = index <= currentCardIndex;
+            const isInteractive = filledCards.includes(index);
             return (
               <button
                 key={index}
@@ -347,6 +349,7 @@ export default function ProposalCreationPage() {
               handleSubmit={(title, description) => {
                 setProposalTitle(title);
                 setProposalDescription(description);
+                setFilledCards(prev => [...prev, 0]);
               }}
               defaultValues={{
                 title: proposalTitle,
@@ -355,13 +358,17 @@ export default function ProposalCreationPage() {
             />
             <VotingSystemCard
               carouselApi={carouselApi}
-              handleSubmit={system => setVotingSystem(system)}
+              handleSubmit={system => {
+                setVotingSystem(system);
+                setFilledCards(prev => [...prev, 1]);
+              }}
             />
             <ResolutionValueCard
               carouselApi={carouselApi}
               handleSubmit={({ candidates, choiceCount }) => {
                 setCandidates(candidates);
                 setProposalChoiceCount(choiceCount);
+                setFilledCards(prev => [...prev, 2]);
               }}
             />
             <DateCard
@@ -369,6 +376,7 @@ export default function ProposalCreationPage() {
               handleSubmit={(startDate, endDate) => {
                 setProposalStartDate(startDate);
                 setProposalEndDate(endDate);
+                setFilledCards(prev => [...prev, 3]);
               }}
               defaultValues={{
                 startDate: proposalStartDate,
@@ -379,6 +387,7 @@ export default function ProposalCreationPage() {
               carouselApi={carouselApi}
               handleSubmit={managers => {
                 setProposalManagers(managers);
+                setFilledCards(prev => [...prev, 4]);
               }}
             />
             <VoterSelectionCard
@@ -386,8 +395,12 @@ export default function ProposalCreationPage() {
               handleSubmit={(users, proposalVisibility) => {
                 setProposalVoters(users);
                 setProposalVisibility(proposalVisibility);
+                setFilledCards(prev => [...prev, 5]);
               }}
-              handlePatternSubmit={pattern => setProposalUserPattern(pattern)}
+              handlePatternSubmit={pattern => {
+                setProposalUserPattern(pattern);
+                setFilledCards(prev => [...prev, 5]);
+              }}
             />
 
             <ProposalSummary

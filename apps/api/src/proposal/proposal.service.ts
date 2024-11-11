@@ -5,15 +5,21 @@ import {
   CreateProposalDto,
   UpdateProposalDto,
   User,
+  Action,
+  Proposal,
 } from '@ambassador';
 import { VoteStatus } from '@ambassador/vote';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { LoggerService } from 'src/logger/logger.service';
 
 @Injectable()
 export class ProposalService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private logger: LoggerService,
+  ) {}
 
   private getCreateManagersInput(
     managerLists: ManagerListDto[],
@@ -49,6 +55,7 @@ export class ProposalService {
         description: proposal.description,
         startDate: proposal.startDate,
         endDate: proposal.endDate,
+        resolutionDate: proposal.resolutionDate ?? proposal.endDate,
         status: proposal.status,
         visibility: proposal.visibility,
         candidates: {
@@ -65,6 +72,34 @@ export class ProposalService {
         managers: this.getCreateManagersInput(proposal.managers),
       },
     });
+  }
+
+  private logUpdateActions(
+    proposalUpdateInput: Prisma.ProposalUpdateInput,
+    prevProposal: Proposal,
+    userId: string,
+  ) {
+    const updateKeys = Object.keys(
+      proposalUpdateInput,
+    ) as (keyof Prisma.ProposalUpdateInput)[];
+
+    for (const key of updateKeys) {
+      switch (key) {
+        case 'startDate':
+        case 'endDate':
+          this.logger.logAction(Action.EDIT_START_END_DATES, {
+            userId,
+            message: `Updated ${key} to ${proposalUpdateInput[key]}`,
+          });
+          break;
+        case 'resolutionDate':
+          this.logger.logAction(Action.EDIT_RESOLUTION_DATE, {
+            userId,
+            message: `Updated resolution date to ${proposalUpdateInput[key]}`,
+          });
+          break;
+      }
+    }
   }
 
   private getProposalUpdateInput({
@@ -101,6 +136,11 @@ export class ProposalService {
         case 'endDate':
           if (permissions.canEditDates) {
             updateInput.endDate = proposalDto.endDate;
+          }
+          break;
+        case 'resolutionDate':
+          if (permissions.canEditDates) {
+            updateInput.resolutionDate = proposalDto.resolutionDate;
           }
           break;
         case 'status':
@@ -157,11 +197,6 @@ export class ProposalService {
           }
           break;
         case 'userPattern':
-          console.log(
-            'userPattern',
-            permissions.canEditUserPattern,
-            proposalDto.userPattern,
-          );
           if (permissions.canEditUserPattern) {
             updateInput.userPattern = {
               update: proposalDto.userPattern,
@@ -237,19 +272,21 @@ export class ProposalService {
       throw new UnauthorizedException('User is not a manager of this proposal');
     }
     const permissions = managers[0].role.permissions;
+    const updateInput = this.getProposalUpdateInput({
+      proposalId,
+      proposalDto,
+      permissions,
+      prevCandidates: candidates,
+    });
 
     return this.prisma.proposal.update({
       where: {
         id: proposalId,
       },
-      data: this.getProposalUpdateInput({
-        proposalId,
-        proposalDto,
-        permissions,
-        prevCandidates: candidates,
-      }),
+      data: updateInput,
     });
   }
+
   async getAllVoterProposals(user: User) {
     const findManyProposalsInput = {
       where: {

@@ -1,7 +1,7 @@
 import { useParams, Outlet, useOutletContext } from 'react-router-dom';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
-import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
+import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import { ManagerPermissions, Proposal } from '@ambassador';
 import ProposalManageDate from '@/components/proposal/manager/ProposalManageDate';
 import {
@@ -13,16 +13,7 @@ import {
 } from '@/components/ui/card';
 import InnerPageNavLinks from '@/components/nav/InnerPageNavLinks';
 import { APIError } from '@/lib/api';
-
-function getLinks(proposalId: string) {
-  const BASE = `${PROPOSAL_HREFS.MANAGE}/${proposalId}`;
-  return [
-    { title: 'Votes', href: `${BASE}/${PROPOSAL_PATHS.VOTES_OVERVIEW}` },
-    { title: 'Content', href: `${BASE}/${PROPOSAL_PATHS.CONTENT_OVERVIEW}` },
-    { title: 'Choices', href: `${BASE}/${PROPOSAL_PATHS.CHOICES_OVERVIEW}` },
-    { title: 'Pattern', href: `${BASE}/${PROPOSAL_PATHS.PATTERN_OVERVIEW}` },
-  ];
-}
+import { capitalizeFirstLetter } from '@/lib/utils';
 
 type ContextType = {
   proposal: Proposal;
@@ -46,7 +37,10 @@ export default function ProposalManagePage() {
     );
   }
 
-  const links = getLinks(proposalId);
+  const links = Object.values(PROPOSAL_OVERVIEW_PATHS).map(path => ({
+    title: capitalizeFirstLetter(path),
+    href: PROPOSAL_HREFS.MANAGER_OVERVIEW(path, proposalId),
+  }));
 
   return (
     <div className="space-y-4 px-4 py-8">

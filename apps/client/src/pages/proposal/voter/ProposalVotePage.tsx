@@ -14,11 +14,12 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { api } from '@/lib/api';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import { Candidate } from '@ambassador';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle } from 'lucide-react';
 
 export default function ProposalVotePage() {
   const { id: proposalId } = useParams();
@@ -36,10 +37,21 @@ export default function ProposalVotePage() {
     proposal.votes[0].candidates,
   );
 
-  const canVote = proposal.votes[0].status === 'PENDING';
+  const proposalHasStarted = new Date(proposal.startDate) < new Date();
+  const canVote = proposal.votes[0].status === 'PENDING' && proposalHasStarted;
   const votesLeft = proposal.choiceCount - selectedCandidates.length;
   const progressPercentage =
     (selectedCandidates.length / proposal.choiceCount) * 100;
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -54,54 +66,65 @@ export default function ProposalVotePage() {
         </CardContent>
       </Card>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="text-xl">
-            {canVote ? 'Select Your Candidates' : 'Your Submitted Votes'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex items-center justify-between">
-            <span className="text-sm font-medium">
-              {canVote ? `Votes left: ${votesLeft}` : 'Votes submitted'}
-            </span>
-            <span className="text-sm font-medium">
-              {selectedCandidates.length}/{proposal.choiceCount}
-            </span>
-          </div>
-          <Progress value={progressPercentage} className="h-2" />
+      {!proposalHasStarted ? (
+        <Alert variant="destructive" className="mb-8">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Proposal Not Started</AlertTitle>
+          <AlertDescription>
+            This proposal has not started yet. Voting will be available from{' '}
+            {formatDate(proposal.startDate)}.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-xl">
+              {canVote ? 'Select Your Candidates' : 'Your Submitted Votes'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-sm font-medium">
+                {canVote ? `Votes left: ${votesLeft}` : 'Votes submitted'}
+              </span>
+              <span className="text-sm font-medium">
+                {selectedCandidates.length}/{proposal.choiceCount}
+              </span>
+            </div>
+            <Progress value={progressPercentage} className="h-2" />
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {proposal.candidates?.map(candidate => (
-              <CandidateCard
-                key={candidate.id}
-                candidate={candidate}
-                isSelected={selectedCandidates.some(
-                  selectedChoice => selectedChoice.value === candidate.value,
-                )}
-                handleClick={() => {
-                  if (!canVote) return;
-                  setSelectedCandidates(prevCandidates => {
-                    if (
-                      prevCandidates.some(
-                        prevChoice => prevChoice.value === candidate.value,
-                      )
-                    ) {
-                      return prevCandidates.filter(
-                        prevChoice => prevChoice.value !== candidate.value,
-                      );
-                    }
-                    if (proposal.choiceCount <= prevCandidates.length) {
-                      return [candidate];
-                    }
-                    return [...prevCandidates, candidate];
-                  });
-                }}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {proposal.candidates?.map(candidate => (
+                <CandidateCard
+                  key={candidate.id}
+                  candidate={candidate}
+                  isSelected={selectedCandidates.some(
+                    selectedChoice => selectedChoice.value === candidate.value,
+                  )}
+                  handleClick={() => {
+                    if (!canVote) return;
+                    setSelectedCandidates(prevCandidates => {
+                      if (
+                        prevCandidates.some(
+                          prevChoice => prevChoice.value === candidate.value,
+                        )
+                      ) {
+                        return prevCandidates.filter(
+                          prevChoice => prevChoice.value !== candidate.value,
+                        );
+                      }
+                      if (proposal.choiceCount <= prevCandidates.length) {
+                        return [candidate];
+                      }
+                      return [...prevCandidates, candidate];
+                    });
+                  }}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <Button
@@ -160,6 +183,29 @@ export default function ProposalVotePage() {
           </Dialog>
         )}
       </div>
+
+      {proposalHasStarted && (
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Clock className="mr-2 h-5 w-5" />
+              Proposal Timeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between">
+              <div>
+                <p className="font-semibold">Start Date:</p>
+                <p>{formatDate(proposal.startDate)}</p>
+              </div>
+              <div>
+                <p className="font-semibold">End Date:</p>
+                <p>{formatDate(proposal.endDate)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

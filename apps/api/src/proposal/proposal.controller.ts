@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Headers,
   Param,
@@ -60,25 +59,7 @@ export class ProposalController {
     proposalDto: UpdateProposalDto,
     @GetUser('id') userId: User['id'],
   ) {
-    this.logger.logAction(Action.EDIT_PROPOSAL, {
-      userId,
-      userAgent,
-      message: JSON.stringify(proposalDto),
-    });
     return this.proposalService.updateOne(proposalId, proposalDto, userId);
-  }
-
-  @Delete(':id')
-  async deleteOne(
-    @Param('id') proposalId: string,
-    @Headers('user-agent') userAgent: string,
-    @GetUser('id') userId: User['id'],
-  ) {
-    this.logger.logAction(Action.DELETE_PROPOSAL, {
-      userId,
-      userAgent,
-    });
-    return 'deleted';
   }
 
   @Get('voter/all')

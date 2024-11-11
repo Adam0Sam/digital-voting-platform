@@ -19,8 +19,9 @@ import { VotingSystems } from "../voting-system/voting-system.js";
 export const CreateProposalDtoSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  startDate: z.coerce.date().optional(),
-  endDate: z.coerce.date().optional(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  resolutionDate: z.coerce.date().optional(),
   status: z.enum(ProposalStatusOptions).default(ProposalStatus.DRAFT),
   visibility: z
     .enum(ProposalVisibilityOptions)
@@ -38,17 +39,15 @@ export type CreateProposalDto = WithDatesAsStrings<
 
 export const ProposalSchema = CreateProposalDtoSchema.omit({
   candidates: true,
-  endDate: true,
-  startDate: true,
   voters: true,
   managers: true,
+  resolutionDate: true,
 }).extend({
   id: z.string(),
   candidates: z.array(CandidateSchema).min(1),
-  startDate: z.coerce.date(),
-  endDate: z.coerce.date(),
   votes: z.array(VoteSchema),
   managers: z.array(ManagerSchema),
+  resolutionDate: z.coerce.date(),
 });
 export type Proposal = WithDatesAsStrings<z.infer<typeof ProposalSchema>>;
 

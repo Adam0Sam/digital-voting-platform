@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ExtendedFormProps } from './interface';
+import { ExtendedFormProps, WithRequiredSubmit } from './interface';
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,18 +19,20 @@ import { addDays, format } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import FormHandleButtons from './FormHandleButtons';
 
-export type DateFormProps = ExtendedFormProps<
-  {
-    date: {
-      from: Date;
-      to: Date;
-    };
-  },
-  {
-    defaultStartDate?: Date;
-    defaultEndDate?: Date;
-    submitButtonLabel?: string;
-  }
+export type DateFormProps = WithRequiredSubmit<
+  ExtendedFormProps<
+    {
+      date: {
+        from: Date;
+        to: Date;
+      };
+    },
+    {
+      defaultStartDate?: Date;
+      defaultEndDate?: Date;
+      submitButtonLabel?: string;
+    }
+  >
 >;
 
 const zodFormSchema = z.object({

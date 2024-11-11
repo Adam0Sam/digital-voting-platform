@@ -99,7 +99,7 @@ export default function VoterCard({
       <CardFooter>
         <Button asChild className="w-full">
           <Link
-            to={`${PROPOSAL_HREFS.VOTE}/${proposalData.id}`}
+            to={PROPOSAL_HREFS.VOTE(proposalData.id)}
             className="flex items-center justify-center gap-2"
           >
             {voteData.status === VoteStatus.PENDING ? 'Vote Now' : 'View Vote'}

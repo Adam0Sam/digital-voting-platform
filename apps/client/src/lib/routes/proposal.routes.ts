@@ -1,23 +1,30 @@
 import { GENERIC_PATHS } from './util.routes';
 
+export const PROPOSAL_OVERVIEW_PATHS = {
+  VOTES: 'votes',
+  CONTENT: 'content',
+  CHOICES: 'choices',
+  PATTERN: 'pattern',
+  TIMELINE: 'timeline',
+} as const;
+
 export const PROPOSAL_PATHS = {
   BASE: 'proposals',
   VOTE: 'vote',
   MANAGE: 'manage',
   CREATE: 'create',
-  VOTES_OVERVIEW: 'votes-overview',
-  CONTENT_OVERVIEW: 'content-overview',
-  CHOICES_OVERVIEW: 'choices-overview',
-  PATTERN_OVERVIEW: 'pattern-overview',
-};
+} as const;
 
 export const PROPOSAL_HREFS = {
   BASE: `/${PROPOSAL_PATHS.BASE}`,
-  VOTE: `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.VOTE}`,
+  VOTE: (proposalId: string) =>
+    `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.VOTE}/${proposalId}`,
   VOTE_ALL: `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.VOTE}/${GENERIC_PATHS.ALL}`,
-  VOTE_ONE: `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.VOTE}/${GENERIC_PATHS.ONE}`,
-  MANAGE: `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.MANAGE}`,
   MANAGE_ALL: `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.MANAGE}/${GENERIC_PATHS.ALL}`,
-  MANAGE_ONE: `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.MANAGE}/${GENERIC_PATHS.ONE}`,
   CREATE: `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.CREATE}`,
+  MANAGER_OVERVIEW: (
+    overview_type: (typeof PROPOSAL_OVERVIEW_PATHS)[keyof typeof PROPOSAL_OVERVIEW_PATHS],
+    proposalId: string,
+  ) =>
+    `/${PROPOSAL_PATHS.BASE}/${PROPOSAL_PATHS.MANAGE}/${proposalId}/${overview_type}`,
 } as const;
