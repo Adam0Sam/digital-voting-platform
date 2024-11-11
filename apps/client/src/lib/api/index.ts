@@ -9,6 +9,7 @@ import { ManagerRoleApi } from './manager-role.api';
 import { ProposalApi } from './proposal.api';
 import { UserApi } from './user.api';
 import { VoteApi } from './vote.api';
+
 export const api = {
   proposals: new ProposalApi(),
   users: new UserApi(),

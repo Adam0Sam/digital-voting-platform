@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ProposalStatus, ProposalVisibility } from '@ambassador';
+import { useRevalidator } from 'react-router-dom';
 
 export default function ContentOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
+  const revalidator = useRevalidator();
   const [status, setStatus] = useState<ProposalStatus>(proposal.status);
   const [visibility, setVisibility] = useState<ProposalVisibility>(
     proposal.visibility,
@@ -34,7 +36,11 @@ export default function ContentOverviewPage() {
             disableSubmit={
               !permissions.canEditTitle && !permissions.canEditDescription
             }
-            onSubmit={data => api.proposals.updateOne(proposal.id, data)}
+            onSubmit={data => {
+              api.proposals.updateOne(proposal.id, data).then(() => {
+                revalidator.revalidate();
+              });
+            }}
           />
         </CardContent>
       </Card>
@@ -92,8 +98,12 @@ export default function ContentOverviewPage() {
           )}
 
           <Button
-            onClick={async () =>
-              await api.proposals.updateOne(proposal.id, { status, visibility })
+            onClick={() =>
+              api.proposals
+                .updateOne(proposal.id, { status, visibility })
+                .then(() => {
+                  revalidator.revalidate();
+                })
             }
             disabled={
               !permissions.canEditStatus && !permissions.canEditVisibility

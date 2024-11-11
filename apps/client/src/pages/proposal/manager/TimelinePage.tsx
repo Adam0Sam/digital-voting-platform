@@ -16,6 +16,7 @@ import { Proposal, ProposalStatus } from '@ambassador';
 import { api } from '@/lib/api';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { triggerButtonStyleVariants } from '@/components/ui/dialog';
+import { useRevalidator } from 'react-router-dom';
 
 function constructMarkerArray(proposal: Proposal) {
   const getPercentage = getPercentageGenerator(
@@ -62,6 +63,7 @@ function getPercentageGenerator(startDate: Date, endDate: Date) {
 
 export default function TimelinePage() {
   const { proposal, permissions } = useManagerProposal();
+  const revalidator = useRevalidator();
   const canEditResolutionDate = permissions.canEditDates;
   const [resolutionDate, setResolutionDate] = useState<Date>(
     new Date(proposal.resolutionDate),
@@ -136,9 +138,13 @@ export default function TimelinePage() {
               <div>
                 <ConfirmDialog
                   handleConfirm={() =>
-                    api.proposals.updateOne(proposal.id, {
-                      status: ProposalStatus.RESOLVED,
-                    })
+                    api.proposals
+                      .updateOne(proposal.id, {
+                        status: ProposalStatus.RESOLVED,
+                      })
+                      .then(() => {
+                        revalidator.revalidate();
+                      })
                   }
                   triggerButton={{
                     text: 'Resolve Votes Now',
