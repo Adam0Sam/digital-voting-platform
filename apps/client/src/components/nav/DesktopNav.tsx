@@ -5,6 +5,7 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
@@ -12,10 +13,16 @@ import {
 import { CircleUserRound } from 'lucide-react';
 import { PROPOSAL_LINK_COLLECTION } from '../../lib/href/proposal.links';
 
-import { NavLinkItem } from './NavLinkItem';
+import { NavLinkItem, StandaloneNavLink } from './NavLinkItem';
 import { USER_PROFILE_HREFS } from '@/lib/routes';
+import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
+import { UserRole } from '@ambassador';
+import { ADMIN_HREFS } from '@/lib/routes/admin.routes';
 
 export default function DesktopNav({ className }: { className?: string }) {
+  const { user } = useSignedInUser();
+  const isAdmin = user?.roles.includes(UserRole.ADMIN);
+
   return (
     <div className={cn('flex flex-1 items-center justify-center', className)}>
       <NavigationMenu className="ml-auto">
@@ -56,6 +63,18 @@ export default function DesktopNav({ className }: { className?: string }) {
               </ul>
             </NavigationMenuContent>
           </NavigationMenuItem>
+          {isAdmin && (
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <StandaloneNavLink
+                  to={ADMIN_HREFS.BASE}
+                  title="Admin"
+                  titleClassName="text-lg px-2"
+                  end={false}
+                ></StandaloneNavLink>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          )}
         </NavigationMenuList>
       </NavigationMenu>
       <NavigationMenuItem className="ml-auto mr-10 flex max-w-max items-center">

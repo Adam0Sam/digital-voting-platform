@@ -26,18 +26,3 @@ export function createAsyncResource<T = unknown>(promise: Promise<T>) {
     },
   };
 }
-
-export function createCachedAsyncResource<T = unknown>(
-  cache: Map<string, ReturnType<typeof createAsyncResource<T>>>,
-  cacheKey: string,
-) {
-  return function (
-    promiseFactory: () => Promise<T> | Promise<T>,
-    key: string = cacheKey,
-  ) {
-    if (!cache.has(key)) {
-      cache.set(key, createAsyncResource(promiseFactory()));
-    }
-    return cache.get(key)!;
-  };
-}

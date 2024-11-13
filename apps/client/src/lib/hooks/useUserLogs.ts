@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
-import { createCachedAsyncResource } from '../async-resource';
 import { ActionLogEntry } from '@ambassador';
 import constructActionFilter, { ActionFilter } from '../action-filter';
+import { createCachedAsyncResource } from '../cache';
 
 const userLogResourceCache = new Map();
 const logCountResourceCache = new Map();

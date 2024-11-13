@@ -9,9 +9,9 @@ import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
 import { Candidate, VoteStatus, Vote } from '@ambassador';
 import { BarChart2, Users, CheckCircle, Vote as VoteIcon } from 'lucide-react';
-import { getCachedFunction } from '@/lib/utils';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
 import { calculateVoteDistribution } from '@/lib/resolution-results';
+import { getCachedFunction } from '@/lib/cache';
 
 const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
 
@@ -19,6 +19,10 @@ export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
   const [proposalVotes, setProposalVotes] = useState<Vote[]>(proposal.votes);
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
+  const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
+    proposal.candidates,
+    proposalVotes,
+  );
 
   const handleVoteSave = (
     voteId: string,
@@ -48,11 +52,7 @@ export default function VoteOverviewPage() {
         <div className="flex items-center gap-2">
           <Badge variant="secondary">Total Votes: {proposalVotes.length}</Badge>
           <Badge variant="secondary">
-            Resolved Votes:{' '}
-            {
-              getCachedVoteDistribution(proposal.candidates, proposalVotes)
-                .finalizedVoteCount
-            }
+            Resolved Votes: {finalizedVoteCount}
           </Badge>
         </div>
       </div>
@@ -78,12 +78,7 @@ export default function VoteOverviewPage() {
               </CardHeader>
               <CardContent>
                 <SingularLabeledBarChart
-                  chartData={
-                    getCachedVoteDistribution(
-                      proposal.candidates,
-                      proposalVotes,
-                    ).voteDistribution
-                  }
+                  chartData={voteDistribution}
                   selectedCells={highlightedChoices}
                   dataLabelKey="optionValue"
                   dataValueKey="voteCount"

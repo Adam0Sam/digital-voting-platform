@@ -92,7 +92,7 @@ export default function RootLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto py-4">
+        <div className="mx-auto py-4">
           <DesktopNav className="hidden md:flex" />
           <MobileNav className="md:hidden" />
         </div>

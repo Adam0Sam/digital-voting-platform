@@ -8,13 +8,13 @@ import {
   CardDescription,
   CardContent,
 } from './ui/card';
-import { getCachedFunction } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import {
   calculateVoteDistribution,
   calculateWinningCandidate,
 } from '@/lib/resolution-results';
+import { getCachedFunction } from '@/lib/cache';
 
 const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
 const getCachedWinningCandidate = getCachedFunction(calculateWinningCandidate);
@@ -22,9 +22,9 @@ const getCachedWinningCandidate = getCachedFunction(calculateWinningCandidate);
 function useAnonVoteResults(id: string) {
   const [voteResults, setVoteResults] = useState<Candidate[][]>([]);
   useEffect(() => {
-    api.vote
-      .getAnonVoteResults(id)
-      .then(candidates => setVoteResults(candidates));
+    api.vote.getAnonVoteResults(id).then(candidates => {
+      setVoteResults(candidates);
+    });
   }, [id]);
   return voteResults;
 }
@@ -43,7 +43,6 @@ export default function ResolutionDisplayCard({
   voteDistributionCallback,
 }: ResolutionDisplayCardProps) {
   const voteResults = useAnonVoteResults(proposal.id);
-
   const getVoteDistribution =
     voteDistributionCallback ?? getCachedVoteDistribution;
 

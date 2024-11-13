@@ -18,7 +18,9 @@ export default function ChoicesOverviewPage() {
         formSubmitLabel="Edit Choices"
         disableEdit={!permissions.canEditCandidates}
         disableSubmit={!permissions.canEditCandidates}
+        initialChoiceCount={proposal.choiceCount}
         ref={choiceFormRef}
+        className="max-w-lg"
       >
         <ConfirmDialog
           triggerButton={{

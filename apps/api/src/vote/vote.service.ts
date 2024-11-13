@@ -138,11 +138,22 @@ export class VoteService {
     const proposal = await this.prisma.proposal.findUnique({
       where: {
         id: proposalId,
-        votes: {
-          some: {
-            userId,
+        OR: [
+          {
+            votes: {
+              some: {
+                userId,
+              },
+            },
           },
-        },
+          {
+            managers: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
       },
       include: {
         votes: {

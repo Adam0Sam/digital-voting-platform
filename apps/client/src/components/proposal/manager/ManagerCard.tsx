@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress';
-import { cn, getCachedFunction } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { BarChartBig, CalendarRange, ArrowRight } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Proposal } from '@ambassador';
@@ -23,6 +23,7 @@ import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 import { getTimeLeft } from '@/lib/time-left';
 import { calculateVoteDistribution } from '@/lib/resolution-results';
+import { getCachedFunction } from '@/lib/cache';
 
 const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
 
