@@ -9,11 +9,15 @@ import {
   CardContent,
 } from './ui/card';
 import { getCachedFunction } from '@/lib/utils';
-import { getChoiceData } from '@/lib/proposal-data';
 import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
+import {
+  calculateVoteDistribution,
+  calculateWinningCandidate,
+} from '@/lib/resolution-results';
 
-const getCachedChoiceData = getCachedFunction(getChoiceData);
+const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
+const getCachedWinningCandidate = getCachedFunction(calculateWinningCandidate);
 
 function useAnonVoteResults(id: string) {
   const [voteResults, setVoteResults] = useState<Candidate[][]>([]);
@@ -26,24 +30,32 @@ function useAnonVoteResults(id: string) {
 }
 
 type ResolutionDisplayCardProps = {
-  proposal: Pick<Proposal, 'candidates' | 'status' | 'id'>;
+  proposal: Pick<Proposal, 'candidates' | 'status' | 'id' | 'votingSystem'>;
   className?: string;
   showHeader?: boolean;
+  voteDistributionCallback?: typeof calculateVoteDistribution;
 };
 
 export default function ResolutionDisplayCard({
   proposal,
   className,
   showHeader = true,
+  voteDistributionCallback,
 }: ResolutionDisplayCardProps) {
   const voteResults = useAnonVoteResults(proposal.id);
-  const { choiceChartData, resolvedVoteCount } = getCachedChoiceData(
+
+  const getVoteDistribution =
+    voteDistributionCallback ?? getCachedVoteDistribution;
+
+  const { voteDistribution, finalizedVoteCount } = getVoteDistribution(
     proposal.candidates,
     voteResults,
   );
+
   const totalVotes = voteResults.length;
-  const winningCandidate = choiceChartData.reduce((prev, current) =>
-    current.choiceVotes > prev.choiceVotes ? current : prev,
+  const winningCandidate = getCachedWinningCandidate(
+    voteDistribution,
+    proposal.votingSystem,
   );
 
   const statusConfig = {
@@ -106,20 +118,20 @@ export default function ResolutionDisplayCard({
             </div>
             <div>
               <p className="text-sm font-medium">Resolved Votes</p>
-              <p className="text-2xl font-bold">{resolvedVoteCount}</p>
+              <p className="text-2xl font-bold">{finalizedVoteCount}</p>
             </div>
             {proposal.status === ProposalStatus.RESOLVED && (
               <>
                 <div>
                   <p className="text-sm font-medium">Winning Choice</p>
                   <p className="text-2xl font-bold">
-                    {winningCandidate.choiceValue}
+                    {winningCandidate?.optionValue ?? 'No Winner'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Votes for Winner</p>
                   <p className="text-2xl font-bold">
-                    {winningCandidate.choiceVotes}
+                    {winningCandidate?.voteCount ?? 0}
                   </p>
                 </div>
               </>
@@ -132,9 +144,9 @@ export default function ResolutionDisplayCard({
               Final Vote Distribution
             </h4>
             <SingularLabeledBarChart
-              chartData={choiceChartData}
-              dataLabelKey="choiceValue"
-              dataValueKey="choiceVotes"
+              chartData={voteDistribution}
+              dataLabelKey="optionValue"
+              dataValueKey="voteCount"
               className="h-[200px] w-full"
             />
           </div>

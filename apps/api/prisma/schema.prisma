@@ -84,7 +84,7 @@ enum ProposalVisibility {
 
 enum VotingSystem {
     FIRST_PAST_THE_POST
-    INSTANT_RUNOFF
+    RANKED_CHOICE
     ABSOLUTE_MAJORITY
 }
 

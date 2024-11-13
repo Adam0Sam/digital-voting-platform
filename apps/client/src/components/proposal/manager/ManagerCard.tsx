@@ -14,15 +14,17 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
+import { cn, getCachedFunction } from '@/lib/utils';
 import { BarChartBig, CalendarRange, ArrowRight } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { getTimeLeft } from '@/lib/time';
 import { Proposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
-import { getChoiceData } from '@/lib/proposal-data';
 import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
+import { getTimeLeft } from '@/lib/time-left';
+import { calculateVoteDistribution } from '@/lib/resolution-results';
+
+const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
 
 export default function ManagerCard({
   proposalData,
@@ -41,12 +43,12 @@ export default function ManagerCard({
     (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
   );
 
-  const { choiceChartData, resolvedVoteCount } = getChoiceData(
+  const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
     proposalData.candidates,
     proposalData.votes,
   );
 
-  const voteProgress = (resolvedVoteCount / proposalData.votes.length) * 100;
+  const voteProgress = (finalizedVoteCount / proposalData.votes.length) * 100;
 
   let badgeStatus: StatusBadgeProps['status'];
   let statusText: string;
@@ -100,7 +102,7 @@ export default function ManagerCard({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Votes resolved:</span>
-            <span className="font-medium">{`${resolvedVoteCount}/${proposalData.votes.length}`}</span>
+            <span className="font-medium">{`${finalizedVoteCount}/${proposalData.votes.length}`}</span>
           </div>
           <Progress value={voteProgress} className="h-2" />
         </div>
@@ -119,9 +121,9 @@ export default function ManagerCard({
               </p>
             </div>
             <SingularLabeledBarChart
-              chartData={choiceChartData}
-              dataLabelKey="choiceValue"
-              dataValueKey="choiceVotes"
+              chartData={voteDistribution}
+              dataLabelKey="optionValue"
+              dataValueKey="voteCount"
             />
           </PopoverContent>
         </Popover>

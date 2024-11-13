@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { SingularLabeledBarChart } from '@/components/bar-chart';
 import { useManagerProposal } from './ProposalManagePage';
-import { getChoiceData } from '@/lib/proposal-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,8 +11,9 @@ import { Candidate, VoteStatus, Vote } from '@ambassador';
 import { BarChart2, Users, CheckCircle, Vote as VoteIcon } from 'lucide-react';
 import { getCachedFunction } from '@/lib/utils';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
+import { calculateVoteDistribution } from '@/lib/resolution-results';
 
-const getCachedChoiceData = getCachedFunction(getChoiceData);
+const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
 
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
@@ -50,8 +50,8 @@ export default function VoteOverviewPage() {
           <Badge variant="secondary">
             Resolved Votes:{' '}
             {
-              getCachedChoiceData(proposal.candidates, proposalVotes)
-                .resolvedVoteCount
+              getCachedVoteDistribution(proposal.candidates, proposalVotes)
+                .finalizedVoteCount
             }
           </Badge>
         </div>
@@ -79,12 +79,14 @@ export default function VoteOverviewPage() {
               <CardContent>
                 <SingularLabeledBarChart
                   chartData={
-                    getCachedChoiceData(proposal.candidates, proposalVotes)
-                      .choiceChartData
+                    getCachedVoteDistribution(
+                      proposal.candidates,
+                      proposalVotes,
+                    ).voteDistribution
                   }
                   selectedCells={highlightedChoices}
-                  dataLabelKey="choiceValue"
-                  dataValueKey="choiceVotes"
+                  dataLabelKey="optionValue"
+                  dataValueKey="voteCount"
                   className="h-[400px] w-full"
                 />
               </CardContent>
@@ -128,6 +130,7 @@ export default function VoteOverviewPage() {
             proposal={proposal}
             className="max-w-2xl flex-1 pt-5"
             showHeader={false}
+            voteDistributionCallback={getCachedVoteDistribution}
           />
         </TabsContent>
       </Tabs>

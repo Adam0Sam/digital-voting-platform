@@ -14,11 +14,11 @@ import {
 } from '@/components/ui/popover';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 import { PROPOSAL_HREFS } from '@/lib/routes';
-import { getTimeLeft } from '@/lib/time';
 import { Proposal, Vote, VoteStatus } from '@ambassador';
 import { cn } from '@/lib/utils';
 import { CalendarClock, ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getTimeLeft } from '@/lib/time-left';
 
 export default function VoterCard({
   proposalData,
