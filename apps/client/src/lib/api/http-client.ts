@@ -38,7 +38,7 @@ export class HttpClient {
     return (await this.fetchWithAuth(path, options)) as Promise<T>;
   }
 
-  async post<T>(path: string, data: T, options?: AuthClientOptions) {
+  async post<T>(path: string, data?: T, options?: AuthClientOptions) {
     return (await this.fetchWithAuth(path, {
       ...options,
       method: 'POST',

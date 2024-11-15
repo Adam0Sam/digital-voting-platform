@@ -35,6 +35,7 @@ const DEFAULT_PERMISSIONS: ManagerPermissions = {
   canEditCandidates: false,
   canEditChoiceCount: false,
   canEditUserPattern: false,
+  canManuallyResolve: false,
 };
 
 /**

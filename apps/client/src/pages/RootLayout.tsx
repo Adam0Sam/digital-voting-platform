@@ -5,63 +5,101 @@ import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 import { AUTH_PATHS } from '@/lib/routes';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, AlertCircle, Mail } from 'lucide-react';
 
 export default function RootLayout() {
   const { user, isFetchingUser } = useUser();
   const navigate = useNavigate();
 
-  if (!user && isFetchingUser) {
-    return <h1>Loading...</h1>;
-  }
-
-  if (!user && !isFetchingUser) {
+  if (isFetchingUser) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-12">
-          <h1 className="text-4xl">Failed to fetch user data.</h1>
-          <div className="smjustify-between flex flex-col gap-8 sm:flex-row">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => navigate(AUTH_PATHS.SIGNUP)}
-            >
-              Sign up with your school account
-            </Button>
-          </div>
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <Card className="w-[350px]">
+          <CardContent className="flex flex-col items-center pt-6">
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            <p className="mt-4 text-lg font-semibold">Loading user data...</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (!user!.active) {
+  if (!user) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-12">
-          <h1 className="text-4xl">Your account is deactivated.</h1>
-          <div className="smjustify-between flex flex-col gap-8 sm:flex-row">
-            <Button variant="secondary" size="lg">
-              Contact Admin
-            </Button>
+      <div className="flex h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl text-destructive">
+              <AlertCircle className="h-6 w-6" />
+              Failed to fetch user data
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <p className="mb-6 text-center text-muted-foreground">
+              We couldn't retrieve your user information. Please sign up or try
+              again later.
+            </p>
             <Button
-              variant="outline"
+              variant="default"
               size="lg"
+              className="w-full"
               onClick={() => navigate(AUTH_PATHS.SIGNUP)}
             >
-              New Account
+              Sign up with your school account
             </Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user.active) {
+    return (
+      <div className="flex h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl text-destructive">
+              <AlertCircle className="h-6 w-6" />
+              Account Deactivated
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <p className="text-center text-muted-foreground">
+              Your account has been deactivated. Please contact an administrator
+              or create a new account.
+            </p>
+            <div className="flex w-full flex-col gap-4 sm:flex-row">
+              <Button variant="secondary" size="lg" className="flex-1">
+                <Mail className="mr-2 h-4 w-4" />
+                Contact Admin
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                onClick={() => navigate(AUTH_PATHS.SIGNUP)}
+              >
+                New Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="my-10 ml-5 md:ml-0 md:justify-center">
-        <DesktopNav className="hidden md:flex" />
-        <MobileNav className="md:hidden" />
-      </div>
-      <Outlet />
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto py-4">
+          <DesktopNav className="hidden md:flex" />
+          <MobileNav className="md:hidden" />
+        </div>
+      </header>
+      <main className="flex-1">
+        <Outlet />
+      </main>
       <Toaster />
     </div>
   );

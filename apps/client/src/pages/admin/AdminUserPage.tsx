@@ -1,4 +1,4 @@
-import GenericSpinner from '@/components/forms/GenericSpinner';
+import GenericSpinner from '@/components/GenericSpinner';
 import UserDeepTable from '@/components/tables/user/UserDeepTable';
 import { AllUsersDeepContext } from '@/lib/context/all-users';
 import {

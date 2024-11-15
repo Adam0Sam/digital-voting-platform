@@ -10,7 +10,7 @@ export class LoggerService {
     action: Action,
     info: {
       userId?: string;
-      userAgent: string;
+      userAgent?: string;
       message?: string;
     },
   ) {

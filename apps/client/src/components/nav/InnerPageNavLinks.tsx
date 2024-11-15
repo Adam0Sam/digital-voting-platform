@@ -2,9 +2,12 @@ import { cn } from '@/lib/utils';
 import { StandaloneNavLink } from './NavLinkItem';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+export type Link = {
+  title: string;
+  href: string;
+};
 type InnerPageNavLinksProps = {
-  links: { title: string; href: string }[];
+  links: Link[];
   forceFirstActive?: boolean;
 };
 export default function InnerPageNavLinks({

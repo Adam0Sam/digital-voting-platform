@@ -1,39 +1,37 @@
 import { useManagerProposal } from './ProposalManagePage';
-import { UserPatternFormContent } from '@/components/forms/user/user-pattern/UserPatternFormContent';
+import UserPatternSelectionGrid, {
+  UserPatternSelectionGridHandles,
+} from '@/components/forms/user/user-pattern/UserPatternSelectionGrid';
 import FormHandleButtons from '@/components/forms/FormHandleButtons';
-import { Grade } from '@ambassador';
-import { UserRole } from '@ambassador/user';
-import { MultiSelectDropdownHandle } from '@/components/MultiSelectDropdown';
 import { useRef } from 'react';
 import { api } from '@/lib/api';
 
 export default function UserPatternPage() {
   const { proposal, permissions } = useManagerProposal();
-  const gradesDropdownRef = useRef<MultiSelectDropdownHandle<Grade>>(null);
-  const rolesDropdownRef = useRef<MultiSelectDropdownHandle<UserRole>>(null);
-  console.log(permissions.canEditUserPattern);
+  const selectionGridRef = useRef<UserPatternSelectionGridHandles>(null);
   return (
-    <div className="mt-16 flex justify-center">
-      <UserPatternFormContent
-        selectedGrades={proposal.userPattern.grades}
-        selectedRoles={proposal.userPattern.roles}
-        gradesDropdownRef={gradesDropdownRef}
-        rolesDropdownRef={rolesDropdownRef}
-      >
-        {permissions.canEditUserPattern && (
-          <FormHandleButtons
-            className="mt-72"
-            handleSubmitClick={() => {
-              api.proposals.updateOne(proposal.id, {
-                userPattern: {
-                  grades: gradesDropdownRef.current?.getSelectedItems() ?? [],
-                  roles: rolesDropdownRef.current?.getSelectedItems() ?? [],
-                },
-              });
-            }}
-          />
-        )}
-      </UserPatternFormContent>
+    <div className="mt-16 flex flex-col items-center">
+      <div className="w-full max-w-screen-md">
+        <UserPatternSelectionGrid
+          initialGrades={proposal.userPattern.grades}
+          initialRoles={proposal.userPattern.roles}
+          ref={selectionGridRef}
+        />
+      </div>
+      {permissions.canEditUserPattern && (
+        <FormHandleButtons
+          handleSubmitClick={() => {
+            if (!selectionGridRef.current)
+              throw new Error('Selection grid ref is null');
+            api.proposals.updateOne(proposal.id, {
+              userPattern: {
+                grades: selectionGridRef.current.getSelectedGrades() ?? [],
+                roles: selectionGridRef.current.getSelectedRoles() ?? [],
+              },
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

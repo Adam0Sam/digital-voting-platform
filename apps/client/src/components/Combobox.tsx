@@ -57,11 +57,9 @@ function _Combobox<T>(
   const [selectedItem, setSelectedItem] = useState<ComboboxItem<T> | null>(
     defaultItem ?? null,
   );
-  console.log('selectedItem', selectedItem);
   useImperativeHandle(ref, () => ({
     getSelectedItem: () => selectedItem,
     setSelectedItem: item => {
-      console.log('setting item', item);
       setSelectedItem(item);
     },
   }));

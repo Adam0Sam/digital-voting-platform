@@ -225,6 +225,7 @@ export function DataTable<TData, TValue>({
                     //TODO: How to fix this?
                     selectedRow[typedKey] = typedValue;
                   }
+                  // @ts-expect-error - This is a hack to get the id
                   selectedRow[idKey] = row.id;
                 }),
                   selectedRows.push(selectedRow);

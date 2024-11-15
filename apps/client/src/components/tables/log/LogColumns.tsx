@@ -1,7 +1,7 @@
 import { ActionLogEntry } from '@ambassador';
 import { ColumnDef, FilterFn } from '@tanstack/react-table';
 
-const timeColumnFilterFn: FilterFn<ActionLogEntry> = (row, id, value) => {
+const timeColumnFilterFn: FilterFn<ActionLogEntry> = (row, _, value) => {
   const rowTime = new Date(row.original.time).getTime();
   const [end, start] = value;
   const startTime = new Date(start).getTime();
@@ -9,7 +9,7 @@ const timeColumnFilterFn: FilterFn<ActionLogEntry> = (row, id, value) => {
   return rowTime >= startTime && rowTime <= endTime;
 };
 
-const actionColumnFilterFn: FilterFn<ActionLogEntry> = (row, id, value) => {
+const actionColumnFilterFn: FilterFn<ActionLogEntry> = (row, _, value) => {
   return value.includes(row.original.action);
 };
 

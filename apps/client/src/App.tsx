@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import router from './app.routes';
 import './App.css';
 import { fetchUser } from './lib/fetch-user';
+import { api } from './lib/api';
 
 export const UserContext = createContext<{
   user: User | null;
@@ -24,10 +25,6 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isFetchingUser, setIsFetchingUser] = useState(true);
 
-  useEffect(() => {
-    // const a = test();
-  }, []);
-
   const mutate = (newUserData: Partial<User>) => {
     setUser(prevUserData => {
       if (!prevUserData) return null;
@@ -43,6 +40,7 @@ function App() {
       .then(userData => {
         setUser(userData);
         setIsFetchingUser(false);
+        api.logger.registerSignin();
       })
       .catch(() => {
         setIsFetchingUser(false);

@@ -26,6 +26,7 @@ export type CandidateFormProps = ExtendedFormProps<FormValues> & {
   initialChoiceCount?: number;
   disableEdit?: boolean;
   children?: React.JSX.Element;
+  className?: string;
 };
 
 export type CandidateFormHandles = {
@@ -53,7 +54,12 @@ function _ProposalChoiceForm(
   }));
 
   return (
-    <div className="flex max-w-md flex-1 flex-col gap-8">
+    <div
+      className={cn(
+        'flex h-full max-w-md flex-1 flex-col gap-8',
+        props.className,
+      )}
+    >
       <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
         <div className="flex flex-col-reverse gap-10 md:flex-row">
           <div className="flex flex-1 flex-col">
@@ -72,7 +78,7 @@ function _ProposalChoiceForm(
                 <Separator className="mb-5 mt-2" />
               </div>
             </SheetTrigger>
-            <ScrollArea className="h-48">
+            <ScrollArea className="h-96">
               {error && <p className="text-md text-destructive">{error}</p>}
               {candidates.map(resolution => (
                 <div

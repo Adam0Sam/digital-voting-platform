@@ -12,4 +12,13 @@ export const VoteSchema = z.object({
   candidates: z.array(CandidateSchema),
 });
 
+export function isVote(v: unknown): v is Vote {
+  try {
+    VoteSchema.parse(v);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export type Vote = z.infer<typeof VoteSchema>;

@@ -35,7 +35,6 @@ export class VoteService {
     if (!proposal) {
       throw new BadRequestException('Proposal not found');
     }
-    console.log('VOTE SERVICE', proposal.candidates.length, candidates?.length);
     if (proposal.candidates.length < candidates.length) {
       throw new BadRequestException('Invalid number of candidates');
     }
@@ -133,5 +132,45 @@ export class VoteService {
         status: voteStatus,
       },
     });
+  }
+
+  async getAnonVotes(proposalId, userId) {
+    const proposal = await this.prisma.proposal.findUnique({
+      where: {
+        id: proposalId,
+        OR: [
+          {
+            votes: {
+              some: {
+                userId,
+              },
+            },
+          },
+          {
+            managers: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        votes: {
+          where: {
+            status: VoteStatus.RESOLVED,
+          },
+          include: {
+            candidates: true,
+          },
+        },
+      },
+    });
+
+    if (!proposal) {
+      throw new BadRequestException('Proposal not found');
+    }
+
+    return proposal.votes.map((vote) => vote.candidates);
   }
 }

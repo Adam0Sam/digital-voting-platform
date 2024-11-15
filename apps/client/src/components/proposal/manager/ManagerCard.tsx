@@ -13,14 +13,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { BarChartBigIcon, CalendarClock } from 'lucide-react';
+import { BarChartBig, CalendarRange, ArrowRight } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { getTimeLeft } from '@/lib/time';
 import { Proposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
-import { getChoiceData } from '@/lib/proposal-data';
-import { PROPOSAL_HREFS, PROPOSAL_PATHS } from '@/lib/routes';
+import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
+import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
+import { getTimeLeft } from '@/lib/time-left';
+import { calculateVoteDistribution } from '@/lib/resolution-results';
+import { getCachedFunction } from '@/lib/cache';
+
+const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
 
 export default function ManagerCard({
   proposalData,
@@ -39,82 +44,102 @@ export default function ManagerCard({
     (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
   );
 
-  const { choiceChartData, resolvedVoteCount } = getChoiceData(
+  const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
     proposalData.candidates,
     proposalData.votes,
   );
 
+  const voteProgress = (finalizedVoteCount / proposalData.votes.length) * 100;
+
+  let badgeStatus: StatusBadgeProps['status'];
+  let statusText: string;
+
+  if (!hasStarted) {
+    badgeStatus = 'pending';
+    statusText = `Starts in ${daysLeft}d ${hoursLeft}h`;
+  } else if (!hasEnded) {
+    badgeStatus = 'active';
+    statusText = `Ends in ${daysLeft}d ${hoursLeft}h`;
+  } else {
+    badgeStatus = 'ended';
+    statusText = 'Ended';
+  }
   return (
-    <Card className={cn('flex flex-col justify-between', className)}>
-      <div>
-        <CardHeader className="flex flex-col items-center">
-          <CardTitle className="text-xl">{proposalData.title}</CardTitle>
-          <CardDescription>{proposalData.description}</CardDescription>
-        </CardHeader>
-
-        <CardContent className="flex flex-col items-center gap-12 p-0">
-          <div className="flex flex-col items-center gap-1">
-            <Popover>
-              <div className="flex w-full items-center justify-between gap-2">
-                <p>
-                  {hasEnded ? 'Ended' : hasStarted ? 'Active' : 'Upcoming'}
-                  {` until ${daysLeft}d. ${hoursLeft}h.`}
-                </p>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost">
-                    <CalendarClock size={24} />
-                  </Button>
-                </PopoverTrigger>
-              </div>
-              <PopoverContent className="w-min">
-                <Calendar
-                  mode="range"
-                  selected={{
-                    from: new Date(proposalData.startDate),
-                    to: new Date(proposalData.endDate),
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-            <Popover>
-              <div className="flex w-full items-center justify-between gap-2">
-                Resolved votes: {resolvedVoteCount}/{proposalData.votes.length}
-                <PopoverTrigger asChild>
-                  <Button variant="ghost">
-                    <BarChartBigIcon size={24} />
-                  </Button>
-                </PopoverTrigger>
-              </div>
-              {/*
-               * TODO: Make width value dynamic
-               */}
-              <PopoverContent className="flex w-96 flex-col gap-4">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-xl font-bold">
-                    Votes ({proposalData.votes.length})
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Choices/Vote: {proposalData.choiceCount}
-                  </p>
-                </div>
-
-                <SingularLabeledBarChart
-                  chartData={choiceChartData}
-                  dataLabelKey="choiceValue"
-                  dataValueKey="choiceVotes"
-                />
-              </PopoverContent>
-            </Popover>
+    <Card className={cn('flex flex-col justify-between shadow-lg', className)}>
+      <CardHeader className="space-y-2">
+        <div className="flex items-center justify-between">
+          <StatusBadge status={badgeStatus}>{statusText}</StatusBadge>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <CalendarRange className="h-4 w-4" />
+                <span className="sr-only">View proposal date range</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="range"
+                selected={{
+                  from: new Date(proposalData.startDate),
+                  to: new Date(proposalData.endDate),
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <CardTitle className="line-clamp-2 text-xl">
+          {proposalData.title}
+        </CardTitle>
+        <CardDescription className="line-clamp-2">
+          {proposalData.description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Time remaining:</span>
+          <span className="font-medium">{`${daysLeft}d ${hoursLeft}h`}</span>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Votes resolved:</span>
+            <span className="font-medium">{`${finalizedVoteCount}/${proposalData.votes.length}`}</span>
           </div>
-        </CardContent>
-      </div>
+          <Progress value={voteProgress} className="h-2" />
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full">
+              <BarChartBig className="mr-2 h-4 w-4" />
+              View Vote Distribution
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="space-y-2">
+              <h3 className="font-semibold">Vote Distribution</h3>
+              <p className="text-sm text-muted-foreground">
+                Choices per Vote: {proposalData.choiceCount}
+              </p>
+            </div>
+            <SingularLabeledBarChart
+              chartData={voteDistribution}
+              dataLabelKey="optionValue"
+              dataValueKey="voteCount"
+            />
+          </PopoverContent>
+        </Popover>
+      </CardContent>
       <CardFooter>
-        <Button className="w-full p-0">
+        <Button asChild className="w-full">
           <Link
-            className="flex h-full w-full items-center justify-center"
-            to={`${PROPOSAL_HREFS.MANAGE}/${proposalData.id}/${PROPOSAL_PATHS.VOTES_OVERVIEW}`}
+            to={PROPOSAL_HREFS.MANAGER_OVERVIEW(
+              PROPOSAL_OVERVIEW_PATHS.VOTES,
+              proposalData.id,
+            )}
+            className="flex items-center justify-center"
           >
-            View
+            Manage Proposal
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
       </CardFooter>

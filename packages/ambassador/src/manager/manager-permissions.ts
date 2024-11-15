@@ -13,6 +13,7 @@ export const ManagerPermissionNames = [
   "canEditCandidates",
   "canEditChoiceCount",
   "canEditUserPattern",
+  "canManuallyResolve",
 ] as const;
 
 export type ManagerPermissionName = (typeof ManagerPermissionNames)[number];

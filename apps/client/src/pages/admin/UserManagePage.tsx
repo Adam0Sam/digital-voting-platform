@@ -1,4 +1,4 @@
-import GenericSpinner from '@/components/forms/GenericSpinner';
+import GenericSpinner from '@/components/GenericSpinner';
 import {
   LOADER_IDS,
   useAsyncLoaderValue,

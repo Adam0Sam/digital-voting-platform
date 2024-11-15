@@ -2,15 +2,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { ReactNode } from 'react';
 
-export default function FormHandleButtons({
-  formSubmitLabel = 'Submit',
-  formCancelLabel = 'Cancel',
-  className,
-  enableSubmit = true,
-  handleSubmitClick,
-  enableCancel = true,
-  handleCancelClick,
-}: {
+type FormHandleButtonsProps = {
   formSubmitLabel?: ReactNode;
   formCancelLabel?: ReactNode;
   className?: string;
@@ -19,8 +11,22 @@ export default function FormHandleButtons({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => void;
   enableCancel?: boolean;
+  submitClassName?: string;
+  cancelClassName?: string;
   handleCancelClick?: () => void;
-}) {
+};
+
+export default function FormHandleButtons({
+  formSubmitLabel = 'Submit',
+  formCancelLabel = 'Cancel',
+  className,
+  enableSubmit = true,
+  handleSubmitClick,
+  enableCancel = true,
+  handleCancelClick,
+  submitClassName,
+  cancelClassName,
+}: FormHandleButtonsProps) {
   return (
     <div className={cn('flex gap-4', className)}>
       {enableCancel && handleCancelClick && (
@@ -28,7 +34,7 @@ export default function FormHandleButtons({
           onClick={handleCancelClick}
           variant="secondary"
           type="button"
-          className="flex-1"
+          className={cn('flex-1', cancelClassName)}
         >
           {formCancelLabel}
         </Button>
@@ -36,7 +42,7 @@ export default function FormHandleButtons({
       {enableSubmit && handleSubmitClick && (
         <Button
           type="submit"
-          className="flex-1"
+          className={cn('flex-1', submitClassName)}
           onClick={e => handleSubmitClick?.(e)}
         >
           {formSubmitLabel}

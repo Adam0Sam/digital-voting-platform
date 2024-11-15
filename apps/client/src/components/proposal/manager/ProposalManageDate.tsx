@@ -9,18 +9,23 @@ import {
 } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
 import { Proposal } from '@ambassador';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
 
+type ProposalManageDateProps = {
+  proposal: Proposal;
+  canEdit: boolean;
+  className?: string;
+};
+
 export default function ProposalManageDate({
   proposal,
   canEdit,
-}: {
-  proposal: Proposal;
-  canEdit: boolean;
-}) {
+  className,
+}: ProposalManageDateProps) {
   const [dateSheetIsOpen, setDateSheetIsOpen] = useState(false);
   const [startDate, setStartDate] = useState<Date>(
     new Date(proposal.startDate),
@@ -31,7 +36,10 @@ export default function ProposalManageDate({
       <PopoverTrigger asChild>
         <Button
           variant={'outline'}
-          className="w-full justify-start text-left font-normal"
+          className={cn(
+            'w-full justify-start text-left font-normal',
+            className,
+          )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           <p className="hidden sm:block">

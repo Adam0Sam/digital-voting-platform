@@ -5,7 +5,6 @@ generator client {
 datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
-    // directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -83,18 +82,28 @@ enum ProposalVisibility {
     MANAGER_ONLY
 }
 
+enum VotingSystem {
+    FIRST_PAST_THE_POST
+    RANKED_CHOICE
+    ABSOLUTE_MAJORITY
+}
+
 model Proposal {
-    id          String             @id @default(uuid())
-    title       String
-    description String
-    startDate   DateTime
-    endDate     DateTime
+    id             String   @id @default(uuid())
+    title          String
+    description    String
+    startDate      DateTime
+    endDate        DateTime
+    resolutionDate DateTime
+
     status      ProposalStatus
     visibility  ProposalVisibility @default(AGENT_ONLY)
     userPattern UserPattern?
 
     votes    Vote[]
     managers Manager[]
+
+    votingSystem VotingSystem
 
     candidates    Candidate[]
     choiceCount   Int
@@ -142,6 +151,7 @@ model ManagerPermissions {
     canEditCandidates  Boolean       @default(false)
     canEditChoiceCount Boolean       @default(false)
     canEditUserPattern Boolean       @default(false)
+    canManuallyResolve Boolean       @default(false)
 }
 
 model Manager {
@@ -190,7 +200,9 @@ enum UserActions {
     SIGNUP
     SIGNIN
     CREATE_PROPOSAL
-    EDIT_PROPOSAL
+    EDIT_START_END_DATES
+    EDIT_RESOLUTION_DATE
+    MANUALLY_RESOLVE_PROPOSAL
     DELETE_PROPOSAL
     VOTE
     EDIT_VOTE

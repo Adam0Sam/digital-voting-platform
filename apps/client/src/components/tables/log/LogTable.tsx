@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { FC, Suspense, useEffect, useState } from 'react';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -24,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Actions, User } from '@ambassador';
 import useUserLogs from '@/lib/hooks/useUserLogs';
-import GenericSpinner from '@/components/forms/GenericSpinner';
+import GenericSpinner from '@/components/GenericSpinner';
 import constructActionFilter, { ActionFilter } from '@/lib/action-filter';
 
 const LOGS_PER_PAGE = 10;
