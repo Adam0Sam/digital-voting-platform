@@ -30,14 +30,13 @@ function withMutatedCandidates(
   prevCandidates: Proposal['candidates'],
   currentCandidates: UpdateProposalDto['candidates'],
 ): Prisma.ProposalUpdateInput {
+  const currentCandidateIdSet = new Set<string>(
+    currentCandidates.map((choice) => choice.id),
+  );
+
   const candidateIdsForDeletion: string[] = prevCandidates
-    .filter((prevChoice) =>
-      currentCandidates.some(
-        (newChoice) =>
-          newChoice.id !== undefined && newChoice.id === prevChoice.id,
-      ),
-    )
-    .map((choice) => choice.id);
+    .filter((prevChoice) => !currentCandidateIdSet.has(prevChoice.id))
+    .map((prevChoice) => prevChoice.id);
 
   return {
     ...updateInputObject,

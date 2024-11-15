@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
-import { ActionLogEntry } from '@ambassador';
 import constructActionFilter, { ActionFilter } from '../action-filter';
-import { createCachedAsyncResource } from '../cache';
+import { createAsyncResource } from '../async-resource';
+import { cacheFunction } from '../cache';
 
-const userLogResourceCache = new Map();
-const logCountResourceCache = new Map();
+const getCachedUserLogsResource = cacheFunction(
+  (...args: Parameters<typeof api.admin.getUserLogs>) =>
+    createAsyncResource(api.admin.getUserLogs(...args)),
+);
+
+const getCachedLogsCountResource = cacheFunction(
+  (...args: Parameters<typeof api.admin.getUserLogsCount>) =>
+    createAsyncResource(api.admin.getUserLogsCount(...args)),
+);
+
 export default function useUserLogs(
   userId: string,
   pageSize = 50,
@@ -16,14 +24,6 @@ export default function useUserLogs(
   useEffect(() => {
     setPage(initialPage);
   }, [actionFilter, initialPage]);
-  const userLogResource = createCachedAsyncResource<ActionLogEntry[]>(
-    userLogResourceCache,
-    `${userId}-${pageSize}-${page}-${JSON.stringify(actionFilter)}`,
-  );
-  const logCountResource = createCachedAsyncResource<number>(
-    logCountResourceCache,
-    `${userId}-${JSON.stringify(actionFilter)}`,
-  );
 
   const getPage = (page: number | 'next' | 'prev') => {
     if (page === 'next') setPage(prevPage => prevPage + 1);
@@ -31,14 +31,19 @@ export default function useUserLogs(
     else setPage(page);
   };
 
+  const userLogsResource = getCachedUserLogsResource(
+    userId,
+    pageSize,
+    page,
+    actionFilter,
+  );
+
+  const logsCountResource = getCachedLogsCountResource(userId, actionFilter);
+
   return {
     logs: {
-      data: userLogResource(() =>
-        api.admin.getUserLogs(userId, pageSize, page, actionFilter),
-      ).read(),
-      count: logCountResource(() =>
-        api.admin.getUserLogsCount(userId, actionFilter),
-      ).read(),
+      data: userLogsResource.read(),
+      count: logsCountResource.read(),
     },
     getPage,
     pageIndex: page,

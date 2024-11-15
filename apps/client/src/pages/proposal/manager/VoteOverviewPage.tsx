@@ -11,9 +11,9 @@ import { Candidate, VoteStatus, Vote } from '@ambassador';
 import { BarChart2, Users, CheckCircle, Vote as VoteIcon } from 'lucide-react';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
 import { calculateVoteDistribution } from '@/lib/resolution-results';
-import { getCachedFunction } from '@/lib/cache';
+import { cacheFunction } from '@/lib/cache';
 
-const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
+const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
 
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();

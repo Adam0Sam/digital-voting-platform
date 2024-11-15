@@ -14,10 +14,10 @@ import {
   calculateVoteDistribution,
   calculateWinningCandidate,
 } from '@/lib/resolution-results';
-import { getCachedFunction } from '@/lib/cache';
+import { cacheFunction } from '@/lib/cache';
 
-const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
-const getCachedWinningCandidate = getCachedFunction(calculateWinningCandidate);
+const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
+const getCachedWinningCandidate = cacheFunction(calculateWinningCandidate);
 
 function useAnonVoteResults(id: string) {
   const [voteResults, setVoteResults] = useState<Candidate[][]>([]);

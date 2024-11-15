@@ -125,12 +125,13 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
     getPage: getDataPage,
     pageIndex: dataPageIndex,
   } = useUserLogs(user.id, LOGS_PER_PAGE, 1, actionFilter);
-
   const [tablePageIndex, setTablePageIndex] = useState(1);
 
   useEffect(() => {
     setTablePageIndex(1);
   }, [actionFilter]);
+
+  console.log('pageLogs', pageLogs);
 
   const dataPageIndexBoundary = Math.ceil(
     (pageLogs.count ?? 0) / LOGS_PER_PAGE,

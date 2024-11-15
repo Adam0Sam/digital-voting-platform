@@ -23,9 +23,9 @@ import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 import { getTimeLeft } from '@/lib/time-left';
 import { calculateVoteDistribution } from '@/lib/resolution-results';
-import { getCachedFunction } from '@/lib/cache';
+import { cacheFunction } from '@/lib/cache';
 
-const getCachedVoteDistribution = getCachedFunction(calculateVoteDistribution);
+const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
 
 export default function ManagerCard({
   proposalData,
