@@ -100,7 +100,7 @@ type PaginatedLogTableProps = {
 const _PaginatedLogTableSkeleton = () => {
   return (
     <div className="flex-1 rounded-md border">
-      <Table className="h-[580px]">
+      <Table className="h-[800px]">
         <TableHeader>
           <TableRow></TableRow>
         </TableHeader>
@@ -180,7 +180,7 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
               table.getRowModel().rows.map(row => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} className="h-1 overflow-hidden">
+                    <TableCell key={cell.id} className="h-16 overflow-hidden">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),

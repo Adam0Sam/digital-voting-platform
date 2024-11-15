@@ -34,8 +34,8 @@ function ProposalLinkButton({ row }: { row: Row<ActionLogEntry> }) {
     navigate(ADMIN_HREFS.PROPOSAL(proposalId));
   };
   return (
-    <Button onClick={handleClick} variant="secondary" size="sm">
-      <ArrowRight size={16} />
+    <Button onClick={handleClick} variant="ghost" size="xs">
+      <ArrowRight size={20} />
     </Button>
   );
 }
