@@ -68,9 +68,12 @@ export class ActionLogController {
 
   @Post('signin')
   registerSigninLog(@GetUser('id') userId: User['id'], @Req() req: Request) {
-    return this.logger.logAction(Action.SIGNIN, {
-      userId: userId,
-      userAgent: req.headers['user-agent'],
+    return this.logger.logAction({
+      action: Action.SIGNIN,
+      info: {
+        userId: userId,
+        userAgent: req.headers['user-agent'],
+      },
     });
   }
 }

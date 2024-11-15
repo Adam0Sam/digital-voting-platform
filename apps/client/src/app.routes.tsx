@@ -129,6 +129,10 @@ const router = createBrowserRouter(
         </Route>
 
         <Route path={ADMIN_PATHS.PROPOSALS} element={<div>Proposals</div>} />
+        <Route
+          path={`${ADMIN_PATHS.PROPOSALS}/${GENERIC_PATHS.ONE}`}
+          element={<>labas</>}
+        />
       </Route>
       <Route path="*" element={<div>404</div>} />
     </Route>,

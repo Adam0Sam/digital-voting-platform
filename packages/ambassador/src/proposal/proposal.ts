@@ -69,3 +69,31 @@ export const UpdateProposalDtoSchema = ProposalSchema.omit({
 export type UpdateProposalDto = WithDatesAsStrings<
   z.infer<typeof UpdateProposalDtoSchema>
 >;
+
+export const mutableProposalKeys = [
+  "title",
+  "description",
+  "startDate",
+  "endDate",
+  "resolutionDate",
+  "status",
+  "visibility",
+  "userPattern",
+  "candidates",
+  "choiceCount",
+] as const satisfies readonly (keyof UpdateProposalDto)[];
+
+export type MutableProposalKey = (typeof mutableProposalKeys)[number];
+
+export function isMutableProposalKey(val: unknown): val is MutableProposalKey {
+  return mutableProposalKeys.includes(val as MutableProposalKey);
+}
+
+export const intrinsicProposalProps: (keyof Proposal)[] = [
+  "title",
+  "description",
+  "startDate",
+  "endDate",
+  "status",
+  "visibility",
+];

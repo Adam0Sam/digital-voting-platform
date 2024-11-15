@@ -15,4 +15,6 @@ export const ADMIN_HREFS = {
     `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.USER}/${id}/${ADMIN_PATHS.LOGS}`,
   MANAGE: (id: string) =>
     `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.USER}/${id}/${ADMIN_PATHS.manage}`,
+  PROPOSAL: (id: string) =>
+    `/${ADMIN_PATHS.BASE}/${ADMIN_PATHS.PROPOSALS}/${id}`,
 };

@@ -23,16 +23,12 @@ import {
   UpdateProposalDtoSchema,
 } from '@ambassador/proposal';
 import { User } from '@ambassador/user';
-import { Action } from '@ambassador/action-log';
 
 @UsePipes(new ValidationPipe({ transform: true }))
 @UseGuards(JwtAuthGuard)
 @Controller('proposal')
 export class ProposalController {
-  constructor(
-    private proposalService: ProposalService,
-    private logger: LoggerService,
-  ) {}
+  constructor(private proposalService: ProposalService) {}
 
   @Post('')
   createOne(
@@ -44,11 +40,7 @@ export class ProposalController {
     @GetUser('id')
     userId: User['id'],
   ) {
-    this.logger.logAction(Action.CREATE_PROPOSAL, {
-      userId,
-      userAgent,
-    });
-    return this.proposalService.createOne(proposal);
+    return this.proposalService.createOne(proposal, { userId, userAgent });
   }
 
   @Put(':id')

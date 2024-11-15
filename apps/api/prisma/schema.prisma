@@ -108,6 +108,7 @@ model Proposal {
     candidates    Candidate[]
     choiceCount   Int
     userPatternId String?
+    UserActionLog UserActionLog[]
 }
 
 model Candidate {
@@ -186,25 +187,24 @@ model Vote {
 }
 
 model UserActionLog {
-    id        String      @id @default(uuid())
-    action    UserActions
-    userAgent String?
-    message   String?
-    time      DateTime    @default(now())
-    user      User?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId    String?
+    id         String      @id @default(uuid())
+    action     UserActions
+    userAgent  String?
+    message    String?
+    time       DateTime    @default(now())
+    user       User?       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId     String?
+    proposal   Proposal?   @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposalId String?
 }
 
 enum UserActions {
-    AUTH_ATTEMPT
     SIGNUP
     SIGNIN
     CREATE_PROPOSAL
     EDIT_START_END_DATES
     EDIT_RESOLUTION_DATE
     MANUALLY_RESOLVE_PROPOSAL
-    DELETE_PROPOSAL
-    VOTE
-    EDIT_VOTE
-    DELETE_VOTE
+    EDIT_TITLE
+    EDIT_DESCRIPTION
 }

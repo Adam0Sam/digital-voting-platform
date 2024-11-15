@@ -62,9 +62,12 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
         active: true,
       });
 
-      this.logger.logAction(Action.SIGNUP, {
-        userId: newUser.id,
-        userAgent: req.headers['user-agent'],
+      this.logger.logAction({
+        action: Action.SIGNUP,
+        info: {
+          userId: newUser.id,
+          userAgent: req.headers['user-agent'],
+        },
       });
       return newUser;
     }

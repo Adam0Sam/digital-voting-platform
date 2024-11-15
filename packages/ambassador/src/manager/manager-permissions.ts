@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MutableProposalKey, UpdateProposalDto } from "../proposal";
 
 export const ManagerPermissionNames = [
   "canEditTitle",
@@ -36,3 +37,26 @@ export const ManagerPermissions = ManagerPermissionNames.reduce(
   }),
   {} as ManagerPermissions
 );
+
+const proposalKeyPermissionMap: Record<
+  MutableProposalKey,
+  ManagerPermissionName
+> = {
+  title: "canEditTitle",
+  description: "canEditDescription",
+  startDate: "canEditDates",
+  endDate: "canEditDates",
+  resolutionDate: "canEditDates",
+  status: "canEditStatus",
+  visibility: "canEditVisibility",
+  candidates: "canEditCandidates",
+  choiceCount: "canEditChoiceCount",
+  userPattern: "canEditUserPattern",
+};
+
+export function canEdit(
+  permissions: ManagerPermissions,
+  key: MutableProposalKey
+) {
+  return permissions[proposalKeyPermissionMap[key]];
+}
