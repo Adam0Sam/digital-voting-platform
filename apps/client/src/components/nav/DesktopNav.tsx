@@ -14,10 +14,9 @@ import { CircleUserRound } from 'lucide-react';
 import { PROPOSAL_LINK_COLLECTION } from '../../lib/href/proposal.links';
 
 import { NavLinkItem, StandaloneNavLink } from './NavLinkItem';
-import { USER_PROFILE_HREFS } from '@/lib/routes';
+import { USER_PROFILE_HREFS, ADMIN_HREFS } from '@/lib/routes';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { UserRole } from '@ambassador';
-import { ADMIN_HREFS } from '@/lib/routes/admin.routes';
 
 export default function DesktopNav({ className }: { className?: string }) {
   const { user } = useSignedInUser();

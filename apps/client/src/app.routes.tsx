@@ -18,15 +18,15 @@ import {
   PROPOSAL_PATHS,
   USER_PROFILE_PATHS,
   USER_TEMPLATES_PATHS,
+  GENERIC_PATHS,
+  ADMIN_PATHS,
 } from './lib/routes';
-import { GENERIC_PATHS } from './lib/routes/util.routes';
 import ManagerRoleTemplates from './pages/profile/profile-templates/ManagerRoleTemplates';
 import VoteOverviewPage from './pages/proposal/manager/VoteOverviewPage';
 import ContentOverviewPage from './pages/proposal/manager/ContentOverviewPage';
 import GreetingPage from './pages/GreetingPage';
 import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
-import { ADMIN_PATHS } from './lib/routes/admin.routes';
 import AdminPage from './pages/admin/AdminPageLayout';
 import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
@@ -110,13 +110,10 @@ const router = createBrowserRouter(
         <Route path={USER_PROFILE_PATHS.HISTORY} element={<div>History</div>} />
         <Route
           path={USER_TEMPLATES_PATHS.BASE}
+          loader={LOADER_ID_MAP[LOADER_IDS.MANAGER_ROLES]}
           element={<ProfileTemplatesPage />}
         >
-          <Route
-            path={USER_TEMPLATES_PATHS.MANAGER}
-            loader={LOADER_ID_MAP[LOADER_IDS.MANAGER_ROLES]}
-            element={<ManagerRoleTemplates />}
-          />
+          <Route element={<ManagerRoleTemplates />} />
         </Route>
       </Route>
       <Route

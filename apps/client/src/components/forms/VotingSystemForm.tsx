@@ -19,10 +19,12 @@ export type VotingSystemFormProps = WithRequiredSubmit<
   ExtendedFormProps<FormValues>
 >;
 
-const votingSystemDescriptions = {
+const votingSystemDescriptions: {
+  [key in VotingSystem]: string;
+} = {
   FIRST_PAST_THE_POST:
     'The candidate with the most votes wins, even without a majority.',
-  INSTANT_RUNOFF:
+  RANKED_CHOICE:
     'Voters rank candidates. The lowest-ranked candidate is eliminated, and their votes redistributed until a majority is reached.',
   ABSOLUTE_MAJORITY:
     'A candidate must receive more than 50% of the votes to win. If no candidate achieves this, a second round is held between the top two candidates.',
