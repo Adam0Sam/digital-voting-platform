@@ -15,7 +15,6 @@ import { JwtAuthGuard } from 'src/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
 import { ZodValidationPipe } from 'src/pipes';
 import { GetUser } from 'src/user/decorator';
-import { LoggerService } from 'src/logger/logger.service';
 import {
   CreateProposalDto,
   CreateProposalDtoSchema,

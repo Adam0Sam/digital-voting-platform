@@ -34,7 +34,7 @@ function ProposalLinkButton({ row }: { row: Row<ActionLogEntry> }) {
     navigate(ADMIN_HREFS.PROPOSAL(proposalId));
   };
   return (
-    <Button onClick={handleClick} variant="secondary">
+    <Button onClick={handleClick} variant="secondary" size="sm">
       <ArrowRight size={16} />
     </Button>
   );
@@ -64,7 +64,7 @@ function MessageCell({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex cursor-help items-center space-x-2">
-                <Eye className="h-4 w-4" />
+                <Eye className="h-4 w-4 flex-shrink-0" />
                 <span className="sr-only">View full message</span>
               </div>
             </TooltipTrigger>
@@ -89,7 +89,7 @@ function TimeCell({ row }: { row: Row<ActionLogEntry> }) {
         <TooltipTrigger asChild>
           <div className="flex cursor-help items-center space-x-2">
             <span>{relativeTime}</span>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
           </div>
         </TooltipTrigger>
         <TooltipContent>

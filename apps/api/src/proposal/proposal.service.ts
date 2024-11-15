@@ -4,6 +4,7 @@ import {
   UpdateProposalDto,
   User,
   Action,
+  withDatesAsStrings,
 } from '@ambassador';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -138,17 +139,12 @@ export class ProposalService {
       proposalId,
       proposalDto,
       permissions,
-      prevCandidates: prevProposal.candidates,
+      prevProposal: withDatesAsStrings(prevProposal),
     });
 
     const logMessages = getProposalUpdateLogMessages(
       updateInput,
-      {
-        ...prevProposal,
-        startDate: prevProposal.startDate.toISOString(),
-        endDate: prevProposal.endDate.toISOString(),
-        resolutionDate: prevProposal.resolutionDate.toISOString(),
-      },
+      withDatesAsStrings(prevProposal),
       userId,
     );
 

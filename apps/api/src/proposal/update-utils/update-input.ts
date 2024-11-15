@@ -1,5 +1,4 @@
 import {
-  Candidate,
   canEdit,
   intrinsicProposalProps,
   isMutableProposalKey,
@@ -69,17 +68,20 @@ export function getProposalUpdateInput({
   proposalId,
   proposalDto,
   permissions,
-  prevCandidates,
+  prevProposal,
 }: {
   proposalId?: string;
   proposalDto: UpdateProposalDto;
   permissions: ManagerPermissions;
-  prevCandidates: Candidate[];
+  prevProposal: Omit<Proposal, 'votes' | 'userPattern' | 'managers'>;
 }) {
   let updateInput: Prisma.ProposalUpdateInput = {};
   let shouldResetVotes = false;
   for (const key in proposalDto) {
     if (!isMutableProposalKey(key)) {
+      continue;
+    }
+    if (proposalDto[key] === prevProposal[key]) {
       continue;
     }
     if (intrinsicProposalProps.includes(key) && canEdit(permissions, key)) {
@@ -93,7 +95,7 @@ export function getProposalUpdateInput({
     if (key === 'candidates' && canEdit(permissions, key)) {
       updateInput = withMutatedCandidates(
         updateInput,
-        prevCandidates,
+        prevProposal.candidates,
         proposalDto.candidates,
       );
       shouldResetVotes = true;

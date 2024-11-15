@@ -154,7 +154,7 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
 
   return (
     <>
-      <div className="flex-1 rounded-md border">
+      <div className="flex-1 overflow-scroll rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -179,7 +179,7 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
               table.getRowModel().rows.map(row => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="h-1 overflow-hidden">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
