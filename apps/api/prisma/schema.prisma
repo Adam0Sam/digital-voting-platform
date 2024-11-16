@@ -119,7 +119,8 @@ model Candidate {
     proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
 
-    votes Vote[]
+    votes       Vote[] @relation("VoteSelections")
+    suggestedIn Vote[] @relation("ManagerSuggestions")
 
     @@unique([value, proposalId])
 }
@@ -136,23 +137,22 @@ model ManagerRole {
 }
 
 model ManagerPermissions {
-    id                 String        @id @default(uuid())
-    managerRoles       ManagerRole[]
-    author             User          @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    authorId           String
-    canEditTitle       Boolean       @default(false)
-    canEditDescription Boolean       @default(false)
-    canEditDates       Boolean       @default(false)
-    canEditStatus      Boolean       @default(false)
-    canEditVisibility  Boolean       @default(false)
-    canDeleteVotes     Boolean       @default(false)
-    canCreateVotes     Boolean       @default(false)
-    canEditVotes       Boolean       @default(false)
-    canEditManagers    Boolean       @default(false)
-    canEditCandidates  Boolean       @default(false)
-    canEditChoiceCount Boolean       @default(false)
-    canEditUserPattern Boolean       @default(false)
-    canManuallyResolve Boolean       @default(false)
+    id                      String        @id @default(uuid())
+    managerRoles            ManagerRole[]
+    author                  User          @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    authorId                String
+    canEditTitle            Boolean       @default(false)
+    canEditDescription      Boolean       @default(false)
+    canEditDates            Boolean       @default(false)
+    canEditStatus           Boolean       @default(false)
+    canEditVisibility       Boolean       @default(false)
+    canEditVotersList       Boolean       @default(false)
+    canOfferVoteSuggestions Boolean       @default(false)
+    canChangeVoteStatus     Boolean       @default(false)
+    canEditCandidates       Boolean       @default(false)
+    canEditChoiceCount      Boolean       @default(false)
+    canEditUserPattern      Boolean       @default(false)
+    canManuallyResolve      Boolean       @default(false)
 }
 
 model Manager {
@@ -177,11 +177,12 @@ model Vote {
     id     String     @id @default(uuid())
     status VoteStatus @default(PENDING)
 
-    user       User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId     String
-    proposal   Proposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    proposalId String
-    candidates Candidate[]
+    user                User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId              String
+    proposal            Proposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposalId          String
+    candidates          Candidate[] @relation("VoteSelections")
+    suggestedCandidates Candidate[] @relation("ManagerSuggestions")
 
     @@unique([userId, proposalId])
 }

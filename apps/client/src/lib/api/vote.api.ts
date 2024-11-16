@@ -9,13 +9,13 @@ export class VoteApi {
     return await this.httpClient.post(`${proposalId}`, { candidates });
   }
 
-  async editVote(
+  async suggestVote(
     proposalId: string,
     voteId: string,
     candidates: Candidate[],
     status: VoteStatus,
   ) {
-    return await this.httpClient.put(`${proposalId}/${voteId}`, {
+    return await this.httpClient.put(`${proposalId}/suggestion/${voteId}`, {
       candidates,
       status,
     });

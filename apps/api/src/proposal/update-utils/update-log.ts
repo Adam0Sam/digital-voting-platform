@@ -5,7 +5,7 @@ import {
   isGrade,
   isMutableProposalKey,
   isUserRole,
-  MutableProposalKey,
+  MutableIntrinsicProposalKey,
   Proposal,
   User,
   UserRole,
@@ -17,17 +17,17 @@ import {
 } from 'src/lib/exclusive';
 import { LogActionParams } from 'src/logger/logger.service';
 
-const updateKeyToActionMap: Record<MutableProposalKey, Action | undefined> = {
+const updateIntrinsicKeyToActionMap: Record<
+  MutableIntrinsicProposalKey,
+  Action | undefined
+> = {
   title: Action.EDIT_TITLE,
   description: Action.EDIT_DESCRIPTION,
   startDate: Action.EDIT_START_END_DATES,
   endDate: Action.EDIT_START_END_DATES,
   resolutionDate: Action.EDIT_RESOLUTION_DATE,
-  status: undefined,
-  visibility: undefined,
-  userPattern: undefined,
-  candidates: undefined,
-  choiceCount: undefined,
+  status: Action.EDIT_STATUS,
+  visibility: Action.EDIT_VISIBILITY,
 };
 
 type CandidateIdToContentMap = Record<
@@ -235,7 +235,7 @@ export function getProposalUpdateLogMessages(
       logMessages = [
         ...logMessages,
         {
-          action: updateKeyToActionMap[key],
+          action: updateIntrinsicKeyToActionMap[key],
           info: {
             message: updateInput[key].toString(),
             userId,

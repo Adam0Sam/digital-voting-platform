@@ -10,6 +10,7 @@ function updateVoteCounts(
   candidates: Candidate[],
   tallyMap: Map<string, VoteDistributionItem>,
 ) {
+  console.log('updateVoteCounts candidates', candidates);
   for (const candidate of candidates) {
     if (!tallyMap.has(candidate.id)) continue;
     tallyMap.set(candidate.id, {

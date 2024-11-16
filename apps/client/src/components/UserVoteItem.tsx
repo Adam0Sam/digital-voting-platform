@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useRef, useState } from 'react';
 import Combobox, { ComboboxHandle } from './combobox/Combobox';
 import ConfirmDialog from './ConfirmDialog';
-import { Candidate, Vote, VoteStatus } from '@ambassador';
+import { Candidate, ManagerPermissions, Vote, VoteStatus } from '@ambassador';
 import { ComboboxItem } from './combobox/type';
 
 function getSelectedChoices(
@@ -39,6 +39,20 @@ const comboboxItemsMap: Record<VoteStatus, ComboboxItem<VoteStatus>> = {
   [VoteStatus.PENDING]: comboboxVoteStatusItems[1],
 };
 
+type UserVoteItemProps = {
+  vote: Vote;
+  onFocus?: (vote: Vote) => void;
+  onBlur?: () => void;
+  permissions?: ManagerPermissions;
+  allChoices: Candidate[];
+  maxChoiceCount: number;
+  saveVoteSuggestionOffer?: (
+    voteId: string,
+    choices: Candidate[],
+    status: VoteStatus,
+  ) => void;
+};
+
 /**
  * State management here is really bad
  */
@@ -46,28 +60,11 @@ export default function UserVoteItem({
   vote,
   onFocus,
   onBlur,
-  canEditVotes,
-  canDeleteVotes,
-  canEditChoiceCount,
+  permissions,
   allChoices,
   maxChoiceCount,
-  saveVoteEdit,
-}: {
-  vote: Vote;
-  onFocus?: (vote: Vote) => void;
-  onBlur?: () => void;
-  canEditVotes?: boolean;
-  canCreateVotes?: boolean;
-  canDeleteVotes?: boolean;
-  canEditChoiceCount?: boolean;
-  allChoices: Candidate[];
-  maxChoiceCount: number;
-  saveVoteEdit?: (
-    voteId: string,
-    choices: Candidate[],
-    status: VoteStatus,
-  ) => void;
-}) {
+  saveVoteSuggestionOffer,
+}: UserVoteItemProps) {
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [choices, setChoices] = useState<(Candidate & { selected: boolean })[]>(
     getSelectedChoices(vote.candidates, allChoices),
@@ -77,7 +74,7 @@ export default function UserVoteItem({
   const comboboxRef = useRef<ComboboxHandle<VoteStatus>>(null);
 
   const handleChoiceClick = (choice: Candidate) => {
-    if (!canEditVotes) return;
+    if (!permissions?.canOfferVoteSuggestions) return;
     setChoiceOverflow(false);
     setChoices(prevChoices => {
       let selectedChoicesCount = 0;
@@ -114,7 +111,7 @@ export default function UserVoteItem({
     });
   };
 
-  const handleVoteEdit = () => {
+  const handleSuggestionOffer = () => {
     if (choiceOverflow) return;
     const selectedChoices = choices.filter(choice => choice.selected);
     if (selectedChoices.length > maxChoiceCount) {
@@ -126,7 +123,7 @@ export default function UserVoteItem({
     const selectedVoteStatus =
       comboboxRef.current?.getSelectedItem()?.value ?? vote.status;
     setVoteStatus(selectedVoteStatus);
-    saveVoteEdit?.(vote.id, selectedChoices, selectedVoteStatus);
+    saveVoteSuggestionOffer?.(vote.id, selectedChoices, selectedVoteStatus);
   };
 
   return (
@@ -155,7 +152,7 @@ export default function UserVoteItem({
               .join(', ')}
           </p>
         </div>
-        {canEditVotes && (
+        {permissions?.canOfferVoteSuggestions && (
           <div className="flex flex-col justify-center">
             <SheetTrigger asChild>
               <Button variant="outline">
@@ -181,7 +178,7 @@ export default function UserVoteItem({
                 })}
               >
                 <p className="text-xl">Choice Count: {maxChoiceCount}</p>
-                {canEditChoiceCount && <Pencil />}
+                {permissions?.canEditChoiceCount && <Pencil />}
               </div>
               <div className="flex w-full flex-col gap-4">
                 {choices.map(choice => {
@@ -200,7 +197,7 @@ export default function UserVoteItem({
               </div>
             </div>
             <div className="flex flex-[1] flex-col items-center gap-12">
-              {canEditVotes && (
+              {permissions?.canOfferVoteSuggestions && (
                 <Combobox
                   items={comboboxVoteStatusItems}
                   defaultItem={comboboxItemsMap[voteStatus]}
@@ -220,12 +217,12 @@ export default function UserVoteItem({
             </div>
           </div>
           <div className="flex w-full justify-center gap-8">
-            {canEditVotes && (
-              <Button onClick={handleVoteEdit} className="flex-[2]">
+            {permissions?.canOfferVoteSuggestions && (
+              <Button onClick={handleSuggestionOffer} className="flex-[2]">
                 <span>Save</span>
               </Button>
             )}
-            {canDeleteVotes && (
+            {permissions?.canChangeVoteStatus && (
               <ConfirmDialog
                 triggerButton={{
                   text: 'Delete',

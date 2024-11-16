@@ -227,6 +227,7 @@ export class ProposalService {
         votes: {
           include: {
             candidates: true,
+            suggestedCandidates: true,
             user: true,
           },
         },

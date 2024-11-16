@@ -30,7 +30,7 @@ const DEFAULT_PERMISSIONS: ManagerPermissions = {
   canEditVisibility: false,
   canDeleteVotes: false,
   canCreateVotes: false,
-  canEditManagers: false,
+  canEditVotersList: false,
   canEditVotes: false,
   canEditCandidates: false,
   canEditChoiceCount: false,

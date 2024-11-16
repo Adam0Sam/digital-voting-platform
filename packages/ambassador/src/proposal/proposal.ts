@@ -84,6 +84,10 @@ export const mutableProposalKeys = [
 ] as const satisfies readonly (keyof UpdateProposalDto)[];
 
 export type MutableProposalKey = (typeof mutableProposalKeys)[number];
+export type MutableIntrinsicProposalKey = Exclude<
+  MutableProposalKey,
+  "userPattern" | "candidates" | "choiceCount"
+>;
 
 export function isMutableProposalKey(val: unknown): val is MutableProposalKey {
   return mutableProposalKeys.includes(val as MutableProposalKey);

@@ -70,69 +70,69 @@ export class VoteService {
     });
   }
 
-  async editVote(
-    userId: string,
-    proposalId: string,
-    voteId: string,
-    candidates: Candidate[],
-    voteStatus: VoteStatus,
-  ) {
-    const proposal = await this.prisma.proposal.findUnique({
-      where: {
-        id: proposalId,
-        managers: {
-          some: {
-            userId,
-          },
-        },
-      },
-      include: {
-        candidates: true,
-        votes: true,
-        managers: {
-          include: {
-            role: {
-              include: {
-                permissions: true,
-              },
-            },
-          },
-        },
-      },
-    });
+  // async editVote(
+  //   userId: string,
+  //   proposalId: string,
+  //   voteId: string,
+  //   candidates: Candidate[],
+  //   voteStatus: VoteStatus,
+  // ) {
+  //   const proposal = await this.prisma.proposal.findUnique({
+  //     where: {
+  //       id: proposalId,
+  //       managers: {
+  //         some: {
+  //           userId,
+  //         },
+  //       },
+  //     },
+  //     include: {
+  //       candidates: true,
+  //       votes: true,
+  //       managers: {
+  //         include: {
+  //           role: {
+  //             include: {
+  //               permissions: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   });
 
-    if (!proposal) {
-      throw new BadRequestException('Proposal not found');
-    }
+  //   if (!proposal) {
+  //     throw new BadRequestException('Proposal not found');
+  //   }
 
-    if (proposal.candidates.length < candidates.length) {
-      throw new BadRequestException('Invalid number of candidates');
-    }
+  //   if (proposal.candidates.length < candidates.length) {
+  //     throw new BadRequestException('Invalid number of candidates');
+  //   }
 
-    const manager = proposal.managers.find(
-      (manager) => manager.userId === userId,
-    );
+  //   const manager = proposal.managers.find(
+  //     (manager) => manager.userId === userId,
+  //   );
 
-    if (!manager.role.permissions.canEditVotes) {
-      throw new ConflictException(
-        'User does not have permission to edit votes',
-      );
-    }
+  //   if (!manager.role.permissions.canEditVotes) {
+  //     throw new ConflictException(
+  //       'User does not have permission to edit votes',
+  //     );
+  //   }
 
-    return await this.prisma.vote.update({
-      where: {
-        id: voteId,
-      },
-      data: {
-        candidates: {
-          set: candidates.map((choice) => ({
-            id: choice.id,
-          })),
-        },
-        status: voteStatus,
-      },
-    });
-  }
+  //   return await this.prisma.vote.update({
+  //     where: {
+  //       id: voteId,
+  //     },
+  //     data: {
+  //       candidates: {
+  //         set: candidates.map((choice) => ({
+  //           id: choice.id,
+  //         })),
+  //       },
+  //       status: voteStatus,
+  //     },
+  //   });
+  // }
 
   async getAnonVotes(proposalId, userId) {
     const proposal = await this.prisma.proposal.findUnique({

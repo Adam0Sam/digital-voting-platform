@@ -35,7 +35,7 @@ export class VoteController {
     return this.voteService.voteForProposal(userId, proposalId, candidates);
   }
 
-  @Put(':proposalId/:voteId')
+  @Put(':proposalId/suggestion/:voteId')
   async editVote(
     @Param('proposalId') proposalId: string,
     @Param('voteId') voteId: string,
@@ -45,13 +45,14 @@ export class VoteController {
     @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
-    return this.voteService.editVote(
-      userId,
-      proposalId,
-      voteId,
-      candidates,
-      voteStatus,
-    );
+    console.log('editVote');
+    // return this.voteService.editVote(
+    //   userId,
+    //   proposalId,
+    //   voteId,
+    //   candidates,
+    //   voteStatus,
+    // );
   }
 
   @Get('anon/:proposalId')
