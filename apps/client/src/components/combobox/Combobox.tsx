@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Check } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import {
   Command,
   CommandEmpty,
@@ -9,20 +9,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from './ui/command';
+} from '../ui/command';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from './ui/tooltip';
-
-export type ComboboxItem<T> = {
-  label: string;
-  value: T;
-  description?: string;
-};
+} from '../ui/tooltip';
+import { ComboboxItem } from './type';
 
 type ComboboxProps<T> = {
   items: ComboboxItem<T>[];

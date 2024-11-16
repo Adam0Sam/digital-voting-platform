@@ -7,6 +7,10 @@ import {
   User,
 } from '@ambassador';
 import { Prisma } from '@prisma/client';
+import {
+  ArrayMembership,
+  getPrimitiveArrayExclusivityMap,
+} from 'src/lib/exclusive';
 import { LogActionParams } from 'src/logger/logger.service';
 
 const updateKeyToActionMap: Record<MutableProposalKey, Action | undefined> = {
@@ -32,14 +36,6 @@ function getUpdateCandidatesLogMessages(
   currentCandidates: Prisma.ProposalUpdateInput['candidates']['upsert'],
   meta: { userId: User['id']; proposalId: Proposal['id'] },
 ) {
-  let prevCandidatePointer = 0;
-  let currentCandidatePointer = 0;
-  const logMessages: LogActionParams[] = [];
-
-  const prevCandidatesSet = new Set(
-    prevCandidates.map((candidate) => candidate.id),
-  );
-  const prevCandidatesLength = prevCandidates.length;
   const prevCandidateIdContentMap = prevCandidates.reduce((acc, candidate) => {
     acc[candidate.id] = {
       value: candidate.value,
@@ -48,20 +44,18 @@ function getUpdateCandidatesLogMessages(
     return acc;
   }, {} as CandidateIdToContentMap);
 
-  let currentCandidatesLength = 0;
+  const prevCandidatesIds = prevCandidates.map((candidate) => candidate.id);
+
   const currentCandidateIdContentMap: CandidateIdToContentMap = {};
-  const currentCandidatesSet = new Set();
+  const currentCandidatesIds = [];
   for (const candidateUpsertId in currentCandidates) {
     const candidateUpsert = currentCandidates[candidateUpsertId];
-    const candidateId = candidateUpsert.where.id || currentCandidatesLength;
-    currentCandidatesSet.add(candidateId);
-    currentCandidateIdContentMap[
-      candidateUpsert.where.id ?? currentCandidatesLength
-    ] = {
+    const candidateId = candidateUpsert.where.id ?? self.crypto.randomUUID();
+    currentCandidatesIds.push(candidateId);
+    currentCandidateIdContentMap[candidateId] = {
       value: candidateUpsert.create.value,
       description: candidateUpsert.create.description,
     };
-    currentCandidatesLength++;
   }
 
   function getLogMessage(
@@ -78,7 +72,7 @@ function getUpdateCandidatesLogMessages(
       info: {
         userId: meta.userId,
         proposalId: meta.proposalId,
-        message: `${contentMap[candidateId].value} ${
+        message: `Value: ${contentMap[candidateId].value} ${
           contentMap[candidateId].description
             ? `(${contentMap[candidateId].description})`
             : ''
@@ -89,62 +83,22 @@ function getUpdateCandidatesLogMessages(
     return logMessage;
   }
 
-  while (
-    prevCandidatePointer < prevCandidatesLength ||
-    currentCandidatePointer < currentCandidatesLength
-  ) {
-    const prevCandidate = prevCandidates[prevCandidatePointer];
-    const currentCandidate = currentCandidates[currentCandidatePointer];
+  const exclusivityMap = getPrimitiveArrayExclusivityMap(
+    prevCandidatesIds,
+    currentCandidatesIds,
+  );
 
-    if (!prevCandidate && !currentCandidate) {
-      break;
+  return Object.keys(exclusivityMap).reduce((acc, candidateId) => {
+    switch (exclusivityMap[candidateId]) {
+      case ArrayMembership.FIRST:
+        acc.push(getLogMessage(Action.REMOVE_CANDIDATE, candidateId));
+        break;
+      case ArrayMembership.SECOND:
+        acc.push(getLogMessage(Action.ADD_CANDIDATE, candidateId));
+        break;
     }
-
-    // Handle case when we've reached the end of prev array
-    if (!prevCandidate && currentCandidate) {
-      const currentCandidateId = currentCandidate.where.id;
-      if (!prevCandidatesSet.has(currentCandidateId)) {
-        logMessages.push(
-          getLogMessage(Action.ADD_CANDIDATE, currentCandidateId),
-        );
-      }
-      currentCandidatePointer++;
-      continue;
-    }
-
-    // Handle case when we've reached the end of current array
-    if (prevCandidate && !currentCandidate) {
-      const prevCandidateId = prevCandidate.id;
-      if (!currentCandidatesSet.has(prevCandidateId)) {
-        logMessages.push(
-          getLogMessage(Action.REMOVE_CANDIDATE, prevCandidateId),
-        );
-      }
-      prevCandidatePointer++;
-      continue;
-    }
-
-    // Both arrays have elements
-    const prevCandidateId = prevCandidate.id;
-    const currentCandidateId = currentCandidate.where.id;
-
-    if (!currentCandidatesSet.has(prevCandidateId)) {
-      logMessages.push(getLogMessage(Action.REMOVE_CANDIDATE, prevCandidateId));
-      prevCandidatePointer++;
-      continue;
-    }
-
-    if (!prevCandidatesSet.has(currentCandidateId)) {
-      logMessages.push(getLogMessage(Action.ADD_CANDIDATE, currentCandidateId));
-      currentCandidatePointer++;
-      continue;
-    }
-
-    prevCandidatePointer++;
-    currentCandidatePointer++;
-  }
-
-  return logMessages;
+    return acc;
+  }, [] as LogActionParams[]);
 }
 
 export function getProposalUpdateLogMessages(
@@ -171,15 +125,29 @@ export function getProposalUpdateLogMessages(
       ];
     }
     if (key === 'candidates') {
-      console.log('candidate upsert', updateInput.candidates.upsert);
-      console.log(
-        'candidate log message',
-        getUpdateCandidatesLogMessages(
+      logMessages = [
+        ...logMessages,
+        ...getUpdateCandidatesLogMessages(
           prevProposal.candidates,
           updateInput.candidates.upsert,
           { userId, proposalId: prevProposal.id },
         ),
-      );
+      ];
+    }
+    if (key === 'choiceCount') {
+      logMessages = [
+        ...logMessages,
+        {
+          action: Action.EDIT_CHOICE_COUNT,
+          info: {
+            message: `From ${
+              prevProposal.choiceCount
+            } to ${updateInput.choiceCount.toString()}`,
+            userId,
+            proposalId: prevProposal.id,
+          },
+        },
+      ];
     }
   }
   return logMessages;

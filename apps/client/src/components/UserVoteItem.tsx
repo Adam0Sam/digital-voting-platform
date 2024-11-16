@@ -5,9 +5,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
 import { useRef, useState } from 'react';
-import Combobox, { ComboboxHandle, ComboboxItem } from './Combobox';
+import Combobox, { ComboboxHandle } from './combobox/Combobox';
 import ConfirmDialog from './ConfirmDialog';
 import { Candidate, Vote, VoteStatus } from '@ambassador';
+import { ComboboxItem } from './combobox/type';
 
 function getSelectedChoices(
   selectedCandidates: Candidate[],

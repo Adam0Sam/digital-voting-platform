@@ -9,24 +9,7 @@ import {
 } from '@ambassador';
 import { Prisma } from '@prisma/client';
 
-function withMutatedIntrinsicProposalProp<
-  T extends keyof Pick<
-    UpdateProposalDto,
-    (typeof intrinsicProposalProps)[number]
-  >,
->(
-  updateInputObject: Prisma.ProposalUpdateInput,
-  key: T,
-  value: UpdateProposalDto[T],
-): Prisma.ProposalUpdateInput {
-  return {
-    ...updateInputObject,
-    [key]: value,
-  };
-}
-
-function withMutatedCandidates(
-  updateInputObject: Prisma.ProposalUpdateInput,
+function getCandidatesUpdateInput(
   prevCandidates: Proposal['candidates'],
   currentCandidates: UpdateProposalDto['candidates'],
 ): Prisma.ProposalUpdateInput {
@@ -39,7 +22,6 @@ function withMutatedCandidates(
     .map((prevChoice) => prevChoice.id);
 
   return {
-    ...updateInputObject,
     candidates: {
       upsert: currentCandidates.map((choice) => ({
         where: {
@@ -84,19 +66,20 @@ export function getProposalUpdateInput({
       continue;
     }
     if (intrinsicProposalProps.includes(key) && canEdit(permissions, key)) {
-      updateInput = withMutatedIntrinsicProposalProp(
-        updateInput,
-        key,
-        proposalDto[key],
-      );
+      updateInput = {
+        ...updateInput,
+        [key]: proposalDto[key],
+      };
       continue;
     }
     if (key === 'candidates' && canEdit(permissions, key)) {
-      updateInput = withMutatedCandidates(
-        updateInput,
-        prevProposal.candidates,
-        proposalDto.candidates,
-      );
+      updateInput = {
+        ...updateInput,
+        ...getCandidatesUpdateInput(
+          prevProposal.candidates,
+          proposalDto.candidates,
+        ),
+      };
       shouldResetVotes = true;
       continue;
     }

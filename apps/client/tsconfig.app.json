@@ -40,6 +40,6 @@
   "include": [
     "src",
     "../../packages/ambassador/dist/**/*.ts",
-    "../../packages/ambassador/src/utils"
+    "../../packages/ambassador/src/utils",
   ]
 }

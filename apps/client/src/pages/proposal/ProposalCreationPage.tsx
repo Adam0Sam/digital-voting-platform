@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UserSelectionForm from '@/components/forms/user/UserSelectionForm';
-import Combobox from '@/components/Combobox';
+import Combobox from '@/components/combobox/Combobox';
 import CandidateForm from '@/components/forms/candidate-selection/CandidateForm';
 import ManagerSelectionForm from '@/components/forms/user/ManagerSelectionForm';
 import { AllUsersProvider } from '@/lib/context/all-users';
