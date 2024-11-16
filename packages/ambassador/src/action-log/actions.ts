@@ -14,7 +14,8 @@ export const Actions = [
   "REMOVE_CANDIDATE",
   "ADD_CANDIDATE",
   "EDIT_CHOICE_COUNT",
-  "EDIT_USER_PATTERN",
+  "EDIT_PATTERN_GRADE",
+  "EDIT_PATTERN_ROLE",
 ] as const;
 
 export const Action = {
@@ -31,7 +32,8 @@ export const Action = {
   REMOVE_CANDIDATE: "REMOVE_CANDIDATE",
   ADD_CANDIDATE: "ADD_CANDIDATE",
   EDIT_CHOICE_COUNT: "EDIT_CHOICE_COUNT",
-  EDIT_USER_PATTERN: "EDIT_USER_PATTERN",
+  EDIT_PATTERN_GRADE: "EDIT_PATTERN_GRADE",
+  EDIT_PATTERN_ROLE: "EDIT_PATTERN_ROLE",
 } as const;
 
 export type Action = (typeof Actions)[number];

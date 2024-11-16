@@ -28,7 +28,7 @@ import GreetingPage from './pages/GreetingPage';
 import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
 import AdminPage from './pages/admin/AdminPageLayout';
-import ChoicesOverviewPage from './pages/proposal/manager/CandidateOverviewPage';
+import CandidateOverviewPage from './pages/proposal/manager/CandidateOverviewPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import UserLogsPage from './pages/admin/UserLogsPage';
 import UserPatternPage from './pages/proposal/manager/UserPatternPage';
@@ -83,7 +83,7 @@ const router = createBrowserRouter(
             />
             <Route
               path={PROPOSAL_OVERVIEW_PATHS.CANDIDATES}
-              element={<ChoicesOverviewPage />}
+              element={<CandidateOverviewPage />}
             />
             <Route
               path={PROPOSAL_OVERVIEW_PATHS.PATTERN}

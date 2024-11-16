@@ -1,10 +1,14 @@
 import {
   Action,
+  Grade,
   intrinsicProposalProps,
+  isGrade,
   isMutableProposalKey,
+  isUserRole,
   MutableProposalKey,
   Proposal,
   User,
+  UserRole,
 } from '@ambassador';
 import { Prisma } from '@prisma/client';
 import {
@@ -31,10 +35,12 @@ type CandidateIdToContentMap = Record<
   { value: string; description?: string }
 >;
 
+type MetaInfo = { userId: User['id']; proposalId: Proposal['id'] };
+
 function getUpdateCandidatesLogMessages(
   prevCandidates: Proposal['candidates'],
   currentCandidates: Prisma.ProposalUpdateInput['candidates']['upsert'],
-  meta: { userId: User['id']; proposalId: Proposal['id'] },
+  meta: MetaInfo,
 ) {
   const prevCandidateIdContentMap = prevCandidates.reduce((acc, candidate) => {
     acc[candidate.id] = {
@@ -101,9 +107,123 @@ function getUpdateCandidatesLogMessages(
   }, [] as LogActionParams[]);
 }
 
+class PatternChangeTracker<T> {
+  private additions: T[] = [];
+  private removals: T[] = [];
+
+  constructor(
+    private readonly action:
+      | typeof Action.EDIT_PATTERN_ROLE
+      | typeof Action.EDIT_PATTERN_GRADE,
+    private readonly meta: MetaInfo,
+  ) {}
+
+  addAddition(value: T) {
+    this.additions.push(value);
+  }
+
+  addRemoval(value: T) {
+    this.removals.push(value);
+  }
+
+  getRemovalsLogMessage() {
+    if (this.removals.length === 0) {
+      return null;
+    }
+    return {
+      action: this.action,
+      info: {
+        userId: this.meta.userId,
+        proposalId: this.meta.proposalId,
+        message: `Removed ${this.removals.join(', ')}`,
+      },
+    };
+  }
+
+  getAdditionsLogMessage() {
+    if (this.additions.length === 0) {
+      return null;
+    }
+    return {
+      action: this.action,
+      info: {
+        userId: this.meta.userId,
+        proposalId: this.meta.proposalId,
+        message: `Added ${this.additions.join(', ')}`,
+      },
+    };
+  }
+}
+
+function getUpdateUserPatternLogMessages(
+  prevPattern: Proposal['userPattern'],
+  currentPattern: Prisma.ProposalUpdateInput['userPattern']['update'],
+  meta: MetaInfo,
+) {
+  if (!Array.isArray(currentPattern.roles)) {
+    throw new Error('currentPattern.Roles is not an array');
+  }
+  if (!Array.isArray(currentPattern.grades)) {
+    throw new Error('currentPattern.grades is not an array');
+  }
+
+  const roleExclusivityMap = getPrimitiveArrayExclusivityMap(
+    prevPattern.roles,
+    currentPattern.roles,
+  );
+  const gradeExclusivityMap = getPrimitiveArrayExclusivityMap(
+    prevPattern.grades,
+    currentPattern.grades,
+  );
+
+  const roleTracker = new PatternChangeTracker<UserRole>(
+    Action.EDIT_PATTERN_ROLE,
+    meta,
+  );
+  const gradeTracker = new PatternChangeTracker<Grade>(
+    Action.EDIT_PATTERN_GRADE,
+    meta,
+  );
+
+  for (const role in roleExclusivityMap) {
+    if (!isUserRole(role)) {
+      throw new Error('role is not a valid user role');
+    }
+    if (roleExclusivityMap[role] === ArrayMembership.BOTH) {
+      continue;
+    }
+    if (roleExclusivityMap[role] === ArrayMembership.FIRST) {
+      roleTracker.addRemoval(role);
+      continue;
+    }
+    roleTracker.addAddition(role);
+  }
+
+  for (const grade in gradeExclusivityMap) {
+    if (!isGrade(grade)) {
+      throw new Error('grade is not a valid grade');
+    }
+    if (gradeExclusivityMap[grade] === ArrayMembership.BOTH) {
+      continue;
+    }
+    if (gradeExclusivityMap[grade] === ArrayMembership.FIRST) {
+      gradeTracker.addRemoval(grade);
+      continue;
+    }
+    gradeTracker.addAddition(grade);
+  }
+
+  return [
+    roleTracker.getAdditionsLogMessage(),
+    roleTracker.getRemovalsLogMessage(),
+    gradeTracker.getAdditionsLogMessage(),
+    gradeTracker.getRemovalsLogMessage(),
+  ];
+}
+
 export function getProposalUpdateLogMessages(
   updateInput: Prisma.ProposalUpdateInput,
-  prevProposal: Omit<Proposal, 'votes' | 'userPattern' | 'managers'>,
+  prevProposal: Omit<Proposal, 'votes' | 'managers'>,
   userId: User['id'],
 ) {
   let logMessages: LogActionParams[] = [];
@@ -147,6 +267,16 @@ export function getProposalUpdateLogMessages(
             proposalId: prevProposal.id,
           },
         },
+      ];
+    }
+    if (key === 'userPattern') {
+      logMessages = [
+        ...logMessages,
+        ...getUpdateUserPatternLogMessages(
+          prevProposal.userPattern,
+          updateInput.userPattern.update,
+          { userId, proposalId: prevProposal.id },
+        ).filter((message) => message !== null),
       ];
     }
   }

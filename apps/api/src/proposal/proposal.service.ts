@@ -115,6 +115,7 @@ export class ProposalService {
         id: proposalId,
       },
       include: {
+        userPattern: true,
         candidates: true,
         managers: {
           where: {

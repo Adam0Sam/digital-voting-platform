@@ -7,7 +7,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import { useRef, useState } from 'react';
 import { api } from '@/lib/api';
 
-export default function ChoicesOverviewPage() {
+export default function CandidateOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
   const [error, setError] = useState<string | null>(null);
   const candidateFormRef = useRef<CandidateFormHandles>(null);
