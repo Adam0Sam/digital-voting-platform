@@ -48,7 +48,7 @@ type UserVoteItemProps = {
   maxChoiceCount: number;
   saveVoteSuggestionOffer?: (
     voteId: string,
-    choices: Candidate[],
+    candidates: Candidate[],
     status: VoteStatus,
   ) => void;
 };

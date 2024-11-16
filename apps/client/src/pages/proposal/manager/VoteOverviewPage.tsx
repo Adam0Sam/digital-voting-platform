@@ -51,8 +51,17 @@ function VoteDistributionChart({
   );
 }
 
+const TAB_NAME = {
+  VOTES: 'votes',
+  SUGGESTED: 'suggested',
+  RESULTS: 'results',
+} as const;
+
+type TabName = (typeof TAB_NAME)[keyof typeof TAB_NAME];
+
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
+  const [currentTab, setCurrentTab] = useState<TabName>(TAB_NAME.VOTES);
   const [suggestedVotes, setSuggestedVotes] = useState<Vote[]>(proposal.votes);
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
 
@@ -60,8 +69,6 @@ export default function VoteOverviewPage() {
     proposal.candidates,
     proposal.votes,
   );
-  const [resolvedVoteCount, setResolvedVoteCount] =
-    useState(finalizedVoteCount);
   const {
     voteDistribution: suggestedVoteDistribution,
     finalizedVoteCount: suggestedFinalizedVoteCount,
@@ -96,28 +103,32 @@ export default function VoteOverviewPage() {
           <Badge variant="secondary">
             Total Votes: {proposal.votes.length}
           </Badge>
-          <Badge variant="secondary">Resolved Votes: {resolvedVoteCount}</Badge>
+          <Badge variant="secondary">
+            Resolved Votes:{' '}
+            {currentTab === TAB_NAME.SUGGESTED
+              ? suggestedFinalizedVoteCount
+              : finalizedVoteCount}
+          </Badge>
         </div>
       </div>
       <Tabs
         defaultValue="votes"
         className="space-y-4"
+        value={currentTab}
         onValueChange={(value: string) => {
-          if (value === 'suggested') {
-            setResolvedVoteCount(suggestedFinalizedVoteCount);
-          } else {
-            setResolvedVoteCount(finalizedVoteCount);
+          if (Object.values(TAB_NAME).includes(value)) {
+            setCurrentTab(value as TabName);
           }
         }}
       >
         <TabsList>
           <TabsTrigger value="votes">
             <VoteIcon className="mr-2 h-4 w-4" />
-            Votes
+            Real Votes
           </TabsTrigger>
           <TabsTrigger value="suggested">
             <Lightbulb className="mr-2 h-4 w-4" />
-            Suggested
+            Suggested Votes
           </TabsTrigger>
           <TabsTrigger value="results">
             <CheckCircle className="mr-2 h-4 w-4" />
@@ -152,6 +163,15 @@ export default function VoteOverviewPage() {
                       }}
                       maxChoiceCount={proposal.choiceCount}
                       onBlur={() => setHighlightedChoices([])}
+                      permissions={permissions}
+                      saveVoteSuggestionOffer={(
+                        voteId: string,
+                        candidates: Candidate[],
+                        status: VoteStatus,
+                      ) => {
+                        handleVoteSuggestionOffer(voteId, candidates, status);
+                        setCurrentTab(TAB_NAME.SUGGESTED);
+                      }}
                     />
                   ))}
                 </ScrollArea>
