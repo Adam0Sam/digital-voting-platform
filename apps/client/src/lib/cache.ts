@@ -48,7 +48,6 @@ export function cacheFunction<TArgs extends unknown[], TResult>(
 ) {
   const validCache = new ValidCache<TResult>(new Map());
   return function (...args: TArgs) {
-    console.log('cacheFunction', args);
     return validCache.getOrSet(JSON.stringify(args), () => fn(...args));
   };
 }

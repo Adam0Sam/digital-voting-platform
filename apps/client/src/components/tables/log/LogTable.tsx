@@ -131,8 +131,6 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
     setTablePageIndex(1);
   }, [actionFilter]);
 
-  console.log('pageLogs', pageLogs);
-
   const dataPageIndexBoundary = Math.ceil(
     (pageLogs.count ?? 0) / LOGS_PER_PAGE,
   );
