@@ -23,13 +23,11 @@ export default function ChoiceCountPopover({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
-    console.log('value', value);
     if (value < 1 || value > maxChoiceCount) {
       setError(`Choice count must be between 1 and ${maxChoiceCount}`);
       return;
     }
     setError(null);
-    console.log('max', maxChoiceCount);
     setChoiceCount(value);
     handleSelect?.(value);
   };

@@ -15,6 +15,7 @@ type CustomButtonProps = {
   text?: ReactNode;
   className?: string;
   variant?: ButtonStyleVariants;
+  disabled?: boolean;
 };
 
 type ConfirmDialogProps = {
@@ -29,13 +30,13 @@ type ConfirmDialogProps = {
 
 export default function ConfirmDialog(props: ConfirmDialogProps) {
   const [dialogIsOpen, setDialogIsOpen] = useState(false);
-
   return (
     <Dialog open={dialogIsOpen} onOpenChange={setDialogIsOpen}>
       <DialogTrigger asChild>
         <Button
           variant={props.triggerButton.variant ?? 'ghost'}
           className={props.triggerButton.className}
+          disabled={props.triggerButton.disabled}
         >
           {props.triggerButton.text}
         </Button>

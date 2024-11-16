@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -27,17 +28,18 @@ export type CandidateFormProps = ExtendedFormProps<FormValues> & {
   disableEdit?: boolean;
   children?: React.JSX.Element;
   className?: string;
+  errorMessage?: string | null;
 };
 
 export type CandidateFormHandles = {
-  getChoices: () => CreateCandidateDto[];
+  getCandidates: () => CreateCandidateDto[];
   getChoiceCount: () => number;
 };
 
-const CandidateForm = forwardRef(_ProposalChoiceForm);
+const CandidateForm = forwardRef(_CandidateForm);
 export default CandidateForm;
 
-function _ProposalChoiceForm(
+function _CandidateForm(
   props: CandidateFormProps,
   ref: React.Ref<CandidateFormHandles>,
 ) {
@@ -46,10 +48,14 @@ function _ProposalChoiceForm(
     props.initialCandidates ?? [],
   );
   const choiceCount = useRef(props.initialChoiceCount ?? 1);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(props.errorMessage ?? null);
+
+  useEffect(() => {
+    setError(props.errorMessage ?? null);
+  }, [props.errorMessage]);
 
   useImperativeHandle(ref, () => ({
-    getChoices: () => candidates,
+    getCandidates: () => candidates,
     getChoiceCount: () => choiceCount.current,
   }));
 
@@ -67,7 +73,7 @@ function _ProposalChoiceForm(
               <div>
                 <div className="flex items-center justify-between">
                   <p className={cn({ 'text-destructive': error })}>
-                    Resolution Values
+                    Candidates
                   </p>
                   {!props.disableEdit && (
                     <Button variant="ghost">

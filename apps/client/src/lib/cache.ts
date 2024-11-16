@@ -1,27 +1,53 @@
-import { createAsyncResource } from './async-resource';
+class ValidCache<T> {
+  constructor(
+    private cacheStore: Map<string, { value: T; timestamp: number }>,
+    private maxCacheSize = 100,
+    private validCacheTime = 1000 * 60 * 5,
+  ) {}
 
-export function createCachedAsyncResource<T = unknown>(
-  cache: Map<string, ReturnType<typeof createAsyncResource<T>>>,
-  cacheKey: string,
-) {
-  return function (promiseFactory: () => Promise<T>, key: string = cacheKey) {
-    if (!cache.has(key)) {
-      cache.set(key, createAsyncResource(promiseFactory()));
+  private validateSize() {
+    if (this.cacheStore.size > this.maxCacheSize) {
+      const oldestKey = Array.from(this.cacheStore.entries()).reduce(
+        (oldest, [key, { timestamp }]) => {
+          if (timestamp < oldest.timestamp) {
+            return { key, timestamp };
+          }
+          return oldest;
+        },
+        { key: '', timestamp: Date.now() },
+      );
+      this.cacheStore.delete(oldestKey.key);
     }
-    return cache.get(key)!;
-  };
+  }
+
+  getOrSet(key: string, producer: () => T): T {
+    const cached = this.get(key);
+    if (cached) return cached;
+    const value = producer();
+    this.set(key, value);
+    return value;
+  }
+
+  get(key: string) {
+    if (
+      this.cacheStore.has(key) &&
+      Date.now() - this.cacheStore.get(key)!.timestamp < this.validCacheTime
+    ) {
+      return this.cacheStore.get(key)!.value;
+    }
+  }
+
+  set(key: string, value: T) {
+    this.validateSize();
+    this.cacheStore.set(key, { value, timestamp: Date.now() });
+  }
 }
 
-export function getCachedFunction<TArgs extends unknown[], TResult>(
+export function cacheFunction<TArgs extends unknown[], TResult>(
   fn: (...args: TArgs) => TResult,
 ) {
-  const cache: Record<string, TResult> = {};
-  return (...args: TArgs) => {
-    const key = JSON.stringify(args);
-    if (cache[key]) {
-      return cache[key];
-    }
-    cache[key] = fn(...args);
-    return cache[key];
+  const validCache = new ValidCache<TResult>(new Map());
+  return function (...args: TArgs) {
+    return validCache.getOrSet(JSON.stringify(args), () => fn(...args));
   };
 }

@@ -28,7 +28,7 @@ import GreetingPage from './pages/GreetingPage';
 import ProposalGreetingPage from './pages/proposal/ProposalGreetingPage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
 import AdminPage from './pages/admin/AdminPageLayout';
-import ChoicesOverviewPage from './pages/proposal/manager/ChoicesOverviewPage';
+import CandidateOverviewPage from './pages/proposal/manager/CandidateOverviewPage';
 import AdminUserPage from './pages/admin/AdminUserPage';
 import UserLogsPage from './pages/admin/UserLogsPage';
 import UserPatternPage from './pages/proposal/manager/UserPatternPage';
@@ -82,8 +82,8 @@ const router = createBrowserRouter(
               element={<ContentOverviewPage />}
             />
             <Route
-              path={PROPOSAL_OVERVIEW_PATHS.CHOICES}
-              element={<ChoicesOverviewPage />}
+              path={PROPOSAL_OVERVIEW_PATHS.CANDIDATES}
+              element={<CandidateOverviewPage />}
             />
             <Route
               path={PROPOSAL_OVERVIEW_PATHS.PATTERN}
@@ -129,6 +129,10 @@ const router = createBrowserRouter(
         </Route>
 
         <Route path={ADMIN_PATHS.PROPOSALS} element={<div>Proposals</div>} />
+        <Route
+          path={`${ADMIN_PATHS.PROPOSALS}/${GENERIC_PATHS.ONE}`}
+          element={<>labas</>}
+        />
       </Route>
       <Route path="*" element={<div>404</div>} />
     </Route>,

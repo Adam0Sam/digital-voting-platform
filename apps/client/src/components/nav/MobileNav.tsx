@@ -69,7 +69,7 @@ export default function MobileNav({ className }: { className?: string }) {
       </Sheet>
 
       <NavLink to="/" className="flex items-center space-x-2">
-        <span className="font-bold">Your App Name</span>
+        <span className="font-bold">Digital Voting</span>
       </NavLink>
 
       <NavLink

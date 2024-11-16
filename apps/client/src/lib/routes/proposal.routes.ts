@@ -3,7 +3,7 @@ import { GENERIC_PATHS } from './util.routes';
 export const PROPOSAL_OVERVIEW_PATHS = {
   VOTES: 'votes',
   CONTENT: 'content',
-  CHOICES: 'choices',
+  CANDIDATES: 'candidates',
   PATTERN: 'pattern',
   TIMELINE: 'timeline',
 } as const;

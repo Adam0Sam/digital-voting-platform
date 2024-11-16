@@ -1,18 +1,17 @@
-import { Candidate } from '@ambassador/candidate';
 import {
   ManagerListDto,
-  ManagerPermissions,
   CreateProposalDto,
   UpdateProposalDto,
   User,
   Action,
-  Proposal,
+  withDatesAsStrings,
 } from '@ambassador';
-import { VoteStatus } from '@ambassador/vote';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoggerService } from 'src/logger/logger.service';
+import { getProposalUpdateInput } from './update-utils/update-input';
+import { getProposalUpdateLogMessages } from './update-utils/update-log';
 
 @Injectable()
 export class ProposalService {
@@ -41,7 +40,10 @@ export class ProposalService {
     };
   }
 
-  async createOne(proposal: CreateProposalDto) {
+  async createOne(
+    proposal: CreateProposalDto,
+    meta: { userId: string; userAgent: string },
+  ) {
     const voteUserIds =
       proposal.voters?.map((voter) => ({ userId: voter.id })) ?? [];
     const candidates = proposal.candidates.map((choice) => ({
@@ -49,7 +51,7 @@ export class ProposalService {
       description: choice.description,
     }));
 
-    return this.prisma.proposal.create({
+    const newProposal = await this.prisma.proposal.create({
       data: {
         title: proposal.title,
         description: proposal.description,
@@ -72,154 +74,15 @@ export class ProposalService {
         managers: this.getCreateManagersInput(proposal.managers),
       },
     });
-  }
-
-  private logUpdateActions(
-    proposalUpdateInput: Prisma.ProposalUpdateInput,
-    prevProposal: Proposal,
-    userId: string,
-  ) {
-    const updateKeys = Object.keys(
-      proposalUpdateInput,
-    ) as (keyof Prisma.ProposalUpdateInput)[];
-
-    for (const key of updateKeys) {
-      switch (key) {
-        case 'startDate':
-        case 'endDate':
-          this.logger.logAction(Action.EDIT_START_END_DATES, {
-            userId,
-            message: `Updated ${key} to ${proposalUpdateInput[key]}`,
-          });
-          break;
-        case 'resolutionDate':
-          this.logger.logAction(Action.EDIT_RESOLUTION_DATE, {
-            userId,
-            message: `Updated resolution date to ${proposalUpdateInput[key]}`,
-          });
-          break;
-      }
-    }
-  }
-
-  private getProposalUpdateInput({
-    proposalId,
-    proposalDto,
-    permissions,
-    prevCandidates,
-  }: {
-    proposalId?: string;
-    proposalDto: UpdateProposalDto;
-    permissions: ManagerPermissions;
-    prevCandidates: Candidate[];
-  }): Prisma.ProposalUpdateInput {
-    const updateInput: Prisma.ProposalUpdateInput = {};
-    let shouldResetVotes = false;
-    for (const _key in proposalDto) {
-      const key = _key as keyof UpdateProposalDto;
-      switch (key) {
-        case 'title':
-          if (permissions.canEditTitle) {
-            updateInput.title = proposalDto.title;
-          }
-          break;
-        case 'description':
-          if (permissions.canEditDescription) {
-            updateInput.description = proposalDto.description;
-          }
-          break;
-        case 'startDate':
-          if (permissions.canEditDates) {
-            updateInput.startDate = proposalDto.startDate;
-          }
-          break;
-        case 'endDate':
-          if (permissions.canEditDates) {
-            updateInput.endDate = proposalDto.endDate;
-          }
-          break;
-        case 'resolutionDate':
-          if (permissions.canEditDates) {
-            updateInput.resolutionDate = proposalDto.resolutionDate;
-          }
-          break;
-        case 'status':
-          if (permissions.canEditStatus) {
-            updateInput.status = proposalDto.status;
-          }
-          break;
-        case 'visibility':
-          if (permissions.canEditVisibility) {
-            updateInput.visibility = proposalDto.visibility;
-          }
-          break;
-        case 'candidates':
-          if (permissions.canEditCandidates) {
-            const candidateIdsForDeletion: string[] = prevCandidates
-              .filter(
-                (prevChoice) =>
-                  !proposalDto.candidates.some(
-                    (newChoice) =>
-                      newChoice.id !== undefined &&
-                      newChoice.id === prevChoice.id,
-                  ),
-              )
-              .map((choice) => choice.id);
-
-            updateInput.candidates = {
-              upsert: proposalDto.candidates.map((choice) => ({
-                where: {
-                  id: choice.id ?? '',
-                },
-                update: {
-                  value: choice.value,
-                  description: choice.description,
-                },
-                create: {
-                  value: choice.value,
-                  description: choice.description,
-                },
-              })),
-              deleteMany: {
-                id: {
-                  in: candidateIdsForDeletion,
-                },
-              },
-            };
-
-            shouldResetVotes = true;
-          }
-          break;
-        case 'choiceCount':
-          if (permissions.canEditChoiceCount) {
-            updateInput.choiceCount = proposalDto.choiceCount;
-            shouldResetVotes = true;
-          }
-          break;
-        case 'userPattern':
-          if (permissions.canEditUserPattern) {
-            updateInput.userPattern = {
-              update: proposalDto.userPattern,
-            };
-          }
-          break;
-      }
-    }
-
-    if (shouldResetVotes) {
-      updateInput.votes = {
-        updateMany: {
-          where: {
-            proposalId: proposalId ?? proposalDto.id,
-          },
-          data: {
-            status: VoteStatus.PENDING,
-          },
-        },
-      };
-    }
-
-    return updateInput;
+    this.logger.logAction({
+      action: Action.CREATE_PROPOSAL,
+      info: {
+        userId: meta.userId,
+        userAgent: meta.userAgent,
+        proposalId: newProposal.id,
+      },
+    });
+    return newProposal;
   }
 
   private getUserPatternWhereClause(
@@ -247,11 +110,12 @@ export class ProposalService {
     proposalDto: UpdateProposalDto,
     userId: string,
   ) {
-    const { managers, candidates } = await this.prisma.proposal.findUnique({
+    const prevProposal = await this.prisma.proposal.findUnique({
       where: {
         id: proposalId,
       },
-      select: {
+      include: {
+        userPattern: true,
         candidates: true,
         managers: {
           where: {
@@ -268,16 +132,26 @@ export class ProposalService {
       },
     });
 
-    if (!managers.length) {
+    if (!prevProposal.managers.length) {
       throw new UnauthorizedException('User is not a manager of this proposal');
     }
-    const permissions = managers[0].role.permissions;
-    const updateInput = this.getProposalUpdateInput({
+    const permissions = prevProposal.managers[0].role.permissions;
+    const updateInput = getProposalUpdateInput({
       proposalId,
       proposalDto,
       permissions,
-      prevCandidates: candidates,
+      prevProposal: withDatesAsStrings(prevProposal),
     });
+
+    const logMessages = getProposalUpdateLogMessages(
+      updateInput,
+      withDatesAsStrings(prevProposal),
+      userId,
+    );
+
+    for (const logMessage of logMessages) {
+      this.logger.logAction(logMessage);
+    }
 
     return this.prisma.proposal.update({
       where: {

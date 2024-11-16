@@ -85,7 +85,6 @@ export default function ManagerRoleTemplates() {
         template.id === roleTemplate.id ? roleTemplate : template,
       ),
     );
-    console.log('editing template');
     await api.managerRole.updateRole(roleTemplate);
   };
 

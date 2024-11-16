@@ -1,3 +1,4 @@
+import React, { FC, Suspense, useEffect, useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -14,75 +15,46 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { FC, Suspense, useEffect, useState } from 'react';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Actions, User } from '@ambassador';
+import { Action, Actions, User } from '@ambassador';
 import useUserLogs from '@/lib/hooks/useUserLogs';
 import GenericSpinner from '@/components/GenericSpinner';
 import constructActionFilter, { ActionFilter } from '@/lib/action-filter';
+import { ComboboxItem } from '@/components/combobox/type';
+import { MultiSelectCombobox } from '@/components/combobox/MultiSelectCombobox';
 
 const LOGS_PER_PAGE = 10;
+
 export default function PaginatedLogTable({ user }: { user: User }) {
   const [actionFilter, setActionFilter] = useState<ActionFilter>(
-    constructActionFilter(),
+    constructActionFilter(true),
   );
 
-  const actionFilterIsEmpty = Object.values(actionFilter).every(
-    value => !value,
-  );
+  const actionItems: ComboboxItem<Action>[] = Actions.map(action => ({
+    value: action,
+    label: (
+      action.charAt(0).toUpperCase() + action.slice(1).toLowerCase()
+    ).replace(/_/g, ' '),
+  }));
+
+  const handleActionFilterChange = (selectedActions: Action[]) => {
+    const newActionFilter = constructActionFilter(false);
+    selectedActions.forEach(action => {
+      newActionFilter[action as keyof ActionFilter] = true;
+    });
+    setActionFilter(newActionFilter);
+  };
 
   return (
     <div className="flex justify-center">
       <div className="flex min-w-0 max-w-screen-lg flex-1 flex-col gap-6 px-0 pb-10 sm:px-4">
         <div className="flex justify-between">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="hidden sm:block">
-                Filter Actions
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <div className="flex flex-col gap-4">
-                <div>
-                  {Actions.map(action => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        onSelect={e => e.preventDefault()}
-                        key={action}
-                        className="capitalize"
-                        checked={actionFilter[action]}
-                        onCheckedChange={() => {
-                          setActionFilter(prev => ({
-                            ...prev,
-                            [action]: !prev[action],
-                          }));
-                        }}
-                      >
-                        {action}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    setActionFilter(
-                      actionFilterIsEmpty
-                        ? constructActionFilter(true)
-                        : constructActionFilter(false),
-                    );
-                  }}
-                >
-                  {actionFilterIsEmpty ? 'Select All' : 'Clear All'}
-                </Button>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <MultiSelectCombobox
+            items={actionItems}
+            defaultItems={actionItems}
+            placeholder="Filter Actions"
+            emptyMessage="No actions available"
+            onChange={handleActionFilterChange}
+          />
         </div>
         <Suspense fallback={<_PaginatedLogTableSkeleton />}>
           <_PaginatedLogTable user={user} actionFilter={actionFilter} />
@@ -92,15 +64,10 @@ export default function PaginatedLogTable({ user }: { user: User }) {
   );
 }
 
-type PaginatedLogTableProps = {
-  user: User;
-  actionFilter: ActionFilter;
-};
-
 const _PaginatedLogTableSkeleton = () => {
   return (
     <div className="flex-1 rounded-md border">
-      <Table className="h-[580px]">
+      <Table className="h-[800px]">
         <TableHeader>
           <TableRow></TableRow>
         </TableHeader>
@@ -116,6 +83,11 @@ const _PaginatedLogTableSkeleton = () => {
   );
 };
 
+type PaginatedLogTableProps = {
+  user: User;
+  actionFilter: ActionFilter;
+};
+
 const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
   user,
   actionFilter,
@@ -125,7 +97,6 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
     getPage: getDataPage,
     pageIndex: dataPageIndex,
   } = useUserLogs(user.id, LOGS_PER_PAGE, 1, actionFilter);
-
   const [tablePageIndex, setTablePageIndex] = useState(1);
 
   useEffect(() => {
@@ -154,7 +125,7 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
 
   return (
     <>
-      <div className="flex-1 rounded-md border">
+      <div className="flex-1 overflow-scroll rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -179,7 +150,7 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
               table.getRowModel().rows.map(row => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="h-16 overflow-hidden">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -206,21 +177,6 @@ const _PaginatedLogTable: FC<PaginatedLogTableProps> = ({
           Page {tablePageIndex} of {dataPageIndexBoundary}{' '}
         </div>
         <div className="flex flex-[4] items-center justify-between gap-12">
-          {/* <Input
-              placeholder="Go to page"
-              className="hidden max-w-sm flex-[3] md:block"
-              type="number"
-              min={0}
-              max={lastPossiblePage}
-              onChange={e => {
-                inputValue.current = Number(e.target.value);
-              }}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  goToPrevTablePage();
-                }
-              }}
-            /> */}
           <div className="flex flex-[1] items-center gap-4">
             <Button
               variant="outline"
