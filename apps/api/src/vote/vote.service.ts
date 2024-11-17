@@ -1,3 +1,4 @@
+import { Action } from '@ambassador';
 import { Candidate } from '@ambassador/candidate';
 import { VoteStatus } from '@ambassador/vote';
 import {
@@ -5,12 +6,16 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
+import { LoggerService } from 'src/logger/logger.service';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class VoteService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private logger: LoggerService,
+  ) {}
 
   async voteForProposal(
     userId: string,
@@ -70,69 +75,86 @@ export class VoteService {
     });
   }
 
-  // async editVote(
-  //   userId: string,
-  //   proposalId: string,
-  //   voteId: string,
-  //   candidates: Candidate[],
-  //   voteStatus: VoteStatus,
-  // ) {
-  //   const proposal = await this.prisma.proposal.findUnique({
-  //     where: {
-  //       id: proposalId,
-  //       managers: {
-  //         some: {
-  //           userId,
-  //         },
-  //       },
-  //     },
-  //     include: {
-  //       candidates: true,
-  //       votes: true,
-  //       managers: {
-  //         include: {
-  //           role: {
-  //             include: {
-  //               permissions: true,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   });
+  async suggestVote(
+    userId: string,
+    proposalId: string,
+    voteId: string,
+    candidates: Candidate[],
+  ) {
+    const proposal = await this.prisma.proposal.findUnique({
+      where: {
+        id: proposalId,
+        managers: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        candidates: true,
+        votes: {
+          where: {
+            id: voteId,
+          },
+          include: {
+            suggestedCandidates: true,
+            user: true,
+          },
+        },
+        managers: {
+          include: {
+            role: {
+              include: {
+                permissions: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-  //   if (!proposal) {
-  //     throw new BadRequestException('Proposal not found');
-  //   }
+    if (!proposal) {
+      throw new BadRequestException('Proposal not found');
+    }
 
-  //   if (proposal.candidates.length < candidates.length) {
-  //     throw new BadRequestException('Invalid number of candidates');
-  //   }
+    if (proposal.candidates.length < candidates.length) {
+      throw new BadRequestException('Invalid number of candidates');
+    }
 
-  //   const manager = proposal.managers.find(
-  //     (manager) => manager.userId === userId,
-  //   );
+    const manager = proposal.managers.find(
+      (manager) => manager.userId === userId,
+    );
 
-  //   if (!manager.role.permissions.canEditVotes) {
-  //     throw new ConflictException(
-  //       'User does not have permission to edit votes',
-  //     );
-  //   }
+    const voteUser = proposal.votes.find((vote) => vote.id === voteId).user;
 
-  //   return await this.prisma.vote.update({
-  //     where: {
-  //       id: voteId,
-  //     },
-  //     data: {
-  //       candidates: {
-  //         set: candidates.map((choice) => ({
-  //           id: choice.id,
-  //         })),
-  //       },
-  //       status: voteStatus,
-  //     },
-  //   });
-  // }
+    if (!manager.role.permissions.canOfferVoteSuggestions) {
+      throw new ConflictException(
+        'User does not have permission to suggest votes',
+      );
+    }
+
+    this.logger.logAction({
+      action: Action.OFFER_VOTE_SUGGESTION,
+      info: {
+        userId,
+        proposalId,
+        message: `Suggested ${candidates.map((candidate) => candidate.value).join(', ')} for ${voteUser.personalNames.join(' ')}, ${voteUser.familyName}`,
+      },
+    });
+
+    return await this.prisma.vote.update({
+      where: {
+        id: voteId,
+      },
+      data: {
+        suggestedCandidates: {
+          set: candidates.map((choice) => ({
+            id: choice.id,
+          })),
+        },
+      },
+    });
+  }
 
   async getAnonVotes(proposalId, userId) {
     const proposal = await this.prisma.proposal.findUnique({

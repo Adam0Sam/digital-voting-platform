@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "UserActions" ADD VALUE 'OFFER_VOTE_SUGGESTION';

@@ -61,8 +61,18 @@ type TabName = (typeof TAB_NAME)[keyof typeof TAB_NAME];
 
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
+
+  if (proposal.votes.some(vote => vote.suggestedCandidates === undefined)) {
+    throw new Error(`Some votes do not have suggested candidates`);
+  }
+
   const [currentTab, setCurrentTab] = useState<TabName>(TAB_NAME.VOTES);
-  const [suggestedVotes, setSuggestedVotes] = useState<Vote[]>(proposal.votes);
+  const [suggestedVotes, setSuggestedVotes] = useState<Vote[]>(
+    proposal.votes.map(vote => ({
+      ...vote,
+      candidates: vote.suggestedCandidates!,
+    })),
+  );
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
 
   const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
@@ -72,7 +82,7 @@ export default function VoteOverviewPage() {
   const {
     voteDistribution: suggestedVoteDistribution,
     finalizedVoteCount: suggestedFinalizedVoteCount,
-  } = getCachedVoteDistribution(proposal.candidates, suggestedVotes);
+  } = getCachedVoteDistribution(proposal.candidates, suggestedVotes, false);
 
   const handleVoteSuggestionOffer = (
     voteId: string,

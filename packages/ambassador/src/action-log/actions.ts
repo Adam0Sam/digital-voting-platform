@@ -16,6 +16,7 @@ export const Actions = [
   "EDIT_CHOICE_COUNT",
   "EDIT_PATTERN_GRADE",
   "EDIT_PATTERN_ROLE",
+  "OFFER_VOTE_SUGGESTION",
 ] as const;
 
 export const Action = {
@@ -34,6 +35,7 @@ export const Action = {
   EDIT_CHOICE_COUNT: "EDIT_CHOICE_COUNT",
   EDIT_PATTERN_GRADE: "EDIT_PATTERN_GRADE",
   EDIT_PATTERN_ROLE: "EDIT_PATTERN_ROLE",
+  OFFER_VOTE_SUGGESTION: "OFFER_VOTE_SUGGESTION",
 } as const;
 
 export type Action = (typeof Actions)[number];
