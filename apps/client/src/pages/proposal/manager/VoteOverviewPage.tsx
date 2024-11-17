@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
-import { Candidate, VoteStatus, Vote } from '@ambassador';
+import { Candidate, Vote } from '@ambassador';
 import {
   BarChart2,
   Users,
@@ -87,15 +87,13 @@ export default function VoteOverviewPage() {
   const handleVoteSuggestionOffer = (
     voteId: string,
     candidates: Candidate[],
-    status: VoteStatus,
   ) => {
-    api.vote.suggestVote(proposal.id, voteId, candidates, status);
+    api.vote.suggestVote(proposal.id, voteId, candidates);
     setSuggestedVotes(prevVotes => {
       const a = prevVotes.map(prevVote => {
         if (prevVote.id === voteId) {
           return {
             ...prevVote,
-            status: status,
             candidates: candidates,
           };
         }
@@ -177,9 +175,8 @@ export default function VoteOverviewPage() {
                       saveVoteSuggestionOffer={(
                         voteId: string,
                         candidates: Candidate[],
-                        status: VoteStatus,
                       ) => {
-                        handleVoteSuggestionOffer(voteId, candidates, status);
+                        handleVoteSuggestionOffer(voteId, candidates);
                         setCurrentTab(TAB_NAME.SUGGESTED);
                       }}
                     />

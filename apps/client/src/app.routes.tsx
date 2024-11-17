@@ -54,7 +54,6 @@ const router = createBrowserRouter(
         id={LOADER_IDS.AUTH}
         loader={LOADER_ID_MAP[LOADER_IDS.AUTH]}
       />
-
       <Route path={PROPOSAL_PATHS.BASE}>
         <Route index element={<ProposalGreetingPage />} />
         <Route

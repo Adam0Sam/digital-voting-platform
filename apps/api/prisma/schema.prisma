@@ -144,7 +144,7 @@ model ManagerPermissions {
     canEditTitle            Boolean       @default(false)
     canEditDescription      Boolean       @default(false)
     canEditDates            Boolean       @default(false)
-    canEditStatus           Boolean       @default(false)
+    canEditProposalStatus   Boolean       @default(false)
     canEditVisibility       Boolean       @default(false)
     canEditVotersList       Boolean       @default(false)
     canOfferVoteSuggestions Boolean       @default(false)
@@ -171,6 +171,7 @@ model Manager {
 enum VoteStatus {
     PENDING
     RESOLVED
+    DISABLED
 }
 
 model Vote {
@@ -216,4 +217,6 @@ enum UserActions {
     EDIT_PATTERN_GRADE
     EDIT_PATTERN_ROLE
     OFFER_VOTE_SUGGESTION
+    DISABLE_USER_VOTE
+    ENABLE_USER_VOTE
 }

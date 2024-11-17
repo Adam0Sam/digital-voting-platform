@@ -1,14 +1,14 @@
+import { useNavigate, useRevalidator } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Pencil, Settings2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-
-import { useRef, useState } from 'react';
-import Combobox, { ComboboxHandle } from './combobox/Combobox';
+import { useState } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 import { Candidate, ManagerPermissions, Vote, VoteStatus } from '@ambassador';
-import { ComboboxItem } from './combobox/type';
+import { PROPOSAL_HREFS } from '@/lib/routes';
+import { api } from '@/lib/api';
 
 function getSelectedChoices(
   selectedCandidates: Candidate[],
@@ -23,22 +23,6 @@ function getSelectedChoices(
   }));
 }
 
-const comboboxVoteStatusItems: ComboboxItem<VoteStatus>[] = [
-  {
-    label: 'Resolved',
-    value: VoteStatus.RESOLVED,
-  },
-  {
-    label: 'Pending',
-    value: VoteStatus.PENDING,
-  },
-];
-
-const comboboxItemsMap: Record<VoteStatus, ComboboxItem<VoteStatus>> = {
-  [VoteStatus.RESOLVED]: comboboxVoteStatusItems[0],
-  [VoteStatus.PENDING]: comboboxVoteStatusItems[1],
-};
-
 type UserVoteItemProps = {
   vote: Vote;
   onFocus?: (vote: Vote) => void;
@@ -46,16 +30,9 @@ type UserVoteItemProps = {
   permissions?: ManagerPermissions;
   allChoices: Candidate[];
   maxChoiceCount: number;
-  saveVoteSuggestionOffer?: (
-    voteId: string,
-    candidates: Candidate[],
-    status: VoteStatus,
-  ) => void;
+  saveVoteSuggestionOffer: (voteId: string, candidates: Candidate[]) => void;
 };
 
-/**
- * State management here is really bad
- */
 export default function UserVoteItem({
   vote,
   onFocus,
@@ -65,13 +42,13 @@ export default function UserVoteItem({
   maxChoiceCount,
   saveVoteSuggestionOffer,
 }: UserVoteItemProps) {
+  const navigate = useNavigate();
+  const revalidator = useRevalidator();
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [choices, setChoices] = useState<(Candidate & { selected: boolean })[]>(
     getSelectedChoices(vote.candidates, allChoices),
   );
   const [choiceOverflow, setChoiceOverflow] = useState(false);
-  const [voteStatus, setVoteStatus] = useState(vote.status);
-  const comboboxRef = useRef<ComboboxHandle<VoteStatus>>(null);
 
   const handleChoiceClick = (choice: Candidate) => {
     if (!permissions?.canOfferVoteSuggestions) return;
@@ -93,17 +70,6 @@ export default function UserVoteItem({
         }
         return prevChoice;
       });
-      if (selectedChoicesCount === 0) {
-        comboboxRef.current?.setSelectedItem(
-          comboboxItemsMap[VoteStatus.PENDING],
-        );
-        setVoteStatus(VoteStatus.PENDING);
-      } else {
-        comboboxRef.current?.setSelectedItem(
-          comboboxItemsMap[VoteStatus.RESOLVED],
-        );
-        setVoteStatus(VoteStatus.RESOLVED);
-      }
       if (selectedChoicesCount > maxChoiceCount) {
         setChoiceOverflow(true);
       }
@@ -120,16 +86,33 @@ export default function UserVoteItem({
     }
     setChoiceOverflow(false);
     setSheetIsOpen(false);
-    const selectedVoteStatus =
-      comboboxRef.current?.getSelectedItem()?.value ?? vote.status;
-    setVoteStatus(selectedVoteStatus);
-    saveVoteSuggestionOffer?.(vote.id, selectedChoices, selectedVoteStatus);
+    saveVoteSuggestionOffer(vote.id, selectedChoices);
+  };
+
+  const handleToggleVoteStatus = () => {
+    if (vote.status === VoteStatus.DISABLED) {
+      api.vote.enableUserVote(vote.proposalId, vote.id);
+    } else {
+      api.vote.disableUserVote(vote.proposalId, vote.id);
+    }
+    revalidator.revalidate();
+    setSheetIsOpen(false);
   };
 
   return (
     <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
       <div
-        className="mb-4 flex gap-2 rounded-sm border-2 border-secondary/0 px-4 py-2 transition-colors hover:border-secondary focus-visible:border-secondary"
+        className={cn(
+          'mb-4 flex gap-2 rounded-sm border-2 px-4 py-2 transition-colors',
+          {
+            'border-secondary/75 hover:border-primary focus-visible:border-primary':
+              vote.status !== VoteStatus.DISABLED,
+          },
+          {
+            'border-destructive/50 hover:border-destructive focus-visible:border-destructive':
+              vote.status === VoteStatus.DISABLED,
+          },
+        )}
         onFocus={() => onFocus?.(vote)}
         onMouseEnter={() => onFocus?.(vote)}
         onBlur={onBlur}
@@ -144,12 +127,9 @@ export default function UserVoteItem({
           </p>
         </div>
         <div className="hidden flex-1 sm:block">
-          <p>{voteStatus}</p>
+          <p>{vote.status}</p>
           <p className="text-muted-foreground">
-            {choices
-              .filter(choice => choice.selected)
-              .map(choice => choice.value)
-              .join(', ')}
+            {vote.candidates.map(choice => choice.value).join(', ')}
           </p>
         </div>
         {permissions?.canOfferVoteSuggestions && (
@@ -178,7 +158,19 @@ export default function UserVoteItem({
                 })}
               >
                 <p className="text-xl">Choice Count: {maxChoiceCount}</p>
-                {permissions?.canEditChoiceCount && <Pencil />}
+                {permissions?.canEditChoiceCount && (
+                  <Pencil
+                    className="cursor-pointer"
+                    onClick={() =>
+                      navigate(
+                        PROPOSAL_HREFS.MANAGER_OVERVIEW(
+                          'candidates',
+                          vote.proposalId,
+                        ),
+                      )
+                    }
+                  />
+                )}
               </div>
               <div className="flex w-full flex-col gap-4">
                 {choices.map(choice => {
@@ -196,52 +188,38 @@ export default function UserVoteItem({
                 })}
               </div>
             </div>
-            <div className="flex flex-[1] flex-col items-center gap-12">
-              {permissions?.canOfferVoteSuggestions && (
-                <Combobox
-                  items={comboboxVoteStatusItems}
-                  defaultItem={comboboxItemsMap[voteStatus]}
-                  handleSelectedValue={(voteStatus: VoteStatus) => {
-                    if (voteStatus === VoteStatus.PENDING) {
-                      setChoices(prevChoices =>
-                        prevChoices.map(choice => ({
-                          ...choice,
-                          selected: false,
-                        })),
-                      );
-                    }
-                  }}
-                  ref={comboboxRef}
-                />
-              )}
-            </div>
           </div>
           <div className="flex w-full justify-center gap-8">
             {permissions?.canOfferVoteSuggestions && (
               <Button onClick={handleSuggestionOffer} className="flex-[2]">
-                <span>Save</span>
+                <span>Save Suggestions</span>
               </Button>
             )}
             {permissions?.canChangeVoteStatus && (
               <ConfirmDialog
                 triggerButton={{
-                  text: 'Delete',
-                  variant: 'destructive',
+                  text:
+                    vote.status === VoteStatus.DISABLED ? 'Enable' : 'Disable',
+                  variant:
+                    vote.status === VoteStatus.DISABLED
+                      ? 'constructive'
+                      : 'destructive',
                   className: 'flex-1',
                 }}
                 confirmButton={{
-                  variant: 'destructive',
+                  variant:
+                    vote.status === VoteStatus.DISABLED
+                      ? 'constructive'
+                      : 'destructive',
                   className: 'flex-[3]',
                 }}
                 cancelButton={{
                   variant: 'secondary',
                   className: 'flex-[2]',
                 }}
-                dialogTitle="Are you sure you want to delete this vote?"
-                dialogDescription="This action cannot be undone"
-                handleConfirm={() => {
-                  console.log('delete vote');
-                }}
+                dialogTitle={`Are you sure you want to ${vote.status === VoteStatus.DISABLED ? 'enable' : 'disable'} this user's vote?`}
+                dialogDescription={`This action will ${vote.status === VoteStatus.DISABLED ? 'allow' : 'prevent'} the user from voting.`}
+                handleConfirm={handleToggleVoteStatus}
               />
             )}
           </div>

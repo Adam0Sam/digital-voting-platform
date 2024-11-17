@@ -55,7 +55,7 @@ export default function ContentOverviewPage() {
             <RadioGroup
               value={status}
               onValueChange={value => setStatus(value as ProposalStatus)}
-              disabled={!permissions.canEditStatus}
+              disabled={!permissions.canEditProposalStatus}
             >
               {Object.values(ProposalStatus).map(value => (
                 <div key={value} className="flex items-center space-x-2">
@@ -86,16 +86,17 @@ export default function ContentOverviewPage() {
             </RadioGroup>
           </div>
 
-          {!permissions.canEditStatus && !permissions.canEditVisibility && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>No edit permissions</AlertTitle>
-              <AlertDescription>
-                You don't have permission to edit the status or visibility of
-                this proposal.
-              </AlertDescription>
-            </Alert>
-          )}
+          {!permissions.canEditProposalStatus &&
+            !permissions.canEditVisibility && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>No edit permissions</AlertTitle>
+                <AlertDescription>
+                  You don't have permission to edit the status or visibility of
+                  this proposal.
+                </AlertDescription>
+              </Alert>
+            )}
 
           <Button
             onClick={() =>
@@ -106,7 +107,8 @@ export default function ContentOverviewPage() {
                 })
             }
             disabled={
-              !permissions.canEditStatus && !permissions.canEditVisibility
+              !permissions.canEditProposalStatus &&
+              !permissions.canEditVisibility
             }
           >
             Update Status and Visibility

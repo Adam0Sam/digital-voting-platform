@@ -156,6 +156,99 @@ export class VoteService {
     });
   }
 
+  async mutateUserVoteStatus({
+    userId,
+    proposalId,
+    voteId,
+    status,
+  }: {
+    userId: string;
+    proposalId: string;
+    voteId: string;
+    status: typeof VoteStatus.DISABLED | typeof VoteStatus.PENDING;
+  }) {
+    const proposal = await this.prisma.proposal.findUnique({
+      where: {
+        id: proposalId,
+        AND: [
+          {
+            managers: {
+              some: {
+                userId,
+              },
+            },
+          },
+          {
+            votes: {
+              some: {
+                id: voteId,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        votes: {
+          where: {
+            id: voteId,
+          },
+          include: {
+            user: true,
+          },
+        },
+        managers: {
+          where: {
+            userId,
+          },
+          include: {
+            role: {
+              include: {
+                permissions: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!proposal) {
+      throw new BadRequestException('Proposal not found');
+    }
+
+    const managerPermissions = proposal.managers.find(
+      (manager) => manager.userId === userId,
+    ).role.permissions;
+
+    const userVote = proposal.votes.find((vote) => vote.id === voteId);
+
+    if (!managerPermissions.canChangeVoteStatus) {
+      throw new ConflictException(
+        'User does not have permission to change vote status',
+      );
+    }
+
+    this.logger.logAction({
+      action:
+        status === VoteStatus.DISABLED
+          ? Action.DISABLE_USER_VOTE
+          : Action.ENABLE_USER_VOTE,
+      info: {
+        userId,
+        proposalId,
+        message: `${status === VoteStatus.DISABLED ? 'Disabled' : 'Enabled'} ${userVote.user.personalNames.join(' ')}, ${userVote.user.familyName} vote`,
+      },
+    });
+    console.log('changing status', status);
+    return await this.prisma.vote.update({
+      where: {
+        id: voteId,
+      },
+      data: {
+        status,
+      },
+    });
+  }
+
   async getAnonVotes(proposalId, userId) {
     const proposal = await this.prisma.proposal.findUnique({
       where: {

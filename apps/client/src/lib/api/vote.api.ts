@@ -1,4 +1,4 @@
-import { Candidate, VoteStatus } from '@ambassador';
+import { Candidate } from '@ambassador';
 import URI from '../constants/uri-constants';
 import { HttpClient } from './http-client';
 
@@ -13,12 +13,18 @@ export class VoteApi {
     proposalId: string,
     voteId: string,
     candidates: Candidate[],
-    status: VoteStatus,
   ) {
     return await this.httpClient.put(`${proposalId}/suggestion/${voteId}`, {
       candidates,
-      status,
     });
+  }
+
+  async disableUserVote(proposalId: string, voteId: string) {
+    return await this.httpClient.put(`${proposalId}/disable/${voteId}`);
+  }
+
+  async enableUserVote(proposalId: string, voteId: string) {
+    return await this.httpClient.put(`${proposalId}/enable/${voteId}`);
   }
 
   async getAnonVoteResults(proposalId: string) {
