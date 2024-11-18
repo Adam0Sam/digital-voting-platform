@@ -9,6 +9,7 @@ import { PROPOSAL_LINK_COLLECTION } from '../../lib/href/proposal.links';
 import { USER_PROFILE_HREFS, ADMIN_HREFS } from '@/lib/routes';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { UserRole } from '@ambassador/user';
+import NotificationBell from '../notification/NotificationBell';
 
 export default function MobileNav({ className }: { className?: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,19 +72,23 @@ export default function MobileNav({ className }: { className?: string }) {
       <NavLink to="/" className="flex items-center space-x-2">
         <span className="font-bold">Digital Voting</span>
       </NavLink>
-
-      <NavLink
-        to={USER_PROFILE_HREFS.BASE}
-        end
-        className={({ isActive }) =>
-          cn(
-            'flex items-center rounded-full p-2',
-            isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
-          )
-        }
-      >
-        <CircleUserRound className="h-6 w-6" />
-      </NavLink>
+      <div className="flex gap-2">
+        <NotificationBell />
+        <NavLink
+          to={USER_PROFILE_HREFS.BASE}
+          end
+          className={({ isActive }) =>
+            cn(
+              'flex items-center rounded-full p-2',
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'hover:bg-muted',
+            )
+          }
+        >
+          <CircleUserRound className="h-6 w-6" />
+        </NavLink>
+      </div>
     </div>
   );
 }

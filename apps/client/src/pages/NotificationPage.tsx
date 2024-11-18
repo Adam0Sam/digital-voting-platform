@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { default as NotificationCard } from '@/components/NotificationCard';
+import { default as NotificationCard } from '@/components/notification/NotificationCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   LOADER_IDS,
@@ -10,13 +10,16 @@ import { Suspense } from 'react';
 import { Await } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { UserNotification } from '@ambassador';
-import { DelayedFulfill } from '@/lib/delayed-fulfill';
+import { useUnreadNotificationCount } from '@/App';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CheckCircle } from 'lucide-react';
 
 export default function NotificationPage() {
   const notifications = useDeferredLoadedData(LOADER_IDS.NOTIFICATIONS);
   return (
     <div className="min-h-screen w-full">
-      <div className="mx-auto px-4 py-4 sm:px-6 sm:py-6 md:py-8">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 md:py-8">
         <h1 className="mb-4 text-2xl font-bold sm:mb-6 sm:text-3xl md:text-4xl">
           Notifications
         </h1>
@@ -43,6 +46,7 @@ function NotificationsSkeleton() {
 
 function Notifications() {
   const notifications = useAsyncLoaderValue(LOADER_IDS.NOTIFICATIONS);
+  const { mutate } = useUnreadNotificationCount();
   const [readNotifications, setReadNotifications] = useState<
     Set<UserNotification>
   >(new Set(notifications.filter(n => n.read)));
@@ -60,25 +64,21 @@ function Notifications() {
   };
 
   const handleMarkAsRead = (notification: UserNotification) => {
-    const delayedFulfill = new DelayedFulfill(2500, async () => {
-      api.notification.markAsRead(notification.id);
-    });
+    api.notification.markAsRead(notification.id);
     addNotificationToRead(notification);
-    delayedFulfill.beginResolve();
-    delayedFulfill.showUndoToast('Marked as read', () =>
-      removeNotificationFromRead(notification),
-    );
+    mutate().decrementBy(1);
   };
 
   const handleMarkAsUnread = (notification: UserNotification) => {
-    const delayedFulfill = new DelayedFulfill(2500, async () => {
-      api.notification.markAsUnread(notification.id);
-    });
+    api.notification.markAsUnread(notification.id);
     removeNotificationFromRead(notification);
-    delayedFulfill.beginResolve();
-    delayedFulfill.showUndoToast('Marked as unread', () =>
-      addNotificationToRead(notification),
-    );
+    mutate().incrementBy(1);
+  };
+
+  const handleMarkAllAsRead = () => {
+    api.notification.markAllAsRead();
+    setReadNotifications(new Set(notifications));
+    mutate().set(0);
   };
 
   const unreadNotifications = notifications.filter(
@@ -86,10 +86,30 @@ function Notifications() {
   );
 
   return (
-    <div className="flex flex-col gap-8">
-      {unreadNotifications.length > 0 && (
-        <div>
-          <h2 className="mb-4 text-xl font-semibold">Unread Notifications</h2>
+    <Tabs defaultValue="unread" className="w-full">
+      <div className="mb-4 flex items-center justify-between">
+        <TabsList>
+          <TabsTrigger value="unread">
+            Unread ({unreadNotifications.length})
+          </TabsTrigger>
+          <TabsTrigger value="read">
+            Read ({readNotifications.size})
+          </TabsTrigger>
+        </TabsList>
+        {unreadNotifications.length > 0 && (
+          <Button
+            onClick={handleMarkAllAsRead}
+            variant="outline"
+            className="ml-auto"
+          >
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Mark All as Read
+          </Button>
+        )}
+      </div>
+
+      <TabsContent value="unread">
+        {unreadNotifications.length > 0 ? (
           <div className="grid gap-6 [grid-auto-rows:max-content] md:grid-cols-2 lg:grid-cols-3">
             {unreadNotifications.map(notification => (
               <NotificationCard
@@ -99,11 +119,13 @@ function Notifications() {
               />
             ))}
           </div>
-        </div>
-      )}
-      {readNotifications.size > 0 && (
-        <div>
-          <h2 className="mb-4 text-xl font-semibold">Read Notifications</h2>
+        ) : (
+          <p className="text-center text-gray-500">No unread notifications.</p>
+        )}
+      </TabsContent>
+
+      <TabsContent value="read">
+        {readNotifications.size > 0 ? (
           <div className="grid gap-6 [grid-auto-rows:max-content] sm:grid-cols-2 lg:grid-cols-3">
             {Array.from(readNotifications).map(notification => (
               <NotificationCard
@@ -114,13 +136,16 @@ function Notifications() {
               />
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-center text-gray-500">No read notifications.</p>
+        )}
+      </TabsContent>
+
       {notifications.length === 0 && (
         <p className="text-center text-gray-500">
           No notifications to display.
         </p>
       )}
-    </div>
+    </Tabs>
   );
 }

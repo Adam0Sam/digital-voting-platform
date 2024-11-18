@@ -18,15 +18,18 @@ export class NotificationController {
     return this.notificationService.getNotifications(userId);
   }
 
+  @Put('read/all')
+  markAllAsRead(@GetUser('id') userId: string) {
+    return this.notificationService.markAllAsRead(userId);
+  }
+
   @Put('read/:id')
   markAsRead(@Param('id') id: string) {
-    console.log('markAsRead');
     return this.notificationService.markAsRead(id);
   }
 
   @Put('unread/:id')
   markAsUnread(@Param('id') id: string) {
-    console.log('markAsUnread');
     return this.notificationService.markAsUnread(id);
   }
 }

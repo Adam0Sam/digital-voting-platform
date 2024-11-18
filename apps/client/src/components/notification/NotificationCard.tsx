@@ -17,7 +17,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from './ui/tooltip';
+} from '../ui/tooltip';
 
 const NotificationType = {
   SUCCESS: 'success',
@@ -117,7 +117,7 @@ export default function NotificationCard({
   return (
     <Card
       className={cn(
-        'relative mb-4 px-2 py-2 transition-all hover:shadow-md',
+        'relative mb-4 flex flex-col justify-between px-2 py-2 transition-all hover:shadow-md',
         borderColorMap[type],
       )}
     >

@@ -8,7 +8,7 @@ export class NotificationApi {
   );
 
   async getUnreadNotificationCount() {
-    return (await this.httpClient.get('notification/unread/count')) as number;
+    return (await this.httpClient.get('unread/count')) as number;
   }
 
   async getNotifications() {
@@ -17,6 +17,10 @@ export class NotificationApi {
 
   async markAsRead(id: string) {
     return await this.httpClient.put(`read/${id}`);
+  }
+
+  async markAllAsRead() {
+    return await this.httpClient.put('read/all');
   }
 
   async markAsUnread(id: string) {
