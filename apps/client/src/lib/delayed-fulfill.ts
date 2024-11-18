@@ -1,3 +1,5 @@
+import { toast } from 'sonner';
+
 const UndefinedCallbackException = new Error('Callback is not defined');
 export class DelayedFulfill {
   private timeoutId: NodeJS.Timeout | null = null;
@@ -36,5 +38,22 @@ export class DelayedFulfill {
       clearTimeout(this.timeoutId);
       this.timeoutId = null;
     }
+  }
+
+  showUndoToast(message: string, onClick?: () => void) {
+    if (!this.callback) {
+      throw UndefinedCallbackException;
+    }
+    toast(message, {
+      description: new Date().toLocaleTimeString(),
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          this.reset();
+          onClick?.();
+        },
+      },
+      duration: this.timeoutDuration,
+    });
   }
 }
