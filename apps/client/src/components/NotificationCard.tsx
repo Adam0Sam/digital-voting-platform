@@ -54,7 +54,7 @@ function getNotificationContent(notification: UserNotification): {
     case UserNotificationType.VOTE_SUGGESTION:
       return {
         title: 'New Vote Suggestion',
-        message: `A manager has suggested votes ${content.candidates.join(', ')}.`,
+        message: `A manager has suggested votes for you: ${content.candidates.join(', ')}.`,
       };
 
     case UserNotificationType.PROPOSAL_RESOLUTION:
@@ -75,7 +75,7 @@ function getNotificationContent(notification: UserNotification): {
     case UserNotificationType.PROPOSAL_UPDATE:
       return {
         title: 'Proposal Updated',
-        message: `The ${content.updatedFields.join(', ')} has been updated to ${content.updatedValues.join(', ')} by a manager in "${proposal.title}".`,
+        message: `The ${content.updatedFields.join(', ')} has been updated to "${content.updatedValues.join(', ')}" in "${proposal.title}".`,
       };
     case UserNotificationType.VOTE_DISABLED:
       return {
