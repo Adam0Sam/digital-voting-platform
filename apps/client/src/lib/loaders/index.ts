@@ -1,2 +1,3 @@
+export * from './loader-defer';
+export * from './loader-map';
 export * from './hooks';
-export * from './utils';
