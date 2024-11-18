@@ -42,4 +42,34 @@ export class NotificationService {
       });
     }
   }
+
+  async markAsRead(id: string) {
+    return this.prisma.userNotification.update({
+      where: { id },
+      data: { read: true },
+    });
+  }
+
+  async markAsUnread(id: string) {
+    return this.prisma.userNotification.update({
+      where: { id },
+      data: { read: false },
+    });
+  }
+
+  async getNotifications(userId: string) {
+    return this.prisma.userNotification.findMany({
+      where: { userId },
+      include: {
+        package: true,
+        proposal: true,
+      },
+    });
+  }
+
+  async getUnreadNotificationCount(userId: string) {
+    return this.prisma.userNotification.count({
+      where: { userId, read: false },
+    });
+  }
 }

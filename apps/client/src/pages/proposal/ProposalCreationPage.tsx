@@ -4,7 +4,6 @@ import DateForm from '@/components/forms/DateForm';
 import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
 import { FC, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import {
   Card,
@@ -58,14 +57,9 @@ export function ProposalSummary({
         onSubmit={e => {
           e.preventDefault();
           delayedFulfill.beginResolve();
-          toast(`Proposal ${data.title} has been created`, {
-            description: new Date().toLocaleTimeString(),
-            action: {
-              label: 'Undo',
-              onClick: delayedFulfill.reset,
-            },
-            duration: DELAY_DURATION,
-          });
+          delayedFulfill.showUndoToast(
+            `Proposal ${data.title} has been created`,
+          );
         }}
       >
         <CardHeader>

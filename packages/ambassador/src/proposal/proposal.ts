@@ -51,6 +51,16 @@ export const ProposalSchema = CreateProposalDtoSchema.omit({
 });
 export type Proposal = WithDatesAsStrings<z.infer<typeof ProposalSchema>>;
 
+export const IntrinsicProposalProps = ProposalSchema.omit({
+  managers: true,
+  candidates: true,
+  votes: true,
+  userPattern: true,
+  choiceCount: true,
+});
+
+export type IntrinsicProposalProp = z.infer<typeof IntrinsicProposalProps>;
+
 export const UpdateProposalDtoSchema = ProposalSchema.omit({
   candidates: true,
 })
@@ -93,7 +103,7 @@ export function isMutableProposalKey(val: unknown): val is MutableProposalKey {
   return mutableProposalKeys.includes(val as MutableProposalKey);
 }
 
-export const intrinsicProposalProps: (keyof Proposal)[] = [
+export const intrinsicProposalProps: MutableIntrinsicProposalKey[] = [
   "title",
   "description",
   "startDate",
@@ -101,3 +111,9 @@ export const intrinsicProposalProps: (keyof Proposal)[] = [
   "status",
   "visibility",
 ];
+
+export function isMutableIntrinsicProposalProp(
+  val: unknown
+): val is MutableIntrinsicProposalKey {
+  return intrinsicProposalProps.includes(val as MutableIntrinsicProposalKey);
+}

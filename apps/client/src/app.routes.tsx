@@ -35,6 +35,7 @@ import UserPatternPage from './pages/proposal/manager/UserPatternPage';
 import UserManagePage from './pages/admin/UserManagePage';
 import { LOADER_IDS, LOADER_ID_MAP, loaderDefer } from './lib/loaders';
 import TimelinePage from './pages/proposal/manager/TimelinePage';
+import NotificationPage from './pages/NotificationPage';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
@@ -106,7 +107,6 @@ const router = createBrowserRouter(
           path={USER_PROFILE_PATHS.PROFILE}
           element={<ProfileSettingsPage />}
         />
-        <Route path={USER_PROFILE_PATHS.HISTORY} element={<div>History</div>} />
         <Route
           path={USER_TEMPLATES_PATHS.BASE}
           loader={LOADER_ID_MAP[LOADER_IDS.MANAGER_ROLES]}
@@ -114,6 +114,12 @@ const router = createBrowserRouter(
         >
           <Route element={<ManagerRoleTemplates />} />
         </Route>
+        <Route
+          path={USER_PROFILE_PATHS.NOTIFICATIONS}
+          id={LOADER_IDS.NOTIFICATIONS}
+          loader={() => loaderDefer(LOADER_IDS.NOTIFICATIONS)}
+          element={<NotificationPage />}
+        />
       </Route>
       <Route
         path={ADMIN_PATHS.BASE}

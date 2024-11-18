@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   Put,
-  Req,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -35,7 +34,6 @@ export class ProposalController {
     proposal: CreateProposalDto,
     @Headers('user-agent')
     userAgent: string,
-    @Req() req,
     @GetUser('id')
     userId: User['id'],
   ) {
@@ -45,7 +43,6 @@ export class ProposalController {
   @Put(':id')
   async updateOne(
     @Param('id') proposalId: string,
-    @Headers('user-agent') userAgent: string,
     @Body('proposal', new ZodValidationPipe(UpdateProposalDtoSchema))
     proposalDto: UpdateProposalDto,
     @GetUser('id') userId: User['id'],

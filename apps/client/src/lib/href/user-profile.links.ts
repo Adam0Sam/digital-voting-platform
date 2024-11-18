@@ -13,15 +13,15 @@ export const USER_PROFILE_LINK_COLLECTION = {
       description: 'Manage your profile settings',
     },
     {
-      href: USER_PROFILE_HREFS.HISTORY,
-      title: 'History',
-      description: 'View your history',
-    },
-    {
       href: USER_TEMPLATES_HREFS.BASE,
       title: 'Templates',
       description: 'Manage your templates',
       hasChildren: true,
+    },
+    {
+      href: USER_PROFILE_HREFS.NOTIFICATIONS,
+      title: 'Notifications',
+      description: 'View your notifications',
     },
   ],
 } satisfies LinkCollection;

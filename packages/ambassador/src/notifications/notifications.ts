@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { Candidate, CandidateSchema } from "../candidate/index.js";
-import { mutableProposalKeys } from "../proposal/index.js";
+import {
+  IntrinsicProposalProps,
+  mutableProposalKeys,
+  ProposalSchema,
+} from "../proposal/index.js";
 import { atLeastTwo } from "../utils/index.js";
 
 export const UserNotificationType = {
@@ -13,17 +17,24 @@ export const UserNotificationType = {
   VOTE_ENABLED: "VOTE_ENABLED",
 } as const;
 
+export type UserNotificationType =
+  (typeof UserNotificationType)[keyof typeof UserNotificationType];
+
 export const BaseUserNotificationSchema = z.object({
+  id: z.string().uuid(),
   userId: z.string().uuid().optional(),
   proposalId: z.string().uuid(),
   createdAt: z.date(),
   read: z.boolean(),
+  proposal: IntrinsicProposalProps,
 });
 
 export const CreateBaseUserNotificationDtoSchema =
   BaseUserNotificationSchema.omit({
+    id: true,
     read: true,
     createdAt: true,
+    proposal: true,
   });
 
 const ProposalResolvedNotificationContentSchema = z.object({
