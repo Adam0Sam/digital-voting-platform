@@ -10,10 +10,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoggerService } from 'src/logger/logger.service';
-import { getProposalUpdateInput } from './update-utils/update-input';
 import { NotificationService } from 'src/notification/notification.service';
 import { ProposalNotificationFactory } from 'src/notification/notification.factory';
 import { LogMessageFactory } from 'src/logger/log-message.factory';
+import { UpdateInputFactory } from './update-input.factory';
 
 @Injectable()
 export class ProposalService {
@@ -139,12 +139,13 @@ export class ProposalService {
       throw new UnauthorizedException('User is not a manager of this proposal');
     }
     const permissions = prevProposal.managers[0].role.permissions;
-    const updateInput = getProposalUpdateInput({
+
+    const updateInput = new UpdateInputFactory(
       proposalId,
       proposalDto,
       permissions,
-      prevProposal: withDatesAsStrings(prevProposal),
-    });
+      withDatesAsStrings(prevProposal),
+    ).generateUpdateInput();
 
     const logMessages = new LogMessageFactory(
       updateInput,

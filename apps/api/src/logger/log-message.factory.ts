@@ -39,7 +39,6 @@ export class LogMessageFactory {
 
   generateLogMessages(): LogMessage[] {
     let logMessages: LogMessage[] = [];
-
     for (const key in this.updateInput) {
       if (!isMutableProposalKey(key)) {
         continue;
