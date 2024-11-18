@@ -55,7 +55,8 @@ model User {
 
     authoredPermissions ManagerPermissions[]
 
-    active Boolean? @default(true)
+    active           Boolean?           @default(true)
+    UserNotification UserNotification[]
 
     @@unique([personalNames, familyName, grade])
     @@index([personalNames, familyName, grade])
@@ -105,10 +106,11 @@ model Proposal {
 
     votingSystem VotingSystem
 
-    candidates    Candidate[]
-    choiceCount   Int
-    userPatternId String?
-    UserActionLog UserActionLog[]
+    candidates       Candidate[]
+    choiceCount      Int
+    userPatternId    String?
+    UserActionLog    UserActionLog[]
+    UserNotification UserNotification[]
 }
 
 model Candidate {
@@ -219,4 +221,37 @@ enum UserActions {
     OFFER_VOTE_SUGGESTION
     DISABLE_USER_VOTE
     ENABLE_USER_VOTE
+}
+
+enum NotificationType {
+    VOTE_SUGGESTION
+    PROPOSAL_RESOLUTION
+    PROPOSAL_ABORTION
+    PROPOSAL_ACTIVATION
+    PROPOSAL_UPDATE
+    VOTE_DISABLED
+    VOTE_ENABLED
+}
+
+model UserNotificationPackage {
+    id               String             @id @default(uuid())
+    type             NotificationType
+    content          Json
+    UserNotification UserNotification[]
+}
+
+model UserNotification {
+    id         String                  @id @default(uuid())
+    userId     String
+    proposalId String
+    createdAt  DateTime                @default(now())
+    read       Boolean                 @default(false)
+    package    UserNotificationPackage @relation(fields: [userNotificationPackageId], references: [id])
+
+    user                      User     @relation(fields: [userId], references: [id])
+    proposal                  Proposal @relation(fields: [proposalId], references: [id])
+    userNotificationPackageId String
+
+    @@index([userId])
+    @@index([proposalId])
 }

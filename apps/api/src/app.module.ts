@@ -13,6 +13,7 @@ import { ManagerRoleModule } from './manager-role/manager-role.module';
 import appConfig from './config/app.config';
 import { LoggerModule } from './logger/logger.module';
 import { ActionLogModule } from './action-log/action-log.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ActionLogModule } from './action-log/action-log.module';
     ManagerRoleModule,
     LoggerModule,
     ActionLogModule,
+    NotificationModule,
   ],
   providers: [
     AppService,

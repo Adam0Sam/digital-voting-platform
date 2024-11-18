@@ -11,13 +11,16 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { getProposalUpdateInput } from './update-utils/update-input';
-import { getProposalUpdateLogMessages } from './update-utils/update-log';
+import { NotificationService } from 'src/notification/notification.service';
+import { ProposalNotificationFactory } from 'src/notification/notification.factory';
+import { LogMessageFactory } from 'src/logger/log-message.factory';
 
 @Injectable()
 export class ProposalService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
+    private notifier: NotificationService,
   ) {}
 
   private getCreateManagersInput(
@@ -143,14 +146,24 @@ export class ProposalService {
       prevProposal: withDatesAsStrings(prevProposal),
     });
 
-    const logMessages = getProposalUpdateLogMessages(
+    const logMessages = new LogMessageFactory(
       updateInput,
       withDatesAsStrings(prevProposal),
-      userId,
-    );
+      { userId, proposalId },
+    ).generateLogMessages();
 
     for (const logMessage of logMessages) {
       this.logger.logAction(logMessage);
+    }
+
+    const notifications = new ProposalNotificationFactory(
+      updateInput,
+      withDatesAsStrings(prevProposal),
+      { userId, proposalId },
+    ).generateNotifications();
+
+    for (const notification of notifications) {
+      await this.notifier.notifyUsers(notification);
     }
 
     return this.prisma.proposal.update({
