@@ -21,6 +21,7 @@ export const Actions = [
   "ENABLE_USER_VOTE",
   "ACCEPT_VOTE_SUGGESTION",
   "REJECT_VOTE_SUGGESTION",
+  "RESOLVED_VOTE",
 ] as const;
 
 export const Action = {
@@ -44,6 +45,7 @@ export const Action = {
   ENABLE_USER_VOTE: "ENABLE_USER_VOTE",
   ACCEPT_VOTE_SUGGESTION: "ACCEPT_VOTE_SUGGESTION",
   REJECT_VOTE_SUGGESTION: "REJECT_VOTE_SUGGESTION",
+  RESOLVED_VOTE: "RESOLVED_VOTE",
 } as const;
 
 export type Action = (typeof Actions)[number];

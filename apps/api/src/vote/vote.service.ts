@@ -64,6 +64,15 @@ export class VoteService {
       throw new BadRequestException('Invalid choice id');
     }
 
+    this.logger.logAction({
+      action: Action.RESOLVED_VOTE,
+      info: {
+        userId,
+        proposalId,
+        message: `Voted for ${candidates.map((candidate) => candidate.value).join(', ')}`,
+      },
+    });
+
     return await this.prisma.vote.update({
       where: {
         userId_proposalId: {

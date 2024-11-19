@@ -168,7 +168,7 @@ export default function VotePage() {
   const votesLeft = proposal.choiceCount - selectedCandidates.length;
   const progressPercentage =
     (selectedCandidates.length / proposal.choiceCount) * 100;
-  const suggestedCandidates = userVote?.suggestedCandidates ?? null;
+  const suggestedCandidates = userVote?.suggestedCandidates ?? [];
 
   const handleVoteSubmission = async () => {
     await api.vote.voteForProposal(proposal.id, selectedCandidates);
@@ -257,7 +257,7 @@ export default function VotePage() {
 
   console.log('suggestedCandidates', suggestedCandidates);
   const renderSuggestionInterface = () =>
-    suggestedCandidates && (
+    suggestedCandidates.length !== 0 && (
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="text-xl">Vote Suggestion</CardTitle>

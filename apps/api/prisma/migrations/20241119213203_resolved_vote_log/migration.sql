@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "UserActions" ADD VALUE 'RESOLVED_VOTE';
