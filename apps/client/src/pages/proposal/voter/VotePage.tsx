@@ -16,6 +16,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -32,6 +33,8 @@ import {
   CheckCircle,
   Users,
   FileText,
+  Ban,
+  Mail,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
@@ -93,7 +96,46 @@ function StatusAlert({ proposalStatus }: { proposalStatus: ProposalStatus }) {
   );
 }
 
-export default function ProposalVotePage() {
+function VoteDisabledAlert({ proposalTitle }: { proposalTitle: string }) {
+  return (
+    <div className="flex flex-1 items-center justify-center">
+      <Card className="mx-auto max-w-md">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2 text-destructive">
+            <Ban className="h-5 w-5" />
+            <span>Vote Disabled</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle className="font-semibold">
+              Unable to vote on "{proposalTitle}"
+            </AlertTitle>
+            <AlertDescription>
+              Your ability to vote on this proposal has been disabled by a
+              manager. This may be due to policy changes or administrative
+              decisions.
+            </AlertDescription>
+          </Alert>
+          <p className="mb-4 text-sm text-muted-foreground">
+            If you believe this is an error or would like more information,
+            please contact the proposal administrator.
+          </p>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button variant="secondary" asChild>
+            <a href={`mailto:idk`} className="flex items-center">
+              <Mail className="mr-2 h-4 w-4" />
+              Contact Admin
+            </a>
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}
+
+export default function VotePage() {
   const { id: proposalId } = useParams();
   const proposals = useLoadedData(LOADER_IDS.VOTER_PROPOSALS);
   const proposal = proposals.find(proposal => proposal.id === proposalId);
@@ -104,20 +146,31 @@ export default function ProposalVotePage() {
 
   const revalidator = useRevalidator();
   const navigate = useNavigate();
+  const userVote = proposal.votes[0];
 
   const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>(
-    proposal.votes[0].candidates,
+    userVote.candidates,
   );
+
+  if (userVote.status === VoteStatus.DISABLED) {
+    return <VoteDisabledAlert proposalTitle={proposal.title} />;
+  }
 
   const canVote =
     proposal.status === ProposalStatus.ACTIVE &&
-    proposal.votes[0].status === VoteStatus.PENDING;
+    userVote.status === VoteStatus.PENDING;
   const proposalHasEnded =
     proposal.status === ProposalStatus.RESOLVED ||
     proposal.status === ProposalStatus.ABORTED;
   const votesLeft = proposal.choiceCount - selectedCandidates.length;
   const progressPercentage =
     (selectedCandidates.length / proposal.choiceCount) * 100;
+
+  const handleVoteSubmission = async () => {
+    await api.vote.voteForProposal(proposal.id, selectedCandidates);
+    revalidator.revalidate();
+    navigate(PROPOSAL_HREFS.VOTE_ALL);
+  };
 
   const renderVotingInterface = () => (
     <Card className="mb-8">
@@ -180,7 +233,6 @@ export default function ProposalVotePage() {
           </CardDescription>
         </CardHeader>
       </Card>
-
       <Tabs defaultValue="vote" className="space-y-4">
         <TabsList>
           <TabsTrigger value="vote">
@@ -246,16 +298,7 @@ export default function ProposalVotePage() {
                       <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                       </DialogClose>
-                      <Button
-                        onClick={async () => {
-                          await api.vote.voteForProposal(
-                            proposal.id,
-                            selectedCandidates,
-                          );
-                          revalidator.revalidate();
-                          navigate(PROPOSAL_HREFS.VOTE_ALL);
-                        }}
-                      >
+                      <Button onClick={handleVoteSubmission}>
                         Confirm Vote
                       </Button>
                     </DialogFooter>

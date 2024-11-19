@@ -10,15 +10,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, Filter } from 'lucide-react';
+import { VoteStatus } from '@ambassador';
 
 export default function VoterLandingPage() {
   const proposals = useLoadedData(LOADER_IDS.VOTER_PROPOSALS);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('startDate');
+  const [voteStatusFilter, setVoteStatusFilter] = useState<VoteStatus | 'all'>(
+    'all',
+  );
 
-  const filteredProposals = proposals.filter(proposal =>
-    proposal.title.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredProposals = proposals.filter(
+    proposal =>
+      proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (voteStatusFilter === 'all' ||
+        proposal.votes[0].status === voteStatusFilter),
   );
 
   const sortedProposals = [...filteredProposals].sort((a, b) => {
@@ -59,6 +66,25 @@ export default function VoterLandingPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-5 w-5 text-gray-400" />
+          <Select
+            value={voteStatusFilter}
+            onValueChange={(newValue: typeof voteStatusFilter) =>
+              setVoteStatusFilter(newValue)
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by Vote Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value={VoteStatus.PENDING}>Pending</SelectItem>
+              <SelectItem value={VoteStatus.RESOLVED}>Resolved</SelectItem>
+              <SelectItem value={VoteStatus.DISABLED}>Disabled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {sortedProposals.length === 0 ? (
@@ -69,10 +95,22 @@ export default function VoterLandingPage() {
           <p className="text-muted-foreground">
             There are currently no proposals matching your search criteria.
           </p>
-          {searchTerm && (
-            <Button variant="outline" onClick={() => setSearchTerm('')}>
-              Clear search
-            </Button>
+          {(searchTerm || voteStatusFilter !== 'all') && (
+            <div className="flex gap-2">
+              {searchTerm && (
+                <Button variant="outline" onClick={() => setSearchTerm('')}>
+                  Clear search
+                </Button>
+              )}
+              {voteStatusFilter !== 'all' && (
+                <Button
+                  variant="outline"
+                  onClick={() => setVoteStatusFilter('all')}
+                >
+                  Clear filter
+                </Button>
+              )}
+            </div>
           )}
         </div>
       ) : (

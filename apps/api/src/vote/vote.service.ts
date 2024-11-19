@@ -52,6 +52,10 @@ export class VoteService {
       throw new ConflictException('User vote already resolved');
     }
 
+    if (userVote.status === VoteStatus.DISABLED) {
+      throw new ConflictException('User vote disabled');
+    }
+
     const availableChoiceIdSet = new Set(
       proposal.candidates.map((choice) => choice.id),
     );

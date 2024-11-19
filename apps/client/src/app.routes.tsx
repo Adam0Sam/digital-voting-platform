@@ -7,7 +7,7 @@ import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
 import ManagerLandingPage from './pages/proposal/manager/ManagerLandingPage';
-import ProposalVotePage from './pages/proposal/voter/ProposalVotePage';
+import VotePage from './pages/proposal/voter/VotePage';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 import ProfilePageLayout from './pages/profile/ProfilePageLayout';
 import RootErrorBoundary from './components/RootErrorBoundary';
@@ -63,7 +63,7 @@ const router = createBrowserRouter(
           loader={LOADER_ID_MAP[LOADER_IDS.VOTER_PROPOSALS]}
         >
           <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
-          <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
+          <Route path={GENERIC_PATHS.ONE} element={<VotePage />} />
         </Route>
 
         <Route
