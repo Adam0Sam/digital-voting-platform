@@ -123,7 +123,6 @@ export class LogMessageFactory {
     );
 
     const candidateLogMessages: LogMessage[] = [];
-
     for (const candidateId in exclusivityMap) {
       const membership = exclusivityMap[candidateId];
       let action: Action;
@@ -136,7 +135,7 @@ export class LogMessageFactory {
         action = Action.ADD_CANDIDATE;
         contentMap = currentCandidateIdContentMap;
       } else {
-        return;
+        continue;
       }
 
       candidateLogMessages.push({
@@ -152,7 +151,6 @@ export class LogMessageFactory {
         },
       });
     }
-
     return candidateLogMessages;
   }
 

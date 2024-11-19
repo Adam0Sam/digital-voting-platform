@@ -5,11 +5,12 @@ import {
   ManagerPermissions,
   Proposal,
   UpdateProposalDto,
-  VoteStatus,
 } from '@ambassador';
 import { Prisma } from '@prisma/client';
 
 export class UpdateInputFactory {
+  private _shouldResetVotes = false;
+
   constructor(
     private proposalId: string,
     private proposalDto: UpdateProposalDto,
@@ -17,9 +18,16 @@ export class UpdateInputFactory {
     private prevProposal: Omit<Proposal, 'votes' | 'userPattern' | 'managers'>,
   ) {}
 
+  get shouldResetVotes(): boolean {
+    return this._shouldResetVotes;
+  }
+
+  private set shouldResetVotes(value: boolean) {
+    this._shouldResetVotes = value;
+  }
+
   generateUpdateInput(): Prisma.ProposalUpdateInput {
     let updateInput: Prisma.ProposalUpdateInput = {};
-    let shouldResetVotes = false;
 
     for (const key in this.proposalDto) {
       if (!this.shouldProcessKey(key)) continue;
@@ -32,13 +40,13 @@ export class UpdateInputFactory {
       if (key === 'candidates') {
         const candidateUpdate = this.generateCandidatesUpdateInput();
         updateInput = { ...updateInput, ...candidateUpdate };
-        shouldResetVotes = true;
+        this.shouldResetVotes = true;
         continue;
       }
 
       if (key === 'choiceCount') {
         updateInput.choiceCount = this.proposalDto.choiceCount;
-        shouldResetVotes = true;
+        this.shouldResetVotes = true;
         continue;
       }
 
@@ -50,18 +58,6 @@ export class UpdateInputFactory {
           },
         };
       }
-    }
-
-    if (shouldResetVotes) {
-      updateInput = {
-        ...updateInput,
-        votes: {
-          updateMany: {
-            where: { proposalId: this.proposalId },
-            data: { status: VoteStatus.PENDING },
-          },
-        },
-      };
     }
 
     return updateInput;

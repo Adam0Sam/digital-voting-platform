@@ -140,12 +140,14 @@ export class ProposalService {
     }
     const permissions = prevProposal.managers[0].role.permissions;
 
-    const updateInput = new UpdateInputFactory(
+    const updateInputFactory = new UpdateInputFactory(
       proposalId,
       proposalDto,
       permissions,
       withDatesAsStrings(prevProposal),
-    ).generateUpdateInput();
+    );
+
+    const updateInput = updateInputFactory.generateUpdateInput();
 
     const logMessages = new LogMessageFactory(
       updateInput,
@@ -164,7 +166,25 @@ export class ProposalService {
     ).generateNotifications();
 
     for (const notification of notifications) {
-      await this.notifier.notifyUsers(notification);
+      this.notifier.notifyUsers(notification);
+    }
+
+    if (updateInputFactory.shouldResetVotes) {
+      for (const candidate of prevProposal.candidates) {
+        await this.prisma.candidate.update({
+          where: {
+            id: candidate.id,
+          },
+          data: {
+            suggestedIn: {
+              set: [],
+            },
+            votes: {
+              set: [],
+            },
+          },
+        });
+      }
     }
 
     return this.prisma.proposal.update({

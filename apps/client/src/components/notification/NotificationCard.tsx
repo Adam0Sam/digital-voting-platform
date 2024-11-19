@@ -54,7 +54,7 @@ function getNotificationContent(notification: UserNotification): {
     case UserNotificationType.VOTE_SUGGESTION:
       return {
         title: 'New Vote Suggestion',
-        message: `A manager has suggested votes for you: ${content.candidates.join(', ')}.`,
+        message: `Proposal "${proposal.title}" manager ${content.suggestedBy} has suggested votes for you: ${content.candidates.map(c => c.value).join(', ')}.`,
       };
 
     case UserNotificationType.PROPOSAL_RESOLUTION:
