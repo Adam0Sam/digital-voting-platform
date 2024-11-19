@@ -41,4 +41,12 @@ export class VoteApi {
   async getAnonVoteResults(proposalId: string) {
     return (await this.httpClient.get(`anon/${proposalId}`)) as Candidate[][];
   }
+
+  async acceptVoteSuggestion(proposalId: string) {
+    return await this.httpClient.put(`${proposalId}/suggestion/accept`);
+  }
+
+  async rejectVoteSuggestion(proposalId: string) {
+    return await this.httpClient.put(`${proposalId}/suggestion/reject`);
+  }
 }

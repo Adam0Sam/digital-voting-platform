@@ -35,11 +35,14 @@ import {
   FileText,
   Ban,
   Mail,
+  ThumbsDown,
+  ThumbsUp,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
 import { getProgressBetweenDates } from '@/lib/utils';
 import Timeline, { constructMarkerArray } from '@/components/Timeline';
+import { toast } from 'sonner';
 
 function StatusAlert({ proposalStatus }: { proposalStatus: ProposalStatus }) {
   type StatusConfig = {
@@ -165,11 +168,40 @@ export default function VotePage() {
   const votesLeft = proposal.choiceCount - selectedCandidates.length;
   const progressPercentage =
     (selectedCandidates.length / proposal.choiceCount) * 100;
+  const suggestedCandidates = userVote?.suggestedCandidates ?? null;
 
   const handleVoteSubmission = async () => {
     await api.vote.voteForProposal(proposal.id, selectedCandidates);
     revalidator.revalidate();
+    toast('Vote Submitted', {
+      description: 'Your vote has been successfully recorded.',
+      duration: 3000,
+      dismissible: false,
+    });
     navigate(PROPOSAL_HREFS.VOTE_ALL);
+  };
+
+  const handleSuggestionAccept = async () => {
+    if (!suggestedCandidates) return;
+    api.vote.acceptVoteSuggestion(proposal.id);
+    revalidator.revalidate();
+    toast('Suggestion Accepted', {
+      description: 'The suggested vote has been accepted.',
+      duration: 3000,
+      dismissible: false,
+    });
+    navigate(PROPOSAL_HREFS.VOTE_ALL);
+  };
+
+  const handleSuggestionReject = async () => {
+    if (!suggestedCandidates) return;
+    api.vote.rejectVoteSuggestion(proposal.id);
+    revalidator.revalidate();
+    toast('Suggestion Rejected', {
+      description: 'The suggested vote has been declined.',
+      duration: 3000,
+      dismissible: false,
+    });
   };
 
   const renderVotingInterface = () => (
@@ -223,6 +255,41 @@ export default function VotePage() {
     </Card>
   );
 
+  console.log('suggestedCandidates', suggestedCandidates);
+  const renderSuggestionInterface = () =>
+    suggestedCandidates && (
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-xl">Vote Suggestion</CardTitle>
+          <CardDescription>
+            A manager has suggested the following vote for you:
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            {suggestedCandidates.map(candidate => (
+              <span
+                key={candidate.id}
+                className="mb-2 mr-2 inline-block rounded-full bg-secondary px-3 py-1 text-sm font-semibold text-secondary-foreground"
+              >
+                {candidate.value}
+              </span>
+            ))}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button onClick={handleSuggestionReject} variant="outline">
+              <ThumbsDown className="mr-2 h-4 w-4" />
+              Decline
+            </Button>
+            <Button onClick={handleSuggestionAccept}>
+              <ThumbsUp className="mr-2 h-4 w-4" />
+              Accept
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="mb-8">
@@ -233,6 +300,9 @@ export default function VotePage() {
           </CardDescription>
         </CardHeader>
       </Card>
+
+      {renderSuggestionInterface()}
+
       <Tabs defaultValue="vote" className="space-y-4">
         <TabsList>
           <TabsTrigger value="vote">
@@ -298,7 +368,7 @@ export default function VotePage() {
                       <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                       </DialogClose>
-                      <Button onClick={handleVoteSubmission}>
+                      <Button onClick={() => handleVoteSubmission()}>
                         Confirm Vote
                       </Button>
                     </DialogFooter>

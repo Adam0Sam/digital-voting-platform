@@ -15,6 +15,8 @@ export const UserNotificationType = {
   PROPOSAL_UPDATE: "PROPOSAL_UPDATE",
   VOTE_DISABLED: "VOTE_DISABLED",
   VOTE_ENABLED: "VOTE_ENABLED",
+  VOTE_SUGGESTION_ACCEPTED: "VOTE_SUGGESTION_ACCEPTED",
+  VOTE_SUGGESTION_REJECTED: "VOTE_SUGGESTION_REJECTED",
 } as const;
 
 export type UserNotificationType =
@@ -48,6 +50,36 @@ const ProposalResolvedNotificationContentSchema = z.object({
 const CreateProposalResolvedNotificationContentDtoSchema = z.object({
   type: z.literal(UserNotificationType.PROPOSAL_RESOLUTION),
   content: z.null(),
+});
+
+const CreateVoteSuggestionAcceptedNotificationContentDtoSchema = z.object({
+  type: z.literal(UserNotificationType.VOTE_SUGGESTION_ACCEPTED),
+  content: z.object({
+    acceptedBy: z.string(),
+  }),
+});
+
+const VoteSuggestionAcceptedNotificationContentSchema = z.object({
+  type: z.literal(UserNotificationType.VOTE_SUGGESTION_ACCEPTED),
+  content: z.object({
+    acceptedBy: z.string(),
+    candidates: z.array(CandidateSchema),
+  }),
+});
+
+const CreateVoteSuggestionRejectedNotificationContentDtoSchema = z.object({
+  type: z.literal(UserNotificationType.VOTE_SUGGESTION_REJECTED),
+  content: z.object({
+    rejectedBy: z.string(),
+  }),
+});
+
+const VoteSuggestionRejectedNotificationContentSchema = z.object({
+  type: z.literal(UserNotificationType.VOTE_SUGGESTION_REJECTED),
+  content: z.object({
+    rejectedBy: z.string(),
+    candidates: z.array(CandidateSchema),
+  }),
 });
 
 const genericNotificationContentSchemas = [
@@ -94,6 +126,8 @@ const UserNotificationContentSchema = z.discriminatedUnion("type", [
   ...atLeastTwo([
     ...genericNotificationContentSchemas,
     ProposalResolvedNotificationContentSchema,
+    VoteSuggestionAcceptedNotificationContentSchema,
+    VoteSuggestionRejectedNotificationContentSchema,
   ]),
 ]);
 
@@ -105,6 +139,8 @@ const CreateUserNotificationContentDtoSchema = z.discriminatedUnion("type", [
   ...atLeastTwo([
     ...genericNotificationContentSchemas,
     CreateProposalResolvedNotificationContentDtoSchema,
+    CreateVoteSuggestionAcceptedNotificationContentDtoSchema,
+    CreateVoteSuggestionRejectedNotificationContentDtoSchema,
   ]),
 ]);
 export const CreateUserNotificationDtoSchema =

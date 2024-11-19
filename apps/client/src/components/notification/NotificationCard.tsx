@@ -44,9 +44,11 @@ function getNotificationType(type: UserNotificationType): NotificationType {
     case UserNotificationType.PROPOSAL_RESOLUTION:
     case UserNotificationType.PROPOSAL_ACTIVATION:
     case UserNotificationType.VOTE_ENABLED:
+    case UserNotificationType.VOTE_SUGGESTION_ACCEPTED:
       return NotificationType.SUCCESS;
     case UserNotificationType.PROPOSAL_ABORTION:
     case UserNotificationType.VOTE_DISABLED:
+    case UserNotificationType.VOTE_SUGGESTION_REJECTED:
       return NotificationType.WARNING;
   }
 }
@@ -94,6 +96,16 @@ function getNotificationContent(notification: UserNotification): {
       return {
         title: 'Vote Activated',
         message: `Your ability to vote on proposal "${proposal.title}" has been enabled!`,
+      };
+    case UserNotificationType.VOTE_SUGGESTION_ACCEPTED:
+      return {
+        title: 'Vote Suggestion Accepted',
+        message: `Your vote suggestions for proposal "${proposal.title}" have been accepted by ${content.acceptedBy}.`,
+      };
+    case UserNotificationType.VOTE_SUGGESTION_REJECTED:
+      return {
+        title: 'Vote Suggestion Rejected',
+        message: `Your vote suggestions for proposal "${proposal.title}" have been rejected by ${content.rejectedBy}.`,
       };
   }
 }

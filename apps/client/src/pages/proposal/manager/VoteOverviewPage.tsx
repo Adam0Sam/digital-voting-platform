@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
-import { Candidate, Vote, VoteStatus } from '@ambassador';
+import { Candidate, ProposalStatus, Vote, VoteStatus } from '@ambassador';
 import {
   BarChart2,
   Users,
@@ -202,6 +202,9 @@ export default function VoteOverviewPage() {
                         setCurrentTab(TAB_NAME.SUGGESTED);
                       }}
                       handleVoteStatusToggle={handleVoteStatusToggle}
+                      isProposalActive={
+                        proposal.status === ProposalStatus.ACTIVE
+                      }
                     />
                   ))}
                 </ScrollArea>
@@ -240,6 +243,9 @@ export default function VoteOverviewPage() {
                       permissions={permissions}
                       saveVoteSuggestionOffer={handleVoteSuggestionOffer}
                       handleVoteStatusToggle={handleVoteStatusToggle}
+                      isProposalActive={
+                        proposal.status === ProposalStatus.ACTIVE
+                      }
                     />
                   ))}
                 </ScrollArea>

@@ -219,6 +219,7 @@ export class ProposalService {
           },
           include: {
             candidates: true,
+            suggestedCandidates: true,
           },
         },
       },

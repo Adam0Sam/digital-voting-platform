@@ -172,6 +172,159 @@ export class VoteService {
             id: choice.id,
           })),
         },
+        suggestedManagerId: proposal.managers[0].id,
+      },
+    });
+  }
+
+  async acceptVoteSuggestion(userId: string, proposalId: string) {
+    const proposal = await this.prisma.proposal.findUnique({
+      where: {
+        id: proposalId,
+        votes: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+      include: {
+        votes: {
+          where: {
+            userId,
+          },
+          include: {
+            suggestedCandidates: true,
+            suggestedBy: true,
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!proposal) {
+      throw new BadRequestException('Proposal not found');
+    }
+
+    const userVote = proposal.votes.find((vote) => vote.userId === userId);
+
+    if (
+      !userVote.suggestedCandidates ||
+      userVote.suggestedCandidates.length === 0
+    ) {
+      throw new ConflictException('No vote suggestions to accept');
+    }
+
+    if (userVote.suggestedManagerId === '' || !userVote.suggestedBy) {
+      throw new ConflictException('No manager associated with vote suggestion');
+    }
+
+    this.logger.logAction({
+      action: Action.ACCEPT_VOTE_SUGGESTION,
+      info: {
+        userId,
+        proposalId,
+        message: `Accepted vote suggestion ${userVote.suggestedCandidates.map((candidate) => candidate.value).join(', ')}`,
+      },
+    });
+
+    this.notifier.notifyUsers({
+      userId: userVote.suggestedManagerId,
+      proposalId,
+      package: {
+        type: NotificationType.VOTE_SUGGESTION_ACCEPTED,
+        content: {
+          acceptedBy: `${userVote.user.personalNames.join(' ')}, ${userVote.user.familyName}`,
+        },
+      },
+    });
+
+    return await this.prisma.vote.update({
+      where: {
+        id: userVote.id,
+      },
+      data: {
+        status: VoteStatus.RESOLVED,
+        candidates: {
+          set: userVote.suggestedCandidates,
+        },
+        suggestedCandidates: {
+          set: [],
+        },
+        suggestedBy: null,
+      },
+    });
+  }
+
+  async rejectVoteSuggestion(userId: string, proposalId: string) {
+    const proposal = await this.prisma.proposal.findUnique({
+      where: {
+        id: proposalId,
+        votes: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+      include: {
+        votes: {
+          where: {
+            userId,
+          },
+          include: {
+            suggestedCandidates: true,
+            suggestedBy: true,
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!proposal) {
+      throw new BadRequestException('Proposal not found');
+    }
+
+    const userVote = proposal.votes.find((vote) => vote.userId === userId);
+
+    if (
+      !userVote.suggestedCandidates ||
+      userVote.suggestedCandidates.length === 0
+    ) {
+      throw new ConflictException('No vote suggestions to reject');
+    }
+
+    if (userVote.suggestedManagerId === '' || !userVote.suggestedBy) {
+      throw new ConflictException('No manager associated with vote suggestion');
+    }
+
+    this.logger.logAction({
+      action: Action.REJECT_VOTE_SUGGESTION,
+      info: {
+        userId,
+        proposalId,
+        message: `Rejected vote suggestion ${userVote.suggestedCandidates.map((candidate) => candidate.value).join(', ')}`,
+      },
+    });
+
+    this.notifier.notifyUsers({
+      userId: userVote.suggestedManagerId,
+      proposalId,
+      package: {
+        type: NotificationType.VOTE_SUGGESTION_REJECTED,
+        content: {
+          rejectedBy: `${userVote.user.personalNames.join(' ')}, ${userVote.user.familyName}`,
+        },
+      },
+    });
+
+    return await this.prisma.vote.update({
+      where: {
+        id: userVote.id,
+      },
+      data: {
+        suggestedCandidates: {
+          set: [],
+        },
+        suggestedBy: null,
       },
     });
   }

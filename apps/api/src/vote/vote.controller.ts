@@ -27,10 +27,25 @@ export class VoteController {
     @Param('id') proposalId: string,
     @Body('candidates', new ZodValidationPipe(z.array(CandidateSchema)))
     candidates: Candidate[],
-    @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
     return this.voteService.voteForProposal(userId, proposalId, candidates);
+  }
+
+  @Put(':proposalId/suggestion/accept')
+  async acceptVoteSuggestion(
+    @Param('proposalId') proposalId: string,
+    @GetUser('id') userId: User['id'],
+  ) {
+    return this.voteService.acceptVoteSuggestion(userId, proposalId);
+  }
+
+  @Put(':proposalId/suggestion/reject')
+  async rejectVoteSuggestion(
+    @Param('proposalId') proposalId: string,
+    @GetUser('id') userId: User['id'],
+  ) {
+    return this.voteService.rejectVoteSuggestion(userId, proposalId);
   }
 
   @Put(':proposalId/suggestion/:voteId')

@@ -8,8 +8,6 @@ export class NotificationService {
 
   async notifyUsers(notification: CreateUserNotificationDto) {
     const isDedicatedToSingleUser = notification.userId !== undefined;
-    console.log('notification', notification);
-    console.log('isDedicatedToSingleUser', isDedicatedToSingleUser);
     const notificationPackage =
       await this.prisma.userNotificationPackage.create({
         data: {
