@@ -86,8 +86,12 @@ function App() {
       })
       .catch(() => {
         setIsFetchingUser(false);
-      });
-    api.notification.getUnreadNotificationCount().then(setUnreadNotifications);
+      })
+      .then(() =>
+        api.notification
+          .getUnreadNotificationCount()
+          .then(setUnreadNotifications),
+      );
   }, []);
 
   return (

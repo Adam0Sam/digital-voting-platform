@@ -6,7 +6,9 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
+import { NotificationType } from '@prisma/client';
 import { LoggerService } from 'src/logger/logger.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -15,6 +17,7 @@ export class VoteService {
   constructor(
     private prisma: PrismaService,
     private logger: LoggerService,
+    private notifier: NotificationService,
   ) {}
 
   async voteForProposal(
@@ -108,6 +111,7 @@ export class VoteService {
                 permissions: true,
               },
             },
+            user: true,
           },
         },
       },
@@ -139,6 +143,18 @@ export class VoteService {
         userId,
         proposalId,
         message: `Suggested ${candidates.map((candidate) => candidate.value).join(', ')} for ${voteUser.personalNames.join(' ')}, ${voteUser.familyName}`,
+      },
+    });
+
+    this.notifier.notifyUsers({
+      proposalId,
+      userId,
+      package: {
+        type: NotificationType.VOTE_SUGGESTION,
+        content: {
+          candidates,
+          suggestedBy: `${manager.user.personalNames.join(' ')}, ${manager.user.familyName}`,
+        },
       },
     });
 
