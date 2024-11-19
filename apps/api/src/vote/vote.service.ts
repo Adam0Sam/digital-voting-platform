@@ -256,7 +256,7 @@ export class VoteService {
     });
 
     this.notifier.notifyUsers({
-      userId,
+      userId: userVote.userId,
       proposalId,
       package: {
         type:

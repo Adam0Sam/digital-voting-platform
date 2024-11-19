@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
-import { Candidate, Vote } from '@ambassador';
+import { Candidate, Vote, VoteStatus } from '@ambassador';
 import {
   BarChart2,
   Users,
@@ -18,6 +18,7 @@ import {
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
 import { calculateVoteDistribution } from '@/lib/resolution-results';
 import { cacheFunction } from '@/lib/cache';
+import { useRevalidator } from 'react-router-dom';
 
 const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
 
@@ -61,7 +62,7 @@ type TabName = (typeof TAB_NAME)[keyof typeof TAB_NAME];
 
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
-
+  const revalidator = useRevalidator();
   if (proposal.votes.some(vote => vote.suggestedCandidates === undefined)) {
     throw new Error(`Some votes do not have suggested candidates`);
   }
@@ -70,19 +71,19 @@ export default function VoteOverviewPage() {
   const [suggestedVotes, setSuggestedVotes] = useState<Vote[]>(
     proposal.votes.map(vote => ({
       ...vote,
-      candidates: vote.suggestedCandidates!,
+      candidates: vote.suggestedCandidates ?? [],
     })),
   );
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
 
   const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
     proposal.candidates,
-    proposal.votes,
+    proposal.votes.filter(vote => vote.status === VoteStatus.RESOLVED),
   );
   const {
     voteDistribution: suggestedVoteDistribution,
     finalizedVoteCount: suggestedFinalizedVoteCount,
-  } = getCachedVoteDistribution(proposal.candidates, suggestedVotes, false);
+  } = getCachedVoteDistribution(proposal.candidates, suggestedVotes);
 
   const handleVoteSuggestionOffer = (
     voteId: string,
@@ -90,7 +91,7 @@ export default function VoteOverviewPage() {
   ) => {
     api.vote.suggestVote(proposal.id, voteId, candidates);
     setSuggestedVotes(prevVotes => {
-      const a = prevVotes.map(prevVote => {
+      const newVotes = prevVotes.map(prevVote => {
         if (prevVote.id === voteId) {
           return {
             ...prevVote,
@@ -99,7 +100,28 @@ export default function VoteOverviewPage() {
         }
         return prevVote;
       });
-      return a;
+      return newVotes;
+    });
+  };
+
+  const handleVoteStatusToggle = async (vote: Vote) => {
+    const newStatus =
+      vote.status === VoteStatus.DISABLED
+        ? VoteStatus.PENDING
+        : VoteStatus.DISABLED;
+    await api.vote.mutateUserVoteStatus(proposal.id, vote.id, newStatus);
+    revalidator.revalidate();
+    setSuggestedVotes(prevVotes => {
+      const newVotes = prevVotes.map(prevVote => {
+        if (prevVote.id === vote.id) {
+          return {
+            ...prevVote,
+            status: newStatus,
+          };
+        }
+        return prevVote;
+      });
+      return newVotes;
     });
   };
 
@@ -144,7 +166,7 @@ export default function VoteOverviewPage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="votes">
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-8 lg:grid-cols-2">
             <VoteDistributionChart
               distribution={voteDistribution}
               highlightedChoices={highlightedChoices}
@@ -179,6 +201,7 @@ export default function VoteOverviewPage() {
                         handleVoteSuggestionOffer(voteId, candidates);
                         setCurrentTab(TAB_NAME.SUGGESTED);
                       }}
+                      handleVoteStatusToggle={handleVoteStatusToggle}
                     />
                   ))}
                 </ScrollArea>
@@ -187,7 +210,7 @@ export default function VoteOverviewPage() {
           </div>
         </TabsContent>
         <TabsContent value="suggested">
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-8 lg:grid-cols-2">
             <VoteDistributionChart
               distribution={suggestedVoteDistribution}
               highlightedChoices={highlightedChoices}
@@ -216,6 +239,7 @@ export default function VoteOverviewPage() {
                       onBlur={() => setHighlightedChoices([])}
                       permissions={permissions}
                       saveVoteSuggestionOffer={handleVoteSuggestionOffer}
+                      handleVoteStatusToggle={handleVoteStatusToggle}
                     />
                   ))}
                 </ScrollArea>

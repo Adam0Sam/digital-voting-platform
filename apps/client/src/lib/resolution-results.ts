@@ -1,4 +1,4 @@
-import { Candidate, VoteStatus, Vote, isVote } from '@ambassador';
+import { Candidate, Vote, isVote } from '@ambassador';
 import { VotingSystem } from '@ambassador/voting-system';
 
 export type VoteDistributionItem = {
@@ -53,7 +53,6 @@ export function calculateWinningCandidate(
 export function calculateVoteDistribution(
   candidates: Candidate[],
   votes: Vote[] | Candidate[][],
-  onlyCountResolvedVotes = true,
 ) {
   const voteTallyMap = new Map<string, VoteDistributionItem>();
   let finalizedVoteCount = 0;
@@ -66,9 +65,6 @@ export function calculateVoteDistribution(
 
   for (const vote of votes) {
     if (isVote(vote)) {
-      if (onlyCountResolvedVotes && vote.status !== VoteStatus.RESOLVED) {
-        continue;
-      }
       if (vote.candidates.length === 0) {
         continue;
       }

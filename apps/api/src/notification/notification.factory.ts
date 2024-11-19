@@ -1,4 +1,5 @@
 import {
+  CreateBaseUserNotificationDto,
   CreateUserNotificationDto,
   isMutableIntrinsicProposalProp,
   isMutableProposalKey,
@@ -25,8 +26,9 @@ export class ProposalNotificationFactory {
 
       if (isMutableIntrinsicProposalProp(key)) {
         if (key === 'status') {
-          const baseNotification = {
+          const baseNotification: CreateBaseUserNotificationDto = {
             proposalId: this.meta.proposalId,
+            userId: this.meta.userId,
           };
 
           switch (this.updateInput[key]) {

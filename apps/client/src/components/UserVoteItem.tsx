@@ -1,4 +1,4 @@
-import { useNavigate, useRevalidator } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Pencil, Settings2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -8,7 +8,6 @@ import { useState } from 'react';
 import ConfirmDialog from './ConfirmDialog';
 import { Candidate, ManagerPermissions, Vote, VoteStatus } from '@ambassador';
 import { PROPOSAL_HREFS } from '@/lib/routes';
-import { api } from '@/lib/api';
 
 function getSelectedChoices(
   selectedCandidates: Candidate[],
@@ -31,6 +30,7 @@ type UserVoteItemProps = {
   allChoices: Candidate[];
   maxChoiceCount: number;
   saveVoteSuggestionOffer: (voteId: string, candidates: Candidate[]) => void;
+  handleVoteStatusToggle: (vote: Vote) => Promise<void>;
 };
 
 export default function UserVoteItem({
@@ -41,9 +41,9 @@ export default function UserVoteItem({
   allChoices,
   maxChoiceCount,
   saveVoteSuggestionOffer,
+  handleVoteStatusToggle,
 }: UserVoteItemProps) {
   const navigate = useNavigate();
-  const revalidator = useRevalidator();
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [choices, setChoices] = useState<(Candidate & { selected: boolean })[]>(
     getSelectedChoices(vote.candidates, allChoices),
@@ -89,14 +89,9 @@ export default function UserVoteItem({
     saveVoteSuggestionOffer(vote.id, selectedChoices);
   };
 
-  const handleToggleVoteStatus = () => {
-    if (vote.status === VoteStatus.DISABLED) {
-      api.vote.enableUserVote(vote.proposalId, vote.id);
-    } else {
-      api.vote.disableUserVote(vote.proposalId, vote.id);
-    }
-    revalidator.revalidate();
+  const handleStatusToggle = async () => {
     setSheetIsOpen(false);
+    await handleVoteStatusToggle(vote);
   };
 
   return (
@@ -219,7 +214,7 @@ export default function UserVoteItem({
                 }}
                 dialogTitle={`Are you sure you want to ${vote.status === VoteStatus.DISABLED ? 'enable' : 'disable'} this user's vote?`}
                 dialogDescription={`This action will ${vote.status === VoteStatus.DISABLED ? 'allow' : 'prevent'} the user from voting.`}
-                handleConfirm={handleToggleVoteStatus}
+                handleConfirm={handleStatusToggle}
               />
             )}
           </div>

@@ -116,5 +116,8 @@ export type UserNotification = z.infer<typeof UserNotificationSchema>;
 export type CreateUserNotificationDto = z.infer<
   typeof CreateUserNotificationDtoSchema
 >;
+export type CreateBaseUserNotificationDto = z.infer<
+  typeof CreateBaseUserNotificationDtoSchema
+>;
 
 type a = z.infer<typeof CreateBaseUserNotificationDtoSchema>;
