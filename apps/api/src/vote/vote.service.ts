@@ -254,7 +254,19 @@ export class VoteService {
         message: `${status === VoteStatus.DISABLED ? 'Disabled' : 'Enabled'} ${userVote.user.personalNames.join(' ')}, ${userVote.user.familyName} vote`,
       },
     });
-    console.log('changing status', status);
+
+    this.notifier.notifyUsers({
+      userId,
+      proposalId,
+      package: {
+        type:
+          status === VoteStatus.DISABLED
+            ? NotificationType.VOTE_DISABLED
+            : NotificationType.VOTE_ENABLED,
+        content: null,
+      },
+    });
+
     return await this.prisma.vote.update({
       where: {
         id: voteId,

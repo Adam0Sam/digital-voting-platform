@@ -7,7 +7,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Info, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import {
+  CheckCircle,
+  Info,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Clock,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { UserNotification, UserNotificationType } from '@ambassador';
@@ -18,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip';
+import { formatDistanceToNow } from 'date-fns';
 
 const NotificationType = {
   SUCCESS: 'success',
@@ -80,11 +88,12 @@ function getNotificationContent(notification: UserNotification): {
     case UserNotificationType.VOTE_DISABLED:
       return {
         title: 'Vote Deactivated',
+        message: `Your ability to vote on proposal "${proposal.title}" has been disabled.`,
       };
-      break;
     case UserNotificationType.VOTE_ENABLED:
       return {
         title: 'Vote Activated',
+        message: `Your ability to vote on proposal "${proposal.title}" has been enabled!`,
       };
   }
 }
@@ -114,6 +123,9 @@ export default function NotificationCard({
 }: NotificationCardProps) {
   const type = getNotificationType(notification.package.type);
   const { title, message } = getNotificationContent(notification);
+  const createdAt = new Date(notification.createdAt);
+  const timeAgo = formatDistanceToNow(createdAt, { addSuffix: true });
+
   return (
     <Card
       className={cn(
@@ -122,16 +134,42 @@ export default function NotificationCard({
       )}
     >
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          {iconMap[type]}
-          {title}
+        <CardTitle className="flex items-center justify-between gap-2 text-lg">
+          <div className="flex items-center gap-2">
+            {iconMap[type]}
+            {title}
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="ml-2"
+                  onClick={() => onReadToggle(notification)}
+                >
+                  {isRead ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {isRead ? 'Mark as Unread' : 'Mark as Read'}
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isRead ? 'Mark as Unread' : 'Mark as Read'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">{message}</p>
       </CardContent>
-      <CardFooter>
-        <Button asChild variant="outline" className="w-full">
+      <CardFooter className="flex items-center justify-between gap-2">
+        <Button asChild variant="outline" className="flex-grow">
           <Link to={PROPOSAL_HREFS.VOTE(notification.proposalId)}>
             View Proposal
           </Link>
@@ -139,24 +177,12 @@ export default function NotificationCard({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute right-2 top-2 ml-2"
-                onClick={() => onReadToggle(notification)}
-              >
-                {isRead ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-
-                <span className="sr-only">Mark as Read</span>
-              </Button>
+              <div className="ml-2 flex items-center text-xs text-muted-foreground">
+                <Clock className="mr-1 h-4 w-4" />
+                {timeAgo}
+              </div>
             </TooltipTrigger>
-            <TooltipContent>
-              {isRead ? 'Mark as Unread' : 'Mark as Read'}
-            </TooltipContent>
+            <TooltipContent>{createdAt.toLocaleString()}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </CardFooter>

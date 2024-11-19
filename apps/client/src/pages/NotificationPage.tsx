@@ -45,7 +45,9 @@ function NotificationsSkeleton() {
 }
 
 function Notifications() {
-  const notifications = useAsyncLoaderValue(LOADER_IDS.NOTIFICATIONS);
+  const notifications = useAsyncLoaderValue(LOADER_IDS.NOTIFICATIONS).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
   const { mutate } = useUnreadNotificationCount();
   const [readNotifications, setReadNotifications] = useState<
     Set<UserNotification>
@@ -110,7 +112,7 @@ function Notifications() {
 
       <TabsContent value="unread">
         {unreadNotifications.length > 0 ? (
-          <div className="grid gap-6 [grid-auto-rows:max-content] md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 [grid-auto-rows:max-content] xl:grid-cols-2 2xl:grid-cols-3">
             {unreadNotifications.map(notification => (
               <NotificationCard
                 key={notification.id}
@@ -126,7 +128,7 @@ function Notifications() {
 
       <TabsContent value="read">
         {readNotifications.size > 0 ? (
-          <div className="grid gap-6 [grid-auto-rows:max-content] sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 [grid-auto-rows:max-content] xl:grid-cols-2 2xl:grid-cols-3">
             {Array.from(readNotifications).map(notification => (
               <NotificationCard
                 key={notification.id}
