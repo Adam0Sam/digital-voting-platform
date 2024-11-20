@@ -7,7 +7,7 @@ import RootLayout from './pages/RootLayout';
 import ProposalCreationPage from './pages/proposal/ProposalCreationPage';
 import VoterLandingPage from './pages/proposal/voter/VoterLandingPage';
 import ManagerLandingPage from './pages/proposal/manager/ManagerLandingPage';
-import ProposalVotePage from './pages/proposal/voter/ProposalVotePage';
+import VotePage from './pages/proposal/voter/VotePage';
 import ProposalManagePage from './pages/proposal/manager/ProposalManagePage';
 import ProfilePageLayout from './pages/profile/ProfilePageLayout';
 import RootErrorBoundary from './components/RootErrorBoundary';
@@ -35,6 +35,7 @@ import UserPatternPage from './pages/proposal/manager/UserPatternPage';
 import UserManagePage from './pages/admin/UserManagePage';
 import { LOADER_IDS, LOADER_ID_MAP, loaderDefer } from './lib/loaders';
 import TimelinePage from './pages/proposal/manager/TimelinePage';
+import NotificationPage from './pages/NotificationPage';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
@@ -54,7 +55,6 @@ const router = createBrowserRouter(
         id={LOADER_IDS.AUTH}
         loader={LOADER_ID_MAP[LOADER_IDS.AUTH]}
       />
-
       <Route path={PROPOSAL_PATHS.BASE}>
         <Route index element={<ProposalGreetingPage />} />
         <Route
@@ -63,7 +63,7 @@ const router = createBrowserRouter(
           loader={LOADER_ID_MAP[LOADER_IDS.VOTER_PROPOSALS]}
         >
           <Route path={GENERIC_PATHS.ALL} element={<VoterLandingPage />} />
-          <Route path={GENERIC_PATHS.ONE} element={<ProposalVotePage />} />
+          <Route path={GENERIC_PATHS.ONE} element={<VotePage />} />
         </Route>
 
         <Route
@@ -107,7 +107,6 @@ const router = createBrowserRouter(
           path={USER_PROFILE_PATHS.PROFILE}
           element={<ProfileSettingsPage />}
         />
-        <Route path={USER_PROFILE_PATHS.HISTORY} element={<div>History</div>} />
         <Route
           path={USER_TEMPLATES_PATHS.BASE}
           loader={LOADER_ID_MAP[LOADER_IDS.MANAGER_ROLES]}
@@ -115,6 +114,12 @@ const router = createBrowserRouter(
         >
           <Route element={<ManagerRoleTemplates />} />
         </Route>
+        <Route
+          path={USER_PROFILE_PATHS.NOTIFICATIONS}
+          id={LOADER_IDS.NOTIFICATIONS}
+          loader={() => loaderDefer(LOADER_IDS.NOTIFICATIONS)}
+          element={<NotificationPage />}
+        />
       </Route>
       <Route
         path={ADMIN_PATHS.BASE}

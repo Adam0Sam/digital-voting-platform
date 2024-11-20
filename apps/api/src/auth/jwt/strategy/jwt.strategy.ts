@@ -33,31 +33,31 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       // available options: https://github.com/mikenicholson/passport-jwt#configure-strategy
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true,
-      // secretOrKeyProvider: (req, token, done) => {
-      //   done(null, 'secret');
-      // },
+      ignoreExpiration: false,
       secretOrKey: config.get('auth.jwt.publicKey'),
-      // issuer: config.get('auth.jwt.issuer'),
       passReqToCallback: true,
     });
   }
 
-  async validate(req: Request, payload: JwtDto) {
+  async validate(req: Request, payload: JwtDto): Promise<User> {
     const personalNames = splitFirstNames(payload.first_name);
+    const familyName = payload.last_name;
+    const grade = toGrade(payload.grade);
+    const roles = payload.roles.map(toUserRole);
 
     const user: User | null = await this.userService.findUser({
+      // @ts-expect-error idk
       personalNames,
-      familyName: payload.last_name,
-      grade: toGrade(payload.grade),
+      familyName,
+      grade,
     });
 
     if (!user) {
-      const newUser = await this.userService.createUser({
+      const newUserAccount = await this.userService.createUser({
         personalNames,
-        familyName: payload.last_name,
-        grade: toGrade(payload.grade),
-        roles: payload.roles.map(toUserRole),
+        familyName,
+        grade,
+        roles,
         email: null,
         active: true,
       });
@@ -65,11 +65,10 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
       this.logger.logAction({
         action: Action.SIGNUP,
         info: {
-          userId: newUser.id,
+          userId: newUserAccount.id,
           userAgent: req.headers['user-agent'],
         },
       });
-      return newUser;
     }
 
     return user;

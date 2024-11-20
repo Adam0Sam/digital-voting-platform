@@ -23,10 +23,9 @@ import { ComboboxItem } from '@/components/combobox/type';
 import { MultiSelectCombobox } from '@/components/combobox/MultiSelectCombobox';
 
 const LOGS_PER_PAGE = 10;
-
 export default function PaginatedLogTable({ user }: { user: User }) {
   const [actionFilter, setActionFilter] = useState<ActionFilter>(
-    constructActionFilter(true),
+    constructActionFilter(false),
   );
 
   const actionItems: ComboboxItem<Action>[] = Actions.map(action => ({
@@ -50,7 +49,7 @@ export default function PaginatedLogTable({ user }: { user: User }) {
         <div className="flex justify-between">
           <MultiSelectCombobox
             items={actionItems}
-            defaultItems={actionItems}
+            defaultItems={[]}
             placeholder="Filter Actions"
             emptyMessage="No actions available"
             onChange={handleActionFilterChange}

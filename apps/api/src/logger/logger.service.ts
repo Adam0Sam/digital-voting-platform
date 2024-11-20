@@ -1,23 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Action } from '@ambassador/action-log';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserActionLog } from '@prisma/client';
-
-export type LogActionParams = {
-  action: Action;
-  info: {
-    userId: string;
-    proposalId?: string;
-    userAgent?: string;
-    message?: string;
-  };
-};
+import { LogMessage } from './type';
 
 @Injectable()
 export class LoggerService {
   constructor(private prisma: PrismaService) {}
 
-  async logAction({ action, info }: LogActionParams): Promise<UserActionLog> {
+  async logAction({ action, info }: LogMessage): Promise<UserActionLog> {
     return this.prisma.userActionLog.create({
       data: {
         action,

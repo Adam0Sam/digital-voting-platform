@@ -1,23 +1,12 @@
-import { Grade } from '@prisma/client';
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsNotEmpty,
-  IsString,
-  IsEnum,
-} from 'class-validator';
 import { z } from 'zod';
-// TODO: Is class-validator bundled with nestjs by default?
-export class UserQueryDto {
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true })
-  personalNames: string[];
-  @IsString()
-  @IsNotEmpty()
-  familyName: string;
-  @IsEnum(Grade)
-  grade: Grade;
-}
+import { Grade } from '@prisma/client';
 
 export const UserEmailSchema = z.string().email();
+
+export const UserQuerySchema = z.object({
+  personalNames: z.array(z.string()).nonempty(),
+  familyName: z.string().nonempty(),
+  grade: z.nativeEnum(Grade),
+});
+
+export type UserQueryDto = z.infer<typeof UserQuerySchema>;

@@ -5,13 +5,13 @@ import { createAsyncResource } from '../async-resource';
 import { cacheFunction } from '../cache';
 
 const getCachedUserLogsResource = cacheFunction(
-  (...args: Parameters<typeof api.admin.getUserLogs>) =>
-    createAsyncResource(api.admin.getUserLogs(...args)),
+  (...args: Parameters<typeof api.logs.getUserLogs>) =>
+    createAsyncResource(api.logs.getUserLogs(...args)),
 );
 
 const getCachedLogsCountResource = cacheFunction(
-  (...args: Parameters<typeof api.admin.getUserLogsCount>) =>
-    createAsyncResource(api.admin.getUserLogsCount(...args)),
+  (...args: Parameters<typeof api.logs.getUserLogsCount>) =>
+    createAsyncResource(api.logs.getUserLogsCount(...args)),
 );
 
 export default function useUserLogs(

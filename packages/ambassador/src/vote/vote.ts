@@ -10,6 +10,8 @@ export const VoteSchema = z.object({
   user: UserSchema,
   proposalId: z.string(),
   candidates: z.array(CandidateSchema),
+  suggestedCandidates: z.array(CandidateSchema).optional(),
+  suggestedBy: z.string().uuid().optional(),
 });
 
 export function isVote(v: unknown): v is Vote {

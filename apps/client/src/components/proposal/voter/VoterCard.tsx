@@ -6,6 +6,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  CardContent,
 } from '@/components/ui/card';
 import {
   Popover,
@@ -16,7 +17,14 @@ import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import { Proposal, Vote, VoteStatus } from '@ambassador';
 import { cn } from '@/lib/utils';
-import { CalendarClock, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import {
+  CalendarClock,
+  ArrowRight,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Ban,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getTimeLeft } from '@/lib/time-left';
 
@@ -57,6 +65,33 @@ export default function VoterCard({
     StatusIcon = CheckCircle;
   }
 
+  const getVoteStatusInfo = (status: VoteStatus) => {
+    switch (status) {
+      case VoteStatus.PENDING:
+        return {
+          text: 'Not Voted',
+          icon: AlertTriangle,
+          color: 'text-yellow-500',
+        };
+      case VoteStatus.RESOLVED:
+        return {
+          text: 'Vote Submitted',
+          icon: CheckCircle,
+          color: 'text-green-500',
+        };
+      case VoteStatus.DISABLED:
+        return { text: 'Vote Disabled', icon: Ban, color: 'text-red-500' };
+      default:
+        return {
+          text: 'Unknown Status',
+          icon: AlertTriangle,
+          color: 'text-gray-500',
+        };
+    }
+  };
+
+  const voteStatusInfo = getVoteStatusInfo(voteData.status);
+
   return (
     <Card className={cn('flex flex-col justify-between shadow-lg', className)}>
       <CardHeader className="space-y-2">
@@ -96,8 +131,23 @@ export default function VoterCard({
           )}
         </CardDescription>
       </CardHeader>
+      <CardContent>
+        <div
+          className={cn(
+            'flex items-center gap-2 font-medium',
+            voteStatusInfo.color,
+          )}
+        >
+          <voteStatusInfo.icon className="h-5 w-5" />
+          <span>{voteStatusInfo.text}</span>
+        </div>
+      </CardContent>
       <CardFooter>
-        <Button asChild className="w-full">
+        <Button
+          asChild
+          className="w-full"
+          disabled={voteData.status === VoteStatus.DISABLED}
+        >
           <Link
             to={PROPOSAL_HREFS.VOTE(proposalData.id)}
             className="flex items-center justify-center gap-2"

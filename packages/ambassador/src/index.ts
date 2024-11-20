@@ -5,3 +5,4 @@ export * from "./proposal/index.js";
 export * from "./user/index.js";
 export * from "./utils/index.js";
 export * from "./vote/index.js";
+export * from "./notifications/index.js";

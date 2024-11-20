@@ -17,6 +17,7 @@ import { NavLinkItem, StandaloneNavLink } from './NavLinkItem';
 import { USER_PROFILE_HREFS, ADMIN_HREFS } from '@/lib/routes';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
 import { UserRole } from '@ambassador';
+import NotificationBell from '../notification/NotificationBell';
 
 export default function DesktopNav({ className }: { className?: string }) {
   const { user } = useSignedInUser();
@@ -76,9 +77,21 @@ export default function DesktopNav({ className }: { className?: string }) {
           )}
         </NavigationMenuList>
       </NavigationMenu>
-      <NavigationMenuItem className="ml-auto mr-10 flex max-w-max items-center">
-        <NavLink to={USER_PROFILE_HREFS.BASE} end className={'self-end'}>
-          <CircleUserRound />
+      <NavigationMenuItem className="ml-auto mr-10 flex max-w-max items-center gap-2">
+        <NotificationBell />
+        <NavLink
+          to={USER_PROFILE_HREFS.BASE}
+          end
+          className={({ isActive }) =>
+            cn(
+              'flex items-center rounded-full p-2',
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'hover:bg-muted',
+            )
+          }
+        >
+          <CircleUserRound className="h-6 w-6" />
         </NavLink>
       </NavigationMenuItem>
     </div>

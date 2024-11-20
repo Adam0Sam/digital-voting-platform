@@ -16,6 +16,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -32,11 +33,16 @@ import {
   CheckCircle,
   Users,
   FileText,
+  Ban,
+  Mail,
+  ThumbsDown,
+  ThumbsUp,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
 import { getProgressBetweenDates } from '@/lib/utils';
 import Timeline, { constructMarkerArray } from '@/components/Timeline';
+import { toast } from 'sonner';
 
 function StatusAlert({ proposalStatus }: { proposalStatus: ProposalStatus }) {
   type StatusConfig = {
@@ -93,7 +99,46 @@ function StatusAlert({ proposalStatus }: { proposalStatus: ProposalStatus }) {
   );
 }
 
-export default function ProposalVotePage() {
+function VoteDisabledAlert({ proposalTitle }: { proposalTitle: string }) {
+  return (
+    <div className="flex flex-1 items-center justify-center">
+      <Card className="mx-auto max-w-md">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2 text-destructive">
+            <Ban className="h-5 w-5" />
+            <span>Vote Disabled</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle className="font-semibold">
+              Unable to vote on "{proposalTitle}"
+            </AlertTitle>
+            <AlertDescription>
+              Your ability to vote on this proposal has been disabled by a
+              manager. This may be due to policy changes or administrative
+              decisions.
+            </AlertDescription>
+          </Alert>
+          <p className="mb-4 text-sm text-muted-foreground">
+            If you believe this is an error or would like more information,
+            please contact the proposal administrator.
+          </p>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button variant="secondary" asChild>
+            <a href={`mailto:idk`} className="flex items-center">
+              <Mail className="mr-2 h-4 w-4" />
+              Contact Admin
+            </a>
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}
+
+export default function VotePage() {
   const { id: proposalId } = useParams();
   const proposals = useLoadedData(LOADER_IDS.VOTER_PROPOSALS);
   const proposal = proposals.find(proposal => proposal.id === proposalId);
@@ -104,20 +149,60 @@ export default function ProposalVotePage() {
 
   const revalidator = useRevalidator();
   const navigate = useNavigate();
+  const userVote = proposal.votes[0];
 
   const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>(
-    proposal.votes[0].candidates,
+    userVote.candidates,
   );
+
+  if (userVote.status === VoteStatus.DISABLED) {
+    return <VoteDisabledAlert proposalTitle={proposal.title} />;
+  }
 
   const canVote =
     proposal.status === ProposalStatus.ACTIVE &&
-    proposal.votes[0].status === VoteStatus.PENDING;
+    userVote.status === VoteStatus.PENDING;
   const proposalHasEnded =
     proposal.status === ProposalStatus.RESOLVED ||
     proposal.status === ProposalStatus.ABORTED;
   const votesLeft = proposal.choiceCount - selectedCandidates.length;
   const progressPercentage =
     (selectedCandidates.length / proposal.choiceCount) * 100;
+  const suggestedCandidates = userVote?.suggestedCandidates ?? [];
+
+  const handleVoteSubmission = async () => {
+    await api.vote.voteForProposal(proposal.id, selectedCandidates);
+    revalidator.revalidate();
+    toast('Vote Submitted', {
+      description: 'Your vote has been successfully recorded.',
+      duration: 3000,
+      dismissible: false,
+    });
+    navigate(PROPOSAL_HREFS.VOTE_ALL);
+  };
+
+  const handleSuggestionAccept = async () => {
+    if (!suggestedCandidates) return;
+    await api.vote.acceptVoteSuggestion(proposal.id);
+    revalidator.revalidate();
+    toast('Suggestion Accepted', {
+      description: 'The suggested vote has been accepted.',
+      duration: 3000,
+      dismissible: false,
+    });
+    navigate(PROPOSAL_HREFS.VOTE_ALL);
+  };
+
+  const handleSuggestionReject = async () => {
+    if (!suggestedCandidates) return;
+    await api.vote.rejectVoteSuggestion(proposal.id);
+    revalidator.revalidate();
+    toast('Suggestion Rejected', {
+      description: 'The suggested vote has been declined.',
+      duration: 3000,
+      dismissible: false,
+    });
+  };
 
   const renderVotingInterface = () => (
     <Card className="mb-8">
@@ -170,6 +255,41 @@ export default function ProposalVotePage() {
     </Card>
   );
 
+  console.log('suggestedCandidates', suggestedCandidates);
+  const renderSuggestionInterface = () =>
+    suggestedCandidates.length !== 0 && (
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-xl">Vote Suggestion</CardTitle>
+          <CardDescription>
+            A manager has suggested the following vote for you:
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            {suggestedCandidates.map(candidate => (
+              <span
+                key={candidate.id}
+                className="mb-2 mr-2 inline-block rounded-full bg-secondary px-3 py-1 text-sm font-semibold text-secondary-foreground"
+              >
+                {candidate.value}
+              </span>
+            ))}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button onClick={handleSuggestionReject} variant="outline">
+              <ThumbsDown className="mr-2 h-4 w-4" />
+              Decline
+            </Button>
+            <Button onClick={handleSuggestionAccept}>
+              <ThumbsUp className="mr-2 h-4 w-4" />
+              Accept
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="mb-8">
@@ -180,6 +300,8 @@ export default function ProposalVotePage() {
           </CardDescription>
         </CardHeader>
       </Card>
+
+      {renderSuggestionInterface()}
 
       <Tabs defaultValue="vote" className="space-y-4">
         <TabsList>
@@ -246,16 +368,7 @@ export default function ProposalVotePage() {
                       <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                       </DialogClose>
-                      <Button
-                        onClick={async () => {
-                          await api.vote.voteForProposal(
-                            proposal.id,
-                            selectedCandidates,
-                          );
-                          revalidator.revalidate();
-                          navigate(PROPOSAL_HREFS.VOTE_ALL);
-                        }}
-                      >
+                      <Button onClick={() => handleVoteSubmission()}>
                         Confirm Vote
                       </Button>
                     </DialogFooter>

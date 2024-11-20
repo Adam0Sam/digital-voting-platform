@@ -14,6 +14,8 @@ export function tablifyUser(user: User): TablifiedUser {
 }
 
 export function tablifyUserDeep(user: UserWithRelations): TablifiedUserDeep {
+  console.log('user', user);
+
   return {
     ...tablifyUser(user),
     managedProposals: user.managedProposals.length,

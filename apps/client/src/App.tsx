@@ -21,11 +21,39 @@ export const useUser = () => {
   return context;
 };
 
+export const UnreadNotificationContext = createContext<{
+  unreadNotifications: number;
+  mutate: () => {
+    incrementBy: (increment: number) => void;
+    decrementBy: (decrement: number) => void;
+    set: (count: number) => void;
+  };
+}>({
+  unreadNotifications: 0,
+  mutate: () => ({
+    incrementBy: () => {},
+    decrementBy: () => {},
+    set: () => {},
+  }),
+});
+
+export const useUnreadNotificationCount = () => {
+  const context = useContext(UnreadNotificationContext);
+  if (!context) {
+    throw new Error(
+      'useUnreadNotificationCount must be used within a UnreadNotificationContextProvider',
+    );
+  }
+  return context;
+};
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
   const [isFetchingUser, setIsFetchingUser] = useState(true);
 
-  const mutate = (newUserData: Partial<User>) => {
+  const mutateUser = (newUserData: Partial<User>) => {
     setUser(prevUserData => {
       if (!prevUserData) return null;
       return {
@@ -34,6 +62,20 @@ function App() {
       };
     });
   };
+
+  const mutateUnreadNotifications = () => ({
+    incrementBy: (increment: number) => {
+      setUnreadNotifications(prev => prev + increment);
+    },
+    decrementBy: (decrement: number) => {
+      setUnreadNotifications(prev =>
+        prev - decrement < 0 ? 0 : prev - decrement,
+      );
+    },
+    set: (count: number) => {
+      setUnreadNotifications(count);
+    },
+  });
 
   useEffect(() => {
     fetchUser()
@@ -44,14 +86,26 @@ function App() {
       })
       .catch(() => {
         setIsFetchingUser(false);
-      });
+      })
+      .then(() =>
+        api.notification
+          .getUnreadNotificationCount()
+          .then(setUnreadNotifications),
+      );
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, mutate, isFetchingUser }}>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-      </ThemeProvider>
+    <UserContext.Provider value={{ user, mutate: mutateUser, isFetchingUser }}>
+      <UnreadNotificationContext.Provider
+        value={{
+          unreadNotifications,
+          mutate: mutateUnreadNotifications,
+        }}
+      >
+        <ThemeProvider>
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </UnreadNotificationContext.Provider>
     </UserContext.Provider>
   );
 }

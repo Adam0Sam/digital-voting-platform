@@ -9,19 +9,44 @@ export class VoteApi {
     return await this.httpClient.post(`${proposalId}`, { candidates });
   }
 
-  async editVote(
+  async suggestVote(
     proposalId: string,
     voteId: string,
     candidates: Candidate[],
+  ) {
+    return await this.httpClient.put(`${proposalId}/suggestion/${voteId}`, {
+      candidates,
+    });
+  }
+
+  async disableUserVote(proposalId: string, voteId: string) {
+    return await this.httpClient.put(`${proposalId}/disable/${voteId}`);
+  }
+
+  async mutateUserVoteStatus(
+    proposalId: string,
+    voteId: string,
     status: VoteStatus,
   ) {
-    return await this.httpClient.put(`${proposalId}/${voteId}`, {
-      candidates,
-      status,
-    });
+    if (status === VoteStatus.DISABLED) {
+      return await this.disableUserVote(proposalId, voteId);
+    }
+    return await this.enableUserVote(proposalId, voteId);
+  }
+
+  async enableUserVote(proposalId: string, voteId: string) {
+    return await this.httpClient.put(`${proposalId}/enable/${voteId}`);
   }
 
   async getAnonVoteResults(proposalId: string) {
     return (await this.httpClient.get(`anon/${proposalId}`)) as Candidate[][];
+  }
+
+  async acceptVoteSuggestion(proposalId: string) {
+    return await this.httpClient.put(`${proposalId}/suggestion/accept`);
+  }
+
+  async rejectVoteSuggestion(proposalId: string) {
+    return await this.httpClient.put(`${proposalId}/suggestion/reject`);
   }
 }

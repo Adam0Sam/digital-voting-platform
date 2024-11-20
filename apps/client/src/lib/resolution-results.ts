@@ -1,4 +1,4 @@
-import { Candidate, VoteStatus, Vote, isVote } from '@ambassador';
+import { Candidate, Vote, isVote } from '@ambassador';
 import { VotingSystem } from '@ambassador/voting-system';
 
 export type VoteDistributionItem = {
@@ -11,7 +11,9 @@ function updateVoteCounts(
   tallyMap: Map<string, VoteDistributionItem>,
 ) {
   for (const candidate of candidates) {
-    if (!tallyMap.has(candidate.id)) continue;
+    if (!tallyMap.has(candidate.id)) {
+      throw new Error(`Candidate ${candidate.id} not found in tally map`);
+    }
     tallyMap.set(candidate.id, {
       ...tallyMap.get(candidate.id)!,
       voteCount: tallyMap.get(candidate.id)!.voteCount + 1,
@@ -63,14 +65,16 @@ export function calculateVoteDistribution(
 
   for (const vote of votes) {
     if (isVote(vote)) {
-      if (vote.status !== VoteStatus.RESOLVED) continue;
+      if (vote.candidates.length === 0) {
+        continue;
+      }
       updateVoteCounts(vote.candidates, voteTallyMap);
     } else {
       updateVoteCounts(vote, voteTallyMap);
     }
     finalizedVoteCount++;
   }
-
+  console.log('voteTallyMap', voteTallyMap);
   const voteDistribution = Array.from(voteTallyMap.values());
 
   return {
