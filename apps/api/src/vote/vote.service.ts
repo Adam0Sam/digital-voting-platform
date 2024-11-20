@@ -235,9 +235,9 @@ export class VoteService {
         message: `Accepted vote suggestion ${userVote.suggestedCandidates.map((candidate) => candidate.value).join(', ')}`,
       },
     });
-
+    console.log('userVote', userVote);
     this.notifier.notifyUsers({
-      userId: userVote.suggestedManagerId,
+      userId: userVote.suggestedBy.userId,
       proposalId,
       package: {
         type: NotificationType.VOTE_SUGGESTION_ACCEPTED,
@@ -259,7 +259,7 @@ export class VoteService {
         suggestedCandidates: {
           set: [],
         },
-        suggestedBy: null,
+        suggestedManagerId: null,
       },
     });
   }
@@ -315,7 +315,7 @@ export class VoteService {
     });
 
     this.notifier.notifyUsers({
-      userId: userVote.suggestedManagerId,
+      userId: userVote.suggestedBy.userId,
       proposalId,
       package: {
         type: NotificationType.VOTE_SUGGESTION_REJECTED,
@@ -333,7 +333,7 @@ export class VoteService {
         suggestedCandidates: {
           set: [],
         },
-        suggestedBy: null,
+        suggestedManagerId: null,
       },
     });
   }

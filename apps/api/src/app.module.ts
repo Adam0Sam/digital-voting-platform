@@ -14,6 +14,7 @@ import appConfig from './config/app.config';
 import { LoggerModule } from './logger/logger.module';
 import { ActionLogModule } from './action-log/action-log.module';
 import { NotificationModule } from './notification/notification.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -35,14 +36,8 @@ import { NotificationModule } from './notification/notification.module';
     LoggerModule,
     ActionLogModule,
     NotificationModule,
+    AdminModule,
   ],
-  providers: [
-    AppService,
-    // should I register JwtAuthGuard here globally before the RolesGuard?
-    // {
-    //   provide: 'APP_GUARD',
-    //   useClass: RolesGuard,
-    // },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -12,8 +12,6 @@ enum UserRole {
     TEACHER
     PARENT
     ADMIN
-    SUPER_ADMIN
-    GUEST
 }
 
 enum Grade {
@@ -254,10 +252,10 @@ model UserNotification {
     proposalId String
     createdAt  DateTime                @default(now())
     read       Boolean                 @default(false)
-    package    UserNotificationPackage @relation(fields: [userNotificationPackageId], references: [id])
+    package    UserNotificationPackage @relation(fields: [userNotificationPackageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-    user                      User     @relation(fields: [userId], references: [id])
-    proposal                  Proposal @relation(fields: [proposalId], references: [id])
+    user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposal                  Proposal @relation(fields: [proposalId], references: [id], onUpdate: Cascade)
     userNotificationPackageId String
 
     @@index([userId])

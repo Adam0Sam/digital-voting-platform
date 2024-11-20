@@ -1,21 +1,12 @@
 import { z } from "zod";
 
-export const UserRoles = [
-  "STUDENT",
-  "TEACHER",
-  "PARENT",
-  "ADMIN",
-  "SUPER_ADMIN",
-  "GUEST",
-] as const;
+export const UserRoles = ["STUDENT", "TEACHER", "PARENT", "ADMIN"] as const;
 
 export const UserRole = {
   STUDENT: "STUDENT",
   TEACHER: "TEACHER",
   PARENT: "PARENT",
   ADMIN: "ADMIN",
-  SUPER_ADMIN: "SUPER_ADMIN",
-  GUEST: "GUEST",
 } as const;
 
 export type UserRole = (typeof UserRoles)[number];

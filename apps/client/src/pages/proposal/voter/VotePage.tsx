@@ -183,7 +183,7 @@ export default function VotePage() {
 
   const handleSuggestionAccept = async () => {
     if (!suggestedCandidates) return;
-    api.vote.acceptVoteSuggestion(proposal.id);
+    await api.vote.acceptVoteSuggestion(proposal.id);
     revalidator.revalidate();
     toast('Suggestion Accepted', {
       description: 'The suggested vote has been accepted.',
@@ -195,7 +195,7 @@ export default function VotePage() {
 
   const handleSuggestionReject = async () => {
     if (!suggestedCandidates) return;
-    api.vote.rejectVoteSuggestion(proposal.id);
+    await api.vote.rejectVoteSuggestion(proposal.id);
     revalidator.revalidate();
     toast('Suggestion Rejected', {
       description: 'The suggested vote has been declined.',

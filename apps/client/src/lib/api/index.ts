@@ -5,6 +5,7 @@ export * from './error';
 
 import { AdminApi } from './admin.api';
 import { LoggerApi } from './logger.api';
+import { LogsApi } from './logs.api';
 import { ManagerRoleApi } from './manager-role.api';
 import { NotificationApi } from './notification.api';
 import { ProposalApi } from './proposal.api';
@@ -19,4 +20,5 @@ export const api = {
   admin: new AdminApi(),
   logger: new LoggerApi(),
   notification: new NotificationApi(),
+  logs: new LogsApi(),
 };

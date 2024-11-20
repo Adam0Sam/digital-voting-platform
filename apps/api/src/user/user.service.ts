@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserQueryDto } from './dto';
-import { CreateUserDto } from '@ambassador';
+import { CreateUserDto, UserRole } from '@ambassador';
 
 @Injectable()
 export class UserService {
@@ -50,6 +50,34 @@ export class UserService {
         votes: true,
         managedProposals: true,
       },
+    });
+  }
+
+  async editUser(userId: string, user: CreateUserDto) {
+    if (user.roles && user.roles.includes(UserRole.ADMIN)) {
+      throw new Error('Cannot set user as admin');
+    }
+
+    return await this.prisma.user.update({
+      where: {
+        id: userId,
+        NOT: {
+          roles: {
+            has: UserRole.ADMIN,
+          },
+        },
+      },
+      data: {
+        grade: user.grade,
+        email: user.email,
+        roles: user.roles,
+      },
+    });
+  }
+
+  async deleteUser(userId: string) {
+    return await this.prisma.user.delete({
+      where: { id: userId, NOT: { roles: { has: UserRole.ADMIN } } },
     });
   }
 }

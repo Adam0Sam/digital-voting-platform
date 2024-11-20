@@ -17,7 +17,7 @@ export const isUser = (value: unknown): value is User => {
   return UserSchema.safeParse(value).success;
 };
 
-const CreateUserDtoSchema = UserSchema.omit({ id: true });
+export const CreateUserDtoSchema = UserSchema.omit({ id: true });
 export type CreateUserDto = z.infer<typeof CreateUserDtoSchema>;
 
 export type UserRelations = {

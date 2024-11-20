@@ -8,7 +8,7 @@ import {
 } from '@ambassador';
 import { Prisma } from '@prisma/client';
 
-export class UpdateInputFactory {
+export class ProposalUpdateInputFactory {
   private _shouldResetVotes = false;
 
   constructor(

@@ -13,7 +13,7 @@ import { UserNotification } from '@ambassador';
 import { useUnreadNotificationCount } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Clock } from 'lucide-react';
 
 export default function NotificationPage() {
   const notifications = useDeferredLoadedData(LOADER_IDS.NOTIFICATIONS);
@@ -89,8 +89,8 @@ function Notifications() {
 
   return (
     <Tabs defaultValue="unread" className="w-full">
-      <div className="mb-4 flex items-center justify-between">
-        <TabsList>
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <TabsList className="mb-2 sm:mb-0">
           <TabsTrigger value="unread">
             Unread ({unreadNotifications.length})
           </TabsTrigger>
@@ -98,16 +98,23 @@ function Notifications() {
             Read ({readNotifications.size})
           </TabsTrigger>
         </TabsList>
-        {unreadNotifications.length > 0 && (
-          <Button
-            onClick={handleMarkAllAsRead}
-            variant="outline"
-            className="ml-auto"
-          >
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Mark All as Read
-          </Button>
-        )}
+        <div className="flex items-center space-x-2">
+          {unreadNotifications.length > 0 && (
+            <Button
+              onClick={handleMarkAllAsRead}
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0"
+            >
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Mark All as Read
+            </Button>
+          )}
+          <p className="text-sm text-muted-foreground">
+            <Clock className="mr-1 inline-block h-4 w-4" />
+            Auto-delete after 1 month
+          </p>
+        </div>
       </div>
 
       <TabsContent value="unread">

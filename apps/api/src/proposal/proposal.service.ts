@@ -13,7 +13,7 @@ import { LoggerService } from 'src/logger/logger.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { ProposalNotificationFactory } from 'src/notification/notification.factory';
 import { LogMessageFactory } from 'src/logger/log-message.factory';
-import { UpdateInputFactory } from './update-input.factory';
+import { ProposalUpdateInputFactory } from './proposal-update-input.factory';
 
 @Injectable()
 export class ProposalService {
@@ -140,7 +140,7 @@ export class ProposalService {
     }
     const permissions = prevProposal.managers[0].role.permissions;
 
-    const updateInputFactory = new UpdateInputFactory(
+    const updateInputFactory = new ProposalUpdateInputFactory(
       proposalId,
       proposalDto,
       permissions,
