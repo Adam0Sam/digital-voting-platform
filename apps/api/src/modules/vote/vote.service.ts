@@ -1,6 +1,9 @@
 import { Action } from '@ambassador';
-import { Candidate } from '@ambassador/candidate';
-import { VoteStatus } from '@ambassador/vote';
+import {
+  CreateVoteSuggestionsDto,
+  VoteSelection,
+  VoteStatus,
+} from '@ambassador/vote';
 import {
   BadRequestException,
   ConflictException,
@@ -23,7 +26,7 @@ export class VoteService {
   async voteForProposal(
     userId: string,
     proposalId: string,
-    candidates: Candidate[],
+    voteSelections: VoteSelection[],
   ) {
     const proposal = await this.prisma.proposal.findUnique({
       where: {
@@ -43,7 +46,7 @@ export class VoteService {
     if (!proposal) {
       throw new BadRequestException('Proposal not found');
     }
-    if (proposal.candidates.length < candidates.length) {
+    if (proposal.candidates.length < voteSelections.length) {
       throw new BadRequestException('Invalid number of candidates');
     }
     const userVote = proposal.votes.find((vote) => vote.userId === userId);
@@ -60,7 +63,11 @@ export class VoteService {
       proposal.candidates.map((choice) => choice.id),
     );
 
-    if (!candidates.every((choice) => availableChoiceIdSet.has(choice.id))) {
+    if (
+      !voteSelections.every((selection) =>
+        availableChoiceIdSet.has(selection.candidate.id),
+      )
+    ) {
       throw new BadRequestException('Invalid choice id');
     }
 
@@ -69,24 +76,30 @@ export class VoteService {
       info: {
         userId,
         proposalId,
-        message: `Voted for ${candidates.map((candidate) => candidate.value).join(', ')}`,
+        message: `Voted for ${voteSelections
+          .map(
+            (selection) => `${selection.candidate.value}
+          ${selection.rank ? `at rank ${selection.rank}` : ''}
+          `,
+          )
+          .join(', ')}`,
       },
     });
 
     return await this.prisma.vote.update({
       where: {
-        userId_proposalId: {
-          userId,
-          proposalId,
-        },
+        id: userVote.id,
       },
       data: {
-        candidates: {
-          set: candidates.map((choice) => ({
-            id: choice.id,
-          })),
-        },
         status: VoteStatus.RESOLVED,
+        voteSelections: {
+          createMany: {
+            data: voteSelections.map((selection) => ({
+              candidateId: selection.candidate.id,
+              rank: selection.rank,
+            })),
+          },
+        },
       },
     });
   }
@@ -95,7 +108,7 @@ export class VoteService {
     userId: string,
     proposalId: string,
     voteId: string,
-    candidates: Candidate[],
+    voteSuggestions: CreateVoteSuggestionsDto[],
   ) {
     const proposal = await this.prisma.proposal.findUnique({
       where: {
@@ -113,7 +126,7 @@ export class VoteService {
             id: voteId,
           },
           include: {
-            suggestedCandidates: true,
+            voteSelections: true,
             user: true,
           },
         },
@@ -134,7 +147,7 @@ export class VoteService {
       throw new BadRequestException('Proposal not found');
     }
 
-    if (proposal.candidates.length < candidates.length) {
+    if (proposal.candidates.length < voteSuggestions.length) {
       throw new BadRequestException('Invalid number of candidates');
     }
 
@@ -155,7 +168,16 @@ export class VoteService {
       info: {
         userId,
         proposalId,
-        message: `Suggested ${candidates.map((candidate) => candidate.value).join(', ')} for ${voteUser.personalNames.join(' ')}, ${voteUser.familyName}`,
+        message: `Suggested ${voteSuggestions
+          .map(
+            (suggestion) =>
+              `${suggestion.candidate.value} ${
+                suggestion.rank ? `at rank ${suggestion.rank}` : ''
+              }`,
+          )
+          .join(
+            ', ',
+          )} for ${voteUser.personalNames.join(' ')}, ${voteUser.familyName}`,
       },
     });
 
@@ -165,7 +187,7 @@ export class VoteService {
       package: {
         type: NotificationType.VOTE_SUGGESTION,
         content: {
-          candidates,
+          candidates: voteSuggestions.map((suggestion) => suggestion.candidate),
           suggestedBy: `${manager.user.personalNames.join(' ')}, ${manager.user.familyName}`,
         },
       },
@@ -176,12 +198,15 @@ export class VoteService {
         id: voteId,
       },
       data: {
-        suggestedCandidates: {
-          set: candidates.map((choice) => ({
-            id: choice.id,
-          })),
+        voteSuggestions: {
+          createMany: {
+            data: voteSuggestions.map((suggestion) => ({
+              ...suggestion,
+              candidateId: suggestion.candidate.id,
+              suggestedByManagerId: manager.id,
+            })),
+          },
         },
-        suggestedManagerId: proposal.managers[0].id,
       },
     });
   }
@@ -202,8 +227,13 @@ export class VoteService {
             userId,
           },
           include: {
-            suggestedCandidates: true,
-            suggestedBy: true,
+            voteSuggestions: {
+              include: {
+                suggestedByManager: true,
+                candidate: true,
+              },
+            },
+
             user: true,
           },
         },
@@ -216,14 +246,11 @@ export class VoteService {
 
     const userVote = proposal.votes.find((vote) => vote.userId === userId);
 
-    if (
-      !userVote.suggestedCandidates ||
-      userVote.suggestedCandidates.length === 0
-    ) {
+    if (!userVote.voteSuggestions || userVote.voteSuggestions.length === 0) {
       throw new ConflictException('No vote suggestions to accept');
     }
 
-    if (userVote.suggestedManagerId === '' || !userVote.suggestedBy) {
+    if (!userVote.voteSuggestions[0].suggestedByManager) {
       throw new ConflictException('No manager associated with vote suggestion');
     }
 
@@ -232,12 +259,12 @@ export class VoteService {
       info: {
         userId,
         proposalId,
-        message: `Accepted vote suggestion ${userVote.suggestedCandidates.map((candidate) => candidate.value).join(', ')}`,
+        message: `Accepted vote suggestion ${userVote.voteSuggestions.map((suggestion) => suggestion.candidate.value).join(', ')}`,
       },
     });
     console.log('userVote', userVote);
     this.notifier.notifyUsers({
-      userId: userVote.suggestedBy.userId,
+      userId: userVote.voteSuggestions[0].suggestedByManagerId,
       proposalId,
       package: {
         type: NotificationType.VOTE_SUGGESTION_ACCEPTED,
@@ -247,21 +274,32 @@ export class VoteService {
       },
     });
 
-    return await this.prisma.vote.update({
-      where: {
-        id: userVote.id,
-      },
-      data: {
-        status: VoteStatus.RESOLVED,
-        candidates: {
-          set: userVote.suggestedCandidates,
+    return await this.prisma.$transaction([
+      this.prisma.voteSelection.deleteMany({
+        where: {
+          voteId: userVote.id,
         },
-        suggestedCandidates: {
-          set: [],
+      }),
+      this.prisma.vote.update({
+        where: {
+          id: userVote.id,
         },
-        suggestedManagerId: null,
-      },
-    });
+        data: {
+          status: VoteStatus.RESOLVED,
+          voteSelections: {
+            createMany: {
+              data: userVote.voteSuggestions.map((suggestion) => ({
+                candidateId: suggestion.candidateId,
+                rank: suggestion.rank,
+              })),
+            },
+          },
+          voteSuggestions: {
+            set: [],
+          },
+        },
+      }),
+    ]);
   }
 
   async rejectVoteSuggestion(userId: string, proposalId: string) {
@@ -280,8 +318,12 @@ export class VoteService {
             userId,
           },
           include: {
-            suggestedCandidates: true,
-            suggestedBy: true,
+            voteSuggestions: {
+              include: {
+                candidate: true,
+                suggestedByManager: true,
+              },
+            },
             user: true,
           },
         },
@@ -294,14 +336,11 @@ export class VoteService {
 
     const userVote = proposal.votes.find((vote) => vote.userId === userId);
 
-    if (
-      !userVote.suggestedCandidates ||
-      userVote.suggestedCandidates.length === 0
-    ) {
+    if (!userVote.voteSuggestions || userVote.voteSuggestions.length === 0) {
       throw new ConflictException('No vote suggestions to reject');
     }
 
-    if (userVote.suggestedManagerId === '' || !userVote.suggestedBy) {
+    if (!userVote.voteSuggestions[0].suggestedByManager) {
       throw new ConflictException('No manager associated with vote suggestion');
     }
 
@@ -310,12 +349,12 @@ export class VoteService {
       info: {
         userId,
         proposalId,
-        message: `Rejected vote suggestion ${userVote.suggestedCandidates.map((candidate) => candidate.value).join(', ')}`,
+        message: `Rejected vote suggestion ${userVote.voteSuggestions.map((suggestion) => suggestion.candidate.value).join(', ')}`,
       },
     });
 
     this.notifier.notifyUsers({
-      userId: userVote.suggestedBy.userId,
+      userId: userVote.voteSuggestions[0].suggestedByManagerId,
       proposalId,
       package: {
         type: NotificationType.VOTE_SUGGESTION_REJECTED,
@@ -330,10 +369,9 @@ export class VoteService {
         id: userVote.id,
       },
       data: {
-        suggestedCandidates: {
+        voteSuggestions: {
           set: [],
         },
-        suggestedManagerId: null,
       },
     });
   }
@@ -470,7 +508,11 @@ export class VoteService {
             status: VoteStatus.RESOLVED,
           },
           include: {
-            candidates: true,
+            voteSelections: {
+              include: {
+                candidate: true,
+              },
+            },
           },
         },
       },
@@ -480,6 +522,6 @@ export class VoteService {
       throw new BadRequestException('Proposal not found');
     }
 
-    return proposal.votes.map((vote) => vote.candidates);
+    return proposal.votes.map((vote) => vote.voteSelections);
   }
 }

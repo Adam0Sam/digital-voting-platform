@@ -10,7 +10,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt/guard';
+import { JwtAuthGuard } from 'src/lib/auth/jwt/guard';
 import { ProposalService } from './proposal.service';
 import { ZodValidationPipe } from 'src/lib/pipes';
 import { GetUser } from 'src/lib/decorator';

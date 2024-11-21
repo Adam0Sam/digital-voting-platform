@@ -12,7 +12,13 @@ import {
 } from "../candidate/candidate.js";
 import { UserPatternSchema } from "./user-pattern.js";
 import { WithDatesAsStrings } from "../utils/util-types.js";
-import { VoteSchema } from "../vote/vote.js";
+import {
+  bindCandidatesToVote,
+  BindedVoteSchema,
+  pairCandidatesWithVoteSelections,
+  pairCandidatesWithVoteSuggestions,
+  VoteSchema,
+} from "../vote/vote.js";
 import { ManagerSchema } from "../manager/manager.js";
 import { VotingSystems } from "../voting-system/voting-system.js";
 
@@ -50,6 +56,33 @@ export const ProposalSchema = CreateProposalDtoSchema.omit({
   resolutionDate: z.coerce.date(),
 });
 export type Proposal = WithDatesAsStrings<z.infer<typeof ProposalSchema>>;
+
+export const BindedProposalSchema = ProposalSchema.omit({
+  votes: true,
+}).extend({
+  votes: z.array(BindedVoteSchema),
+});
+
+export type BindedProposal = WithDatesAsStrings<
+  z.infer<typeof BindedProposalSchema>
+>;
+
+export function bindProposal(proposal: Proposal): BindedProposal {
+  return {
+    ...proposal,
+    votes: proposal.votes.map((vote) => ({
+      ...vote,
+      voteSelections: pairCandidatesWithVoteSelections(
+        proposal.candidates,
+        vote.voteSelections
+      ),
+      suggestedVotes: pairCandidatesWithVoteSuggestions(
+        proposal.candidates,
+        vote?.suggestedVotes ?? []
+      ),
+    })),
+  };
+}
 
 export const IntrinsicProposalProps = ProposalSchema.omit({
   managers: true,

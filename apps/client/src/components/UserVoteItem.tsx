@@ -6,7 +6,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import ConfirmDialog from './ConfirmDialog';
-import { Candidate, ManagerPermissions, Vote, VoteStatus } from '@ambassador';
+import {
+  BindedVote,
+  Candidate,
+  ManagerPermissions,
+  VoteSelection,
+  VoteStatus,
+} from '@ambassador';
 import { PROPOSAL_HREFS } from '@/lib/routes';
 import {
   Tooltip,
@@ -19,11 +25,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 function getSelectedChoices(
-  selectedCandidates: Candidate[],
+  voteSelections: VoteSelection[],
   allCandidates: Candidate[],
 ) {
   const selectedChoiceIdSet = new Set(
-    selectedCandidates.map(choice => choice.id),
+    voteSelections.map(selection => selection.candidate.id),
   );
   return allCandidates.map(choice => ({
     ...choice,
@@ -32,14 +38,14 @@ function getSelectedChoices(
 }
 
 type UserVoteItemProps = {
-  vote: Vote;
-  onFocus?: (vote: Vote) => void;
+  vote: BindedVote;
+  onFocus?: (vote: BindedVote) => void;
   onBlur?: () => void;
   permissions?: ManagerPermissions;
   allChoices: Candidate[];
   maxChoiceCount: number;
   saveVoteSuggestionOffer: (voteId: string, candidates: Candidate[]) => void;
-  handleVoteStatusToggle: (vote: Vote) => Promise<void>;
+  handleVoteStatusToggle: (vote: BindedVote) => Promise<void>;
   isProposalActive: boolean;
 };
 
@@ -57,7 +63,7 @@ export default function UserVoteItem({
   const navigate = useNavigate();
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [choices, setChoices] = useState<(Candidate & { selected: boolean })[]>(
-    getSelectedChoices(vote.candidates, allChoices),
+    getSelectedChoices(vote.voteSelections, allChoices),
   );
   const [choiceOverflow, setChoiceOverflow] = useState(false);
 
@@ -157,7 +163,9 @@ export default function UserVoteItem({
             {vote.status}
           </Badge>
           <p className="mt-1 text-sm text-muted-foreground">
-            {vote.candidates.map(choice => choice.value).join(', ')}
+            {vote.voteSelections
+              .map(selection => selection.candidate.value)
+              .join(', ')}
           </p>
         </div>
         <div className="flex flex-col justify-center">

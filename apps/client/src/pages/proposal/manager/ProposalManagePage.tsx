@@ -1,8 +1,8 @@
 import { useParams, Outlet, useOutletContext } from 'react-router-dom';
 import { useSignedInUser } from '@/lib/hooks/useSignedInUser';
-import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
+import { LOADER_ID_MAP, LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
-import { ManagerPermissions, Proposal } from '@ambassador';
+import { ManagerPermissions } from '@ambassador';
 import ProposalManageDate from '@/components/proposal/manager/ProposalManageDate';
 import {
   Card,
@@ -16,13 +16,16 @@ import { APIError } from '@/lib/api';
 import { capitalizeFirstLetter } from '@/lib/utils';
 
 type ContextType = {
-  proposal: Proposal;
+  proposal: Awaited<
+    ReturnType<(typeof LOADER_ID_MAP)[typeof LOADER_IDS.MANAGER_PROPOSALS]>
+  >[number];
   permissions: ManagerPermissions;
 };
 
 export default function ProposalManagePage() {
   const { id: proposalId } = useParams();
   const proposals = useLoadedData(LOADER_IDS.MANAGER_PROPOSALS);
+
   const proposal = proposals.find(proposal => proposal.id === proposalId);
 
   const { user: signedInUser } = useSignedInUser();

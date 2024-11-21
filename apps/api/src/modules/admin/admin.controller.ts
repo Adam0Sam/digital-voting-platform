@@ -13,9 +13,9 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt/guard';
-import { Roles } from 'src/auth/rbac/decorator';
-import { UserRolesGuard } from 'src/auth/rbac/guard';
+import { JwtAuthGuard } from 'src/lib/auth/jwt/guard';
+import { Roles } from 'src/lib/auth/rbac/decorator';
+import { UserRolesGuard } from 'src/lib/auth/rbac/guard';
 import { ZodValidationPipe } from 'src/lib/pipes';
 import { UserService } from 'src/modules/user/user.service';
 

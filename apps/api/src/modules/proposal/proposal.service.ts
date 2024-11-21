@@ -179,7 +179,7 @@ export class ProposalService {
             suggestedIn: {
               set: [],
             },
-            votes: {
+            voteSelections: {
               set: [],
             },
           },
@@ -218,12 +218,13 @@ export class ProposalService {
             userId: user.id,
           },
           include: {
-            candidates: true,
-            suggestedCandidates: true,
+            voteSelections: true,
+            voteSuggestions: true,
           },
         },
       },
-    };
+    } satisfies Prisma.ProposalFindManyArgs;
+
     const proposals = await this.prisma.proposal.findMany(
       findManyProposalsInput,
     );
@@ -261,8 +262,8 @@ export class ProposalService {
       include: {
         votes: {
           include: {
-            candidates: true,
-            suggestedCandidates: true,
+            voteSelections: true,
+            voteSuggestions: true,
             user: true,
           },
         },

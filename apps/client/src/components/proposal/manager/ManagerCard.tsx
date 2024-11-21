@@ -17,21 +17,21 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { BarChartBig, CalendarRange, ArrowRight } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { Proposal } from '@ambassador';
+import { BindedProposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
 import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 import { getTimeLeft } from '@/lib/time-left';
-import { calculateVoteDistribution } from '@/lib/resolution-results';
+import { getVoteDistribution } from '@/lib/resolution-results';
 import { cacheFunction } from '@/lib/cache';
 
-const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
+const getCachedVoteDistribution = cacheFunction(getVoteDistribution);
 
 export default function ManagerCard({
   proposalData,
   className,
 }: {
-  proposalData: Proposal;
+  proposalData: BindedProposal;
   className?: string;
 }) {
   const { hasStarted, hasEnded, timeLeft } = getTimeLeft(
@@ -46,7 +46,7 @@ export default function ManagerCard({
 
   const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
     proposalData.candidates,
-    proposalData.votes,
+    proposalData.votes.map(vote => vote.voteSelections),
   );
 
   const voteProgress = (finalizedVoteCount / proposalData.votes.length) * 100;

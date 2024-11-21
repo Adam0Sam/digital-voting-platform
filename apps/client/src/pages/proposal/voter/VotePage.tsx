@@ -25,7 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { api } from '@/lib/api';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS } from '@/lib/routes';
-import { Candidate, ProposalStatus, VoteStatus } from '@ambassador';
+import { ProposalStatus, VoteSelection, VoteStatus } from '@ambassador';
 import {
   ArrowLeft,
   Clock,
@@ -151,8 +151,8 @@ export default function VotePage() {
   const navigate = useNavigate();
   const userVote = proposal.votes[0];
 
-  const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>(
-    userVote.candidates,
+  const [voteSelections, setVoteSelections] = useState<VoteSelection[]>(
+    userVote.voteSelections,
   );
 
   if (userVote.status === VoteStatus.DISABLED) {
@@ -165,13 +165,14 @@ export default function VotePage() {
   const proposalHasEnded =
     proposal.status === ProposalStatus.RESOLVED ||
     proposal.status === ProposalStatus.ABORTED;
-  const votesLeft = proposal.choiceCount - selectedCandidates.length;
+  const votesLeft = proposal.choiceCount - voteSelections.length;
   const progressPercentage =
-    (selectedCandidates.length / proposal.choiceCount) * 100;
-  const suggestedCandidates = userVote?.suggestedCandidates ?? [];
+    (voteSelections.length / proposal.choiceCount) * 100;
+  const suggestedCandidates =
+    userVote?.suggestedVotes?.map(suggestion => suggestion.candidate) ?? [];
 
   const handleVoteSubmission = async () => {
-    await api.vote.voteForProposal(proposal.id, selectedCandidates);
+    await api.vote.voteForProposal(proposal.id, voteSelections);
     revalidator.revalidate();
     toast('Vote Submitted', {
       description: 'Your vote has been successfully recorded.',
@@ -217,7 +218,7 @@ export default function VotePage() {
             {canVote ? `Votes left: ${votesLeft}` : 'Votes submitted'}
           </span>
           <span className="text-sm font-medium">
-            {selectedCandidates.length}/{proposal.choiceCount}
+            {voteSelections.length}/{proposal.choiceCount}
           </span>
         </div>
         <Progress value={progressPercentage} className="h-2" />
@@ -227,25 +228,33 @@ export default function VotePage() {
             <CandidateCard
               key={candidate.id}
               candidate={candidate}
-              isSelected={selectedCandidates.some(
-                selectedChoice => selectedChoice.value === candidate.value,
+              isSelected={voteSelections.some(
+                selection => selection.candidate.value === candidate.value,
               )}
               handleClick={() => {
                 if (!canVote) return;
-                setSelectedCandidates(prevCandidates => {
-                  if (
-                    prevCandidates.some(
-                      prevChoice => prevChoice.value === candidate.value,
-                    )
-                  ) {
-                    return prevCandidates.filter(
-                      prevChoice => prevChoice.value !== candidate.value,
-                    );
+
+                setVoteSelections(prevSelections => {
+                  console.log('prevSelections', prevSelections);
+                  if (proposal.choiceCount <= prevSelections.length) {
+                    return [
+                      {
+                        candidate,
+                        candidateId: candidate.id,
+                        voteId: userVote.id,
+                      },
+                    ];
                   }
-                  if (proposal.choiceCount <= prevCandidates.length) {
-                    return [candidate];
-                  }
-                  return [...prevCandidates, candidate];
+                  return [
+                    ...prevSelections.filter(
+                      selection => selection.candidate.id !== candidate.id,
+                    ),
+                    {
+                      voteId: userVote.id,
+                      candidate,
+                      candidateId: candidate.id,
+                    },
+                  ];
                 });
               }}
             />
@@ -255,7 +264,6 @@ export default function VotePage() {
     </Card>
   );
 
-  console.log('suggestedCandidates', suggestedCandidates);
   const renderSuggestionInterface = () =>
     suggestedCandidates.length !== 0 && (
       <Card className="mb-8">
@@ -340,7 +348,7 @@ export default function VotePage() {
                   <DialogTrigger asChild>
                     <Button
                       className="w-full sm:w-auto"
-                      disabled={selectedCandidates.length <= 0}
+                      disabled={voteSelections.length <= 0}
                     >
                       Submit Vote
                     </Button>
@@ -349,9 +357,9 @@ export default function VotePage() {
                     <DialogHeader>
                       <DialogTitle>Confirm Your Vote</DialogTitle>
                       <DialogDescription>
-                        {selectedCandidates.length === proposal.choiceCount
+                        {voteSelections.length === proposal.choiceCount
                           ? 'You have used all your available votes.'
-                          : `You have selected ${selectedCandidates.length} out of ${proposal.choiceCount} possible choices.`}
+                          : `You have selected ${voteSelections.length} out of ${proposal.choiceCount} possible choices.`}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="my-4">
@@ -359,8 +367,10 @@ export default function VotePage() {
                         Selected Candidates:
                       </h4>
                       <ul className="list-inside list-disc">
-                        {selectedCandidates.map(candidate => (
-                          <li key={candidate.id}>{candidate.value}</li>
+                        {voteSelections.map(selection => (
+                          <li key={selection.candidate.id}>
+                            {selection.candidate.value}
+                          </li>
                         ))}
                       </ul>
                     </div>

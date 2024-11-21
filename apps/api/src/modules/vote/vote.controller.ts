@@ -8,14 +8,19 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt/guard';
+import { JwtAuthGuard } from 'src/lib/auth/jwt/guard';
 import { VoteService } from './vote.service';
 import { GetUser } from 'src/lib/decorator';
 import { ZodValidationPipe } from 'src/lib/pipes';
-import { Candidate, CandidateSchema } from '@ambassador/candidate';
 import { User } from '@ambassador/user';
 import { z } from 'zod';
-import { VoteStatus } from '@ambassador';
+import {
+  CreateVoteSuggestionsDto,
+  CreateVoteSuggestionsDtoSchema,
+  VoteSelection,
+  VoteSelectionSchema,
+  VoteStatus,
+} from '@ambassador';
 
 @UseGuards(JwtAuthGuard)
 @Controller('vote')
@@ -25,11 +30,13 @@ export class VoteController {
   @Post(':id')
   async castUserVote(
     @Param('id') proposalId: string,
-    @Body('candidates', new ZodValidationPipe(z.array(CandidateSchema)))
-    candidates: Candidate[],
+    @Body('voteSelections', new ZodValidationPipe(z.array(VoteSelectionSchema)))
+    voteSelections: VoteSelection[],
     @GetUser('id') userId: User['id'],
   ) {
-    return this.voteService.voteForProposal(userId, proposalId, candidates);
+    console.log('voteSelections', voteSelections);
+
+    return this.voteService.voteForProposal(userId, proposalId, voteSelections);
   }
 
   @Put(':proposalId/suggestion/accept')
@@ -52,12 +59,20 @@ export class VoteController {
   async suggestVote(
     @Param('proposalId') proposalId: string,
     @Param('voteId') voteId: string,
-    @Body('candidates', new ZodValidationPipe(z.array(CandidateSchema)))
-    candidates: Candidate[],
+    @Body(
+      'voteSuggestions',
+      new ZodValidationPipe(z.array(CreateVoteSuggestionsDtoSchema)),
+    )
+    voteSuggestions: CreateVoteSuggestionsDto[],
     @Headers('user-agent') userAgent: string,
     @GetUser('id') userId: User['id'],
   ) {
-    return this.voteService.suggestVote(userId, proposalId, voteId, candidates);
+    return this.voteService.suggestVote(
+      userId,
+      proposalId,
+      voteId,
+      voteSuggestions,
+    );
   }
 
   @Put(':proposalId/disable/:voteId')

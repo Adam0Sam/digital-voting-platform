@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
 import { User } from '@ambassador/user';
-import { JwtAuthGuard } from 'src/auth/jwt/guard';
+import { JwtAuthGuard } from 'src/lib/auth/jwt/guard';
 import { UserService } from './user.service';
 import { GetUser } from '../../lib/decorator';
 import { ZodValidationPipe } from 'src/lib/pipes';

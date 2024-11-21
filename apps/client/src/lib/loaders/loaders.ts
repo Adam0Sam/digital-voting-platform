@@ -3,6 +3,7 @@ import URI from '../constants/uri-constants';
 import { AUTH_PATHS } from '../routes';
 import { api } from '../api';
 import { fetchUser } from '../fetch-user';
+import { bindProposal } from '@ambassador';
 
 export function authLoader() {
   const CLIENT_ID = 'ia';
@@ -17,12 +18,12 @@ function getUserQueryId(url: URL) {
 
 export async function userLogsLoader({ request }: { request: Request }) {
   const userId = getUserQueryId(new URL(request.url));
-  return await api.admin.getUserLogs(userId);
+  return await api.logs.getUserLogs(userId);
 }
 
 export async function managerProposalsLoader() {
   const data = await api.proposals.getAllManagerProposals();
-  return data;
+  return data.map(bindProposal);
 }
 
 export async function managerRolesLoader() {
@@ -44,7 +45,7 @@ export async function userLoader({ request }: { request: Request }) {
 
 export async function voterProposalsLoader() {
   const data = await api.proposals.getAllVoterProposals();
-  return data;
+  return data.map(proposal => bindProposal({ ...proposal, managers: [] }));
 }
 
 export async function unreadNotificationCountLoader() {

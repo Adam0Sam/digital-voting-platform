@@ -9,7 +9,7 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt/guard';
+import { JwtAuthGuard } from 'src/lib/auth/jwt/guard';
 import { ManagerRoleService } from './manager-role.service';
 import { ZodValidationPipe } from 'src/lib/pipes';
 

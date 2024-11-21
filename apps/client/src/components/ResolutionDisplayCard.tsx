@@ -1,4 +1,4 @@
-import { ProposalStatus, Candidate, Proposal } from '@ambassador';
+import { ProposalStatus, Proposal, VoteSelection } from '@ambassador';
 import { AlertTriangle, Clock, FileText, Award } from 'lucide-react';
 import { SingularLabeledBarChart } from './bar-chart';
 import {
@@ -11,19 +11,20 @@ import {
 import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import {
-  calculateVoteDistribution,
-  calculateWinningCandidate,
+  getVoteDistribution,
+  getWinningCandidate,
 } from '@/lib/resolution-results';
 import { cacheFunction } from '@/lib/cache';
+import { VotingSystem } from '@ambassador/voting-system';
 
-const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
-const getCachedWinningCandidate = cacheFunction(calculateWinningCandidate);
+const getCachedVoteDistribution = cacheFunction(getVoteDistribution);
+const getCachedWinningCandidate = cacheFunction(getWinningCandidate);
 
 function useAnonVoteResults(id: string) {
-  const [voteResults, setVoteResults] = useState<Candidate[][]>([]);
+  const [voteResults, setVoteResults] = useState<VoteSelection[][]>([]);
   useEffect(() => {
-    api.vote.getAnonVoteResults(id).then(candidates => {
-      setVoteResults(candidates);
+    api.vote.getAnonVoteResults(id).then(voteSelections => {
+      setVoteResults(voteSelections);
     });
   }, [id]);
   return voteResults;
@@ -33,7 +34,7 @@ type ResolutionDisplayCardProps = {
   proposal: Pick<Proposal, 'candidates' | 'status' | 'id' | 'votingSystem'>;
   className?: string;
   showHeader?: boolean;
-  voteDistributionCallback?: typeof calculateVoteDistribution;
+  voteDistributionCallback?: typeof getVoteDistribution;
 };
 
 export default function ResolutionDisplayCard({
@@ -51,10 +52,10 @@ export default function ResolutionDisplayCard({
     voteResults,
   );
 
-  const totalVotes = voteResults.length;
   const winningCandidate = getCachedWinningCandidate(
-    voteDistribution,
-    proposal.votingSystem,
+    proposal.candidates,
+    voteResults,
+    proposal.votingSystem as VotingSystem,
   );
 
   const statusConfig = {
@@ -113,7 +114,7 @@ export default function ResolutionDisplayCard({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-sm font-medium">Total Votes</p>
-              <p className="text-2xl font-bold">{totalVotes}</p>
+              <p className="text-2xl font-bold">{voteResults.length}</p>
             </div>
             <div>
               <p className="text-sm font-medium">Resolved Votes</p>
