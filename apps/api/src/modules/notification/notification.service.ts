@@ -1,4 +1,4 @@
-import { CreateUserNotificationDto } from '@ambassador';
+import { CreateUserNotificationDto } from '@ambassador/notifications';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
 

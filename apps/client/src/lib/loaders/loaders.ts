@@ -3,7 +3,6 @@ import URI from '../constants/uri-constants';
 import { AUTH_PATHS } from '../routes';
 import { api } from '../api';
 import { fetchUser } from '../fetch-user';
-import { bindProposal } from '@ambassador';
 
 export function authLoader() {
   const CLIENT_ID = 'ia';
@@ -22,17 +21,15 @@ export async function userLogsLoader({ request }: { request: Request }) {
 }
 
 export async function managerProposalsLoader() {
-  const data = await api.proposals.getAllManagerProposals();
-  return data.map(bindProposal);
+  return await api.proposals.getAllManagerProposals();
 }
 
 export async function managerRolesLoader() {
-  const data = await api.managerRole.getAuthoredRoles();
-  return data;
+  return await api.managerRole.getAuthoredRoles();
 }
 
 export async function userDeepInfoLoader() {
-  return api.admin.getAllUsersDeep();
+  return await api.admin.getAllUsersDeep();
 }
 
 export async function userLoader({ request }: { request: Request }) {
@@ -44,8 +41,7 @@ export async function userLoader({ request }: { request: Request }) {
 }
 
 export async function voterProposalsLoader() {
-  const data = await api.proposals.getAllVoterProposals();
-  return data.map(proposal => bindProposal({ ...proposal, managers: [] }));
+  return await api.proposals.getAllVoterProposals();
 }
 
 export async function unreadNotificationCountLoader() {

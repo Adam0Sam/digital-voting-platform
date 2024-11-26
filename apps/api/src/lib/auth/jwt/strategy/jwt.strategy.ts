@@ -44,9 +44,9 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     const familyName = payload.last_name;
     const grade = toGrade(payload.grade);
     const roles = payload.roles.map(toUserRole);
-    console.log('Validating');
+
     const user: User | null = await this.userService.findUser({
-      // @ts-expect-error idk
+      // @ts-expect-error weird typescript error
       personalNames,
       familyName,
       grade,

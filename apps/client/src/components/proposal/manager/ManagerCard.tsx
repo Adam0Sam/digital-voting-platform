@@ -17,7 +17,7 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { BarChartBig, CalendarRange, ArrowRight } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { BindedProposal } from '@ambassador';
+import { Proposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
 import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
@@ -31,7 +31,7 @@ export default function ManagerCard({
   proposalData,
   className,
 }: {
-  proposalData: BindedProposal;
+  proposalData: Proposal;
   className?: string;
 }) {
   const { hasStarted, hasEnded, timeLeft } = getTimeLeft(
