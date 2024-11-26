@@ -1,9 +1,10 @@
-import { Action } from '@ambassador';
 import {
-  CreateVoteSuggestionsDto,
+  Action,
+  CreateVoteSuggestionDto,
   VoteSelection,
   VoteStatus,
-} from '@ambassador/vote';
+} from '@ambassador';
+
 import {
   BadRequestException,
   ConflictException,
@@ -59,13 +60,13 @@ export class VoteService {
       throw new ConflictException('User vote disabled');
     }
 
-    const availableChoiceIdSet = new Set(
-      proposal.candidates.map((choice) => choice.id),
+    const candidateIdValueMap = new Map(
+      proposal.candidates.map((candidate) => [candidate.id, candidate.value]),
     );
 
     if (
       !voteSelections.every((selection) =>
-        availableChoiceIdSet.has(selection.candidate.id),
+        candidateIdValueMap.has(selection.candidateId),
       )
     ) {
       throw new BadRequestException('Invalid choice id');
@@ -78,7 +79,7 @@ export class VoteService {
         proposalId,
         message: `Voted for ${voteSelections
           .map(
-            (selection) => `${selection.candidate.value}
+            (selection) => `${candidateIdValueMap.get(selection.candidateId)} 
           ${selection.rank ? `at rank ${selection.rank}` : ''}
           `,
           )
@@ -95,7 +96,7 @@ export class VoteService {
         voteSelections: {
           createMany: {
             data: voteSelections.map((selection) => ({
-              candidateId: selection.candidate.id,
+              candidateId: selection.candidateId,
               rank: selection.rank,
             })),
           },
@@ -108,7 +109,7 @@ export class VoteService {
     userId: string,
     proposalId: string,
     voteId: string,
-    voteSuggestions: CreateVoteSuggestionsDto[],
+    voteSuggestions: CreateVoteSuggestionDto[],
   ) {
     const proposal = await this.prisma.proposal.findUnique({
       where: {
@@ -163,6 +164,18 @@ export class VoteService {
       );
     }
 
+    const candidateIdValueMap = new Map(
+      proposal.candidates.map((candidate) => [candidate.id, candidate.value]),
+    );
+
+    if (
+      !voteSuggestions.every((selection) =>
+        candidateIdValueMap.has(selection.candidateId),
+      )
+    ) {
+      throw new BadRequestException('Invalid choice id');
+    }
+
     this.logger.logAction({
       action: Action.OFFER_VOTE_SUGGESTION,
       info: {
@@ -171,7 +184,7 @@ export class VoteService {
         message: `Suggested ${voteSuggestions
           .map(
             (suggestion) =>
-              `${suggestion.candidate.value} ${
+              `${candidateIdValueMap.get(suggestion.candidateId)} ${
                 suggestion.rank ? `at rank ${suggestion.rank}` : ''
               }`,
           )
@@ -187,7 +200,9 @@ export class VoteService {
       package: {
         type: NotificationType.VOTE_SUGGESTION,
         content: {
-          candidates: voteSuggestions.map((suggestion) => suggestion.candidate),
+          candidateNames: voteSuggestions.map((suggestion) =>
+            candidateIdValueMap.get(suggestion.candidateId),
+          ),
           suggestedBy: `${manager.user.personalNames.join(' ')}, ${manager.user.familyName}`,
         },
       },
@@ -202,7 +217,7 @@ export class VoteService {
           createMany: {
             data: voteSuggestions.map((suggestion) => ({
               ...suggestion,
-              candidateId: suggestion.candidate.id,
+              candidateId: suggestion.candidateId,
               suggestedByManagerId: manager.id,
             })),
           },

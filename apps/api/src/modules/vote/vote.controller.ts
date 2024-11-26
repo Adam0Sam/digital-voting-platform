@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   Post,
   Put,
@@ -15,8 +14,8 @@ import { ZodValidationPipe } from 'src/lib/pipes';
 import { User } from '@ambassador/user';
 import { z } from 'zod';
 import {
-  CreateVoteSuggestionsDto,
-  CreateVoteSuggestionsDtoSchema,
+  CreateVoteSuggestionDto,
+  CreateVoteSuggestionDtoSchema,
   VoteSelection,
   VoteSelectionSchema,
   VoteStatus,
@@ -61,10 +60,9 @@ export class VoteController {
     @Param('voteId') voteId: string,
     @Body(
       'voteSuggestions',
-      new ZodValidationPipe(z.array(CreateVoteSuggestionsDtoSchema)),
+      new ZodValidationPipe(z.array(CreateVoteSuggestionDtoSchema)),
     )
-    voteSuggestions: CreateVoteSuggestionsDto[],
-    @Headers('user-agent') userAgent: string,
+    voteSuggestions: CreateVoteSuggestionDto[],
     @GetUser('id') userId: User['id'],
   ) {
     return this.voteService.suggestVote(

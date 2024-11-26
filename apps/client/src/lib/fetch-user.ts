@@ -5,7 +5,6 @@ import { api } from './api';
 export const fetchUser: (idToken?: string | null) => Promise<User> = async (
   idToken = JWTController.getItem(),
 ) => {
-  console.log('fetching user with ', idToken);
   if (!idToken) {
     throw new Error('No id_token found');
   }

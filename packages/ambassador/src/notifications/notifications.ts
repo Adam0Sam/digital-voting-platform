@@ -87,7 +87,7 @@ const genericNotificationContentSchemas = [
     type: z.literal(UserNotificationType.VOTE_SUGGESTION),
     content: z.object({
       suggestedBy: z.string().uuid(),
-      candidates: z.array(CandidateSchema),
+      candidateNames: z.array(z.string()),
     }),
   }),
   z.object({
