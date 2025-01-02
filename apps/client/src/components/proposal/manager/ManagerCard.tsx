@@ -20,10 +20,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Proposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
 import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
-import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
-import { getTimeLeft } from '@/lib/time-left';
+import StatusBadge from '@/components/StatusBadge';
 import { getVoteDistribution } from '@/lib/resolution-results';
 import { cacheFunction } from '@/lib/cache';
+import { getProposalStatusInfo } from '@/lib/get-status';
 
 const getCachedVoteDistribution = cacheFunction(getVoteDistribution);
 
@@ -34,41 +34,21 @@ export default function ManagerCard({
   proposalData: Proposal;
   className?: string;
 }) {
-  const { hasStarted, hasEnded, timeLeft } = getTimeLeft(
-    proposalData.startDate,
-    proposalData.endDate,
-  );
-
-  const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hoursLeft = Math.floor(
-    (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-  );
-
   const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
     proposalData.candidates,
     proposalData.votes.map(vote => vote.voteSelections),
   );
 
   const voteProgress = (finalizedVoteCount / proposalData.votes.length) * 100;
+  const proposalStatusInfo = getProposalStatusInfo(proposalData);
 
-  let badgeStatus: StatusBadgeProps['status'];
-  let statusText: string;
-
-  if (!hasStarted) {
-    badgeStatus = 'pending';
-    statusText = `Starts in ${daysLeft}d ${hoursLeft}h`;
-  } else if (!hasEnded) {
-    badgeStatus = 'active';
-    statusText = `Ends in ${daysLeft}d ${hoursLeft}h`;
-  } else {
-    badgeStatus = 'ended';
-    statusText = 'Ended';
-  }
   return (
     <Card className={cn('flex flex-col justify-between shadow-lg', className)}>
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between">
-          <StatusBadge status={badgeStatus}>{statusText}</StatusBadge>
+          <StatusBadge status={proposalStatusInfo.badgeStatus}>
+            {proposalStatusInfo.statusText}
+          </StatusBadge>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -96,10 +76,6 @@ export default function ManagerCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Time remaining:</span>
-          <span className="font-medium">{`${daysLeft}d ${hoursLeft}h`}</span>
-        </div>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Votes resolved:</span>

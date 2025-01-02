@@ -16,7 +16,7 @@ import { VoteStatus } from '@ambassador';
 export default function VoterLandingPage() {
   const proposals = useLoadedData(LOADER_IDS.VOTER_PROPOSALS);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('startDate');
+  const [sortBy, setSortBy] = useState<'startDate' | 'endDate'>('startDate');
   const [voteStatusFilter, setVoteStatusFilter] = useState<VoteStatus | 'all'>(
     'all',
   );
@@ -56,7 +56,10 @@ export default function VoterLandingPage() {
         </div>
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-5 w-5 text-gray-400" />
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select
+            value={sortBy}
+            onValueChange={(value: 'startDate' | 'endDate') => setSortBy(value)}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
