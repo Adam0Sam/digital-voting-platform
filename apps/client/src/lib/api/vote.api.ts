@@ -1,5 +1,5 @@
 import {
-  CreateVoteSuggestionsDto,
+  CreateVoteSuggestionDto,
   VoteSelection,
   VoteStatus,
 } from '@ambassador';
@@ -16,7 +16,7 @@ export class VoteApi {
   async suggestVote(
     proposalId: string,
     voteId: string,
-    voteSuggestions: CreateVoteSuggestionsDto[],
+    voteSuggestions: CreateVoteSuggestionDto[],
   ) {
     return await this.httpClient.put(`${proposalId}/suggestion/${voteId}`, {
       voteSuggestions,

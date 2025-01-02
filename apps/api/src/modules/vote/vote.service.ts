@@ -216,9 +216,9 @@ export class VoteService {
         voteSuggestions: {
           createMany: {
             data: voteSuggestions.map((suggestion) => ({
-              ...suggestion,
               candidateId: suggestion.candidateId,
               suggestedByManagerId: manager.id,
+              rank: suggestion.rank,
             })),
           },
         },
@@ -242,13 +242,17 @@ export class VoteService {
             userId,
           },
           include: {
+            proposal: {
+              include: {
+                managers: true,
+              },
+            },
             voteSuggestions: {
               include: {
                 suggestedByManager: true,
                 candidate: true,
               },
             },
-
             user: true,
           },
         },
@@ -277,9 +281,11 @@ export class VoteService {
         message: `Accepted vote suggestion ${userVote.voteSuggestions.map((suggestion) => suggestion.candidate.value).join(', ')}`,
       },
     });
-    console.log('userVote', userVote);
+
+    const suggestedByManager = userVote.voteSuggestions[0].suggestedByManager;
+
     this.notifier.notifyUsers({
-      userId: userVote.voteSuggestions[0].suggestedByManagerId,
+      userId: suggestedByManager.userId,
       proposalId,
       package: {
         type: NotificationType.VOTE_SUGGESTION_ACCEPTED,
@@ -291,6 +297,11 @@ export class VoteService {
 
     return await this.prisma.$transaction([
       this.prisma.voteSelection.deleteMany({
+        where: {
+          voteId: userVote.id,
+        },
+      }),
+      this.prisma.voteSuggestion.deleteMany({
         where: {
           voteId: userVote.id,
         },
@@ -308,9 +319,6 @@ export class VoteService {
                 rank: suggestion.rank,
               })),
             },
-          },
-          voteSuggestions: {
-            set: [],
           },
         },
       }),

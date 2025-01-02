@@ -31,15 +31,15 @@ export const VoteSchema = z.object({
   user: UserSchema,
   proposalId: z.string(),
   voteSelections: z.array(VoteSelectionSchema).min(1),
-  suggestedVotes: z.array(VoteSuggestionSchema).optional(),
+  voteSuggestions: z.array(VoteSuggestionSchema).optional(),
 });
 
 export const BindedVoteSchema = VoteSchema.omit({
   voteSelections: true,
-  suggestedVotes: true,
+  voteSuggestions: true,
 }).extend({
   voteSelections: z.array(VoteSelectionSchema).min(1),
-  suggestedVotes: z.array(VoteSuggestionSchema).optional(),
+  voteSuggestions: z.array(VoteSuggestionSchema).optional(),
 });
 
 export type BindedVote = z.infer<typeof BindedVoteSchema>;
