@@ -5,8 +5,8 @@ import { User } from '@ambassador';
 export class UserApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/user`);
 
-  async getOne(id_token: string) {
-    const user = (await this.httpClient.get('', { id_token })) as User;
+  async getOne() {
+    const user = (await this.httpClient.get('')) as User;
     return user;
   }
 

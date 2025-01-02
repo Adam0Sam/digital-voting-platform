@@ -7,7 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import UserVoteItem from '@/components/UserVoteItem';
-import { Candidate, ProposalStatus, Vote, VoteStatus } from '@ambassador';
+import {
+  BindedVote,
+  Candidate,
+  CreateVoteSuggestionsDto,
+  ProposalStatus,
+  Vote,
+  VoteStatus,
+} from '@ambassador';
 import {
   BarChart2,
   Users,
@@ -16,11 +23,11 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
-import { calculateVoteDistribution } from '@/lib/resolution-results';
+import { getVoteDistribution } from '@/lib/resolution-results';
 import { cacheFunction } from '@/lib/cache';
 import { useRevalidator } from 'react-router-dom';
 
-const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
+const getCachedVoteDistribution = cacheFunction(getVoteDistribution);
 
 function VoteDistributionChart({
   distribution,
@@ -63,39 +70,49 @@ type TabName = (typeof TAB_NAME)[keyof typeof TAB_NAME];
 export default function VoteOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
   const revalidator = useRevalidator();
-  if (proposal.votes.some(vote => vote.suggestedCandidates === undefined)) {
-    throw new Error(`Some votes do not have suggested candidates`);
-  }
-
+  console.log('proposal.votes', proposal.votes);
   const [currentTab, setCurrentTab] = useState<TabName>(TAB_NAME.VOTES);
-  const [suggestedVotes, setSuggestedVotes] = useState<Vote[]>(
+  const [suggestedVotes, setSuggestedVotes] = useState<BindedVote[]>(
     proposal.votes.map(vote => ({
       ...vote,
-      candidates: vote.suggestedCandidates ?? [],
+      voteSelections: vote.suggestedVotes ?? [],
     })),
   );
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
 
   const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
     proposal.candidates,
-    proposal.votes.filter(vote => vote.status === VoteStatus.RESOLVED),
+    proposal.votes
+      .filter(vote => vote.status === VoteStatus.RESOLVED)
+      .map(vote => vote.voteSelections),
   );
+
   const {
     voteDistribution: suggestedVoteDistribution,
     finalizedVoteCount: suggestedFinalizedVoteCount,
-  } = getCachedVoteDistribution(proposal.candidates, suggestedVotes);
+  } = getCachedVoteDistribution(
+    proposal.candidates,
+    suggestedVotes.map(vote => vote.voteSelections),
+  );
 
   const handleVoteSuggestionOffer = (
     voteId: string,
     candidates: Candidate[],
   ) => {
-    api.vote.suggestVote(proposal.id, voteId, candidates);
+    const voteSuggestions: CreateVoteSuggestionsDto[] = candidates.map(
+      candidate => ({
+        voteId,
+        candidateId: candidate.id,
+        candidate,
+      }),
+    );
+    api.vote.suggestVote(proposal.id, voteId, voteSuggestions);
     setSuggestedVotes(prevVotes => {
       const newVotes = prevVotes.map(prevVote => {
         if (prevVote.id === voteId) {
           return {
             ...prevVote,
-            candidates: candidates,
+            voteSelections: voteSuggestions,
           };
         }
         return prevVote;
@@ -188,7 +205,9 @@ export default function VoteOverviewPage() {
                       allChoices={proposal.candidates}
                       onFocus={vote => {
                         setHighlightedChoices(
-                          vote.candidates.map(candidate => candidate.value),
+                          vote.voteSelections.map(
+                            selection => selection.candidate.value,
+                          ),
                         );
                       }}
                       maxChoiceCount={proposal.choiceCount}
@@ -235,7 +254,9 @@ export default function VoteOverviewPage() {
                       allChoices={proposal.candidates}
                       onFocus={vote => {
                         setHighlightedChoices(
-                          vote.candidates.map(candidate => candidate.value),
+                          vote.voteSelections.map(
+                            selection => selection.candidate.value,
+                          ),
                         );
                       }}
                       maxChoiceCount={proposal.choiceCount}

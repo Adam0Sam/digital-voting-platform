@@ -1,4 +1,4 @@
-import { Candidate, Vote, isVote } from '@ambassador';
+import { BEST_RANK, Candidate, VoteSelection } from '@ambassador';
 import { VotingSystem } from '@ambassador/voting-system';
 
 export type VoteDistributionItem = {
@@ -6,76 +6,203 @@ export type VoteDistributionItem = {
   voteCount: number;
 };
 
-function updateVoteCounts(
-  candidates: Candidate[],
-  tallyMap: Map<string, VoteDistributionItem>,
+export function getFPTPWinner(voteDistribution: VoteDistributionItem[]) {
+  return voteDistribution.reduce((prev, current) =>
+    current.voteCount > prev.voteCount ? current : prev,
+  );
+}
+
+export function getAbsoluteMajorityWinner(
+  voteDistribution: VoteDistributionItem[],
 ) {
+  let totalVotes = 0;
+  let bestItem: VoteDistributionItem = {
+    optionValue: '',
+    voteCount: -Infinity,
+  };
+  for (const item of voteDistribution) {
+    totalVotes += item.voteCount;
+    if (item.voteCount > bestItem.voteCount) {
+      bestItem = item;
+    }
+  }
+
+  if (bestItem.voteCount > totalVotes / 2) {
+    return bestItem;
+  } else {
+    return null;
+  }
+}
+
+export function getRankedChoiceWinner(
+  candidates: Candidate[],
+  votes: VoteSelection[][],
+) {
+  const remainingCandidates = new Set(
+    candidates.map(candidate => candidate.id),
+  );
+  let winnerItem: VoteDistributionItem | null = null;
+
+  while (winnerItem === null) {
+    const { roundTallyMap, worstPerformingCandidate, bestPerformingCandidate } =
+      getRoundTally(candidates, votes, remainingCandidates);
+
+    if (
+      roundTallyMap.get(bestPerformingCandidate.candidateId)! >
+      votes.length / 2
+    ) {
+      winnerItem = {
+        optionValue: candidates.find(
+          candidate => candidate.id === bestPerformingCandidate.candidateId,
+        )!.value,
+        voteCount: roundTallyMap.get(bestPerformingCandidate.candidateId)!,
+      };
+    }
+
+    remainingCandidates.delete(worstPerformingCandidate.candidateId);
+  }
+
+  return winnerItem;
+}
+
+export function getWinningCandidate(
+  candidates: Candidate[],
+  votes: VoteSelection[][],
+  type: VotingSystem,
+) {
+  switch (type) {
+    case VotingSystem.FIRST_PAST_THE_POST:
+      return getFPTPWinner(
+        getVoteDistribution(candidates, votes).voteDistribution,
+      );
+    case VotingSystem.ABSOLUTE_MAJORITY:
+      return getAbsoluteMajorityWinner(
+        getVoteDistribution(candidates, votes).voteDistribution,
+      );
+    case VotingSystem.RANKED_CHOICE:
+      return getRankedChoiceWinner(candidates, votes);
+  }
+}
+
+function getCurrentFavoriteCandidates(
+  voteSelections: VoteSelection[],
+  availableCandidateIds: Set<string>,
+) {
+  let favoriteCandidates: string[] = [];
+  let currentFavoriteRank = Infinity;
+
+  for (const voteSelection of voteSelections) {
+    const rank = voteSelection?.rank ?? BEST_RANK;
+    if (
+      rank === currentFavoriteRank &&
+      availableCandidateIds.has(voteSelection.candidateId)
+    ) {
+      favoriteCandidates.push(voteSelection.candidateId);
+    } else if (
+      (voteSelection?.rank ?? BEST_RANK) < currentFavoriteRank &&
+      availableCandidateIds.has(voteSelection.candidateId)
+    ) {
+      favoriteCandidates = [voteSelection.candidateId];
+      currentFavoriteRank = rank;
+    }
+  }
+
+  return favoriteCandidates;
+}
+
+function getRoundTally(
+  candidates: Candidate[],
+  votes: VoteSelection[][],
+  availableCandidateIds: Set<string>,
+) {
+  const roundTallyMap = new Map<string, number>();
+
   for (const candidate of candidates) {
-    if (!tallyMap.has(candidate.id)) {
+    roundTallyMap.set(candidate.id, 0);
+  }
+
+  const worstPerformingCandidate: {
+    candidateId: string;
+    voteCount: number;
+  } = {
+    candidateId: candidates[0].id,
+    voteCount: Infinity,
+  };
+
+  const bestPerformingCandidate: {
+    candidateId: string;
+    voteCount: number;
+  } = {
+    candidateId: candidates[0].id,
+    voteCount: -Infinity,
+  };
+
+  for (const voteSelections of votes) {
+    const favoriteCandidateIds = getCurrentFavoriteCandidates(
+      voteSelections,
+      availableCandidateIds,
+    );
+    for (const favoriteCandidateId of favoriteCandidateIds) {
+      if (!roundTallyMap.has(favoriteCandidateId)) {
+        throw new Error(
+          `Candidate ${favoriteCandidateId} not found in tally map`,
+        );
+      }
+
+      const newVoteCount = roundTallyMap.get(favoriteCandidateId)! + 1;
+
+      if (newVoteCount < worstPerformingCandidate.voteCount) {
+        worstPerformingCandidate.candidateId = favoriteCandidateId;
+        worstPerformingCandidate.voteCount = newVoteCount;
+      }
+
+      if (newVoteCount > bestPerformingCandidate.voteCount) {
+        bestPerformingCandidate.candidateId = favoriteCandidateId;
+        bestPerformingCandidate.voteCount = newVoteCount;
+      }
+
+      roundTallyMap.set(favoriteCandidateId, newVoteCount);
+    }
+  }
+
+  return {
+    roundTallyMap,
+    worstPerformingCandidate,
+    bestPerformingCandidate,
+  };
+}
+
+export function getVoteDistribution(
+  candidates: Candidate[],
+  votes: VoteSelection[][],
+): {
+  voteDistribution: VoteDistributionItem[];
+  finalizedVoteCount: number;
+} {
+  const finalizedVoteCount = votes.reduce((acc, voteSelections) => {
+    if (voteSelections.length === 0) {
+      return acc;
+    }
+    return acc + 1;
+  }, 0);
+
+  const { roundTallyMap } = getRoundTally(
+    candidates,
+    votes,
+    new Set(candidates.map(candidate => candidate.id)),
+  );
+
+  const voteDistribution: VoteDistributionItem[] = [];
+  for (const candidate of candidates) {
+    if (!roundTallyMap.has(candidate.id)) {
       throw new Error(`Candidate ${candidate.id} not found in tally map`);
     }
-    tallyMap.set(candidate.id, {
-      ...tallyMap.get(candidate.id)!,
-      voteCount: tallyMap.get(candidate.id)!.voteCount + 1,
-    });
-  }
-}
 
-export function calculateWinningCandidate(
-  voteDistribution: VoteDistributionItem[],
-  votingSystem: VotingSystem,
-) {
-  function firstPastThePost() {
-    return voteDistribution.reduce((prev, current) =>
-      current.voteCount > prev.voteCount ? current : prev,
-    );
-  }
-
-  function absoluteMajority() {
-    const totalVotes = voteDistribution.reduce(
-      (acc, curr) => acc + curr.voteCount,
-      0,
-    );
-    const majority = totalVotes / 2;
-    return voteDistribution.find(candidate => candidate.voteCount > majority);
-  }
-
-  switch (votingSystem) {
-    case VotingSystem.FIRST_PAST_THE_POST:
-      return firstPastThePost();
-    case VotingSystem.ABSOLUTE_MAJORITY:
-      return absoluteMajority();
-    case VotingSystem.RANKED_CHOICE:
-      throw new Error('Ranked choice voting not supported');
-  }
-}
-
-export function calculateVoteDistribution(
-  candidates: Candidate[],
-  votes: Vote[] | Candidate[][],
-) {
-  const voteTallyMap = new Map<string, VoteDistributionItem>();
-  let finalizedVoteCount = 0;
-  for (const candidate of candidates) {
-    voteTallyMap.set(candidate.id, {
+    voteDistribution.push({
       optionValue: candidate.value,
-      voteCount: 0,
+      voteCount: roundTallyMap.get(candidate.id)!,
     });
   }
-
-  for (const vote of votes) {
-    if (isVote(vote)) {
-      if (vote.candidates.length === 0) {
-        continue;
-      }
-      updateVoteCounts(vote.candidates, voteTallyMap);
-    } else {
-      updateVoteCounts(vote, voteTallyMap);
-    }
-    finalizedVoteCount++;
-  }
-  console.log('voteTallyMap', voteTallyMap);
-  const voteDistribution = Array.from(voteTallyMap.values());
 
   return {
     voteDistribution,

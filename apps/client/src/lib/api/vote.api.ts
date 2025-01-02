@@ -1,21 +1,25 @@
-import { Candidate, VoteStatus } from '@ambassador';
+import {
+  CreateVoteSuggestionsDto,
+  VoteSelection,
+  VoteStatus,
+} from '@ambassador';
 import URI from '../constants/uri-constants';
 import { HttpClient } from './http-client';
 
 export class VoteApi {
   private readonly httpClient = new HttpClient(`${URI.SERVER_URL}/vote`);
 
-  async voteForProposal(proposalId: string, candidates: Candidate[]) {
-    return await this.httpClient.post(`${proposalId}`, { candidates });
+  async voteForProposal(proposalId: string, voteSelections: VoteSelection[]) {
+    return await this.httpClient.post(`${proposalId}`, { voteSelections });
   }
 
   async suggestVote(
     proposalId: string,
     voteId: string,
-    candidates: Candidate[],
+    voteSuggestions: CreateVoteSuggestionsDto[],
   ) {
     return await this.httpClient.put(`${proposalId}/suggestion/${voteId}`, {
-      candidates,
+      voteSuggestions,
     });
   }
 
@@ -39,7 +43,9 @@ export class VoteApi {
   }
 
   async getAnonVoteResults(proposalId: string) {
-    return (await this.httpClient.get(`anon/${proposalId}`)) as Candidate[][];
+    return (await this.httpClient.get(
+      `anon/${proposalId}`,
+    )) as VoteSelection[][];
   }
 
   async acceptVoteSuggestion(proposalId: string) {

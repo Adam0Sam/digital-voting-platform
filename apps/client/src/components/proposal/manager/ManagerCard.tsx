@@ -22,10 +22,10 @@ import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledC
 import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge, { StatusBadgeProps } from '@/components/StatusBadge';
 import { getTimeLeft } from '@/lib/time-left';
-import { calculateVoteDistribution } from '@/lib/resolution-results';
+import { getVoteDistribution } from '@/lib/resolution-results';
 import { cacheFunction } from '@/lib/cache';
 
-const getCachedVoteDistribution = cacheFunction(calculateVoteDistribution);
+const getCachedVoteDistribution = cacheFunction(getVoteDistribution);
 
 export default function ManagerCard({
   proposalData,
@@ -46,7 +46,7 @@ export default function ManagerCard({
 
   const { voteDistribution, finalizedVoteCount } = getCachedVoteDistribution(
     proposalData.candidates,
-    proposalData.votes,
+    proposalData.votes.map(vote => vote.voteSelections),
   );
 
   const voteProgress = (finalizedVoteCount / proposalData.votes.length) * 100;

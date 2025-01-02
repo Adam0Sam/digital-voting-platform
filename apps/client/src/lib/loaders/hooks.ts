@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom';
 import { LOADER_IDS, LoaderReturnType } from './loader-map';
 import { DeferredData } from '.';
+
 export const useLoadedData = <T extends keyof typeof LOADER_IDS>(id: T) => {
   return useRouteLoaderData(id) as LoaderReturnType<T>;
 };

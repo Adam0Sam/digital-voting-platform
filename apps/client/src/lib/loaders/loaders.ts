@@ -17,21 +17,19 @@ function getUserQueryId(url: URL) {
 
 export async function userLogsLoader({ request }: { request: Request }) {
   const userId = getUserQueryId(new URL(request.url));
-  return await api.admin.getUserLogs(userId);
+  return await api.logs.getUserLogs(userId);
 }
 
 export async function managerProposalsLoader() {
-  const data = await api.proposals.getAllManagerProposals();
-  return data;
+  return await api.proposals.getAllManagerProposals();
 }
 
 export async function managerRolesLoader() {
-  const data = await api.managerRole.getAuthoredRoles();
-  return data;
+  return await api.managerRole.getAuthoredRoles();
 }
 
 export async function userDeepInfoLoader() {
-  return api.admin.getAllUsersDeep();
+  return await api.admin.getAllUsersDeep();
 }
 
 export async function userLoader({ request }: { request: Request }) {
@@ -43,8 +41,7 @@ export async function userLoader({ request }: { request: Request }) {
 }
 
 export async function voterProposalsLoader() {
-  const data = await api.proposals.getAllVoterProposals();
-  return data;
+  return await api.proposals.getAllVoterProposals();
 }
 
 export async function unreadNotificationCountLoader() {

@@ -11,7 +11,7 @@ import { Loader2, AlertCircle, Mail } from 'lucide-react';
 export default function RootLayout() {
   const { user, isFetchingUser } = useUser();
   const navigate = useNavigate();
-
+  console.log('user', user);
   if (isFetchingUser) {
     return (
       <div className="flex h-screen items-center justify-center">

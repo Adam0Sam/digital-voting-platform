@@ -1,7 +1,28 @@
 import { z } from "zod";
-import { User, UserSchema } from "../user/user.js";
-import { VoteStatus, VoteStatusOptions } from "./vote-status.js";
-import { Candidate, CandidateSchema } from "../candidate/candidate.js";
+import { UserSchema } from "../user/user.js";
+import { VoteStatusOptions } from "./vote-status.js";
+
+export const VoteSelectionSchema = z.object({
+  voteId: z.string().uuid(),
+  candidateId: z.string().uuid(),
+  rank: z.number().optional(),
+});
+
+export type VoteSelection = z.infer<typeof VoteSelectionSchema>;
+
+export const VoteSuggestionSchema = VoteSelectionSchema.extend({
+  suggestedByManagerId: z.string().uuid(),
+});
+
+export type VoteSuggestion = z.infer<typeof VoteSuggestionSchema>;
+
+export const CreateVoteSuggestionDtoSchema = VoteSuggestionSchema.omit({
+  suggestedByManagerId: true,
+});
+
+export type CreateVoteSuggestionDto = z.infer<
+  typeof CreateVoteSuggestionDtoSchema
+>;
 
 export const VoteSchema = z.object({
   id: z.string(),
@@ -9,18 +30,24 @@ export const VoteSchema = z.object({
   userId: z.string(),
   user: UserSchema,
   proposalId: z.string(),
-  candidates: z.array(CandidateSchema),
-  suggestedCandidates: z.array(CandidateSchema).optional(),
-  suggestedBy: z.string().uuid().optional(),
+  voteSelections: z.array(VoteSelectionSchema).min(1),
+  suggestedVotes: z.array(VoteSuggestionSchema).optional(),
 });
 
-export function isVote(v: unknown): v is Vote {
-  try {
-    VoteSchema.parse(v);
-    return true;
-  } catch {
-    return false;
-  }
+export const BindedVoteSchema = VoteSchema.omit({
+  voteSelections: true,
+  suggestedVotes: true,
+}).extend({
+  voteSelections: z.array(VoteSelectionSchema).min(1),
+  suggestedVotes: z.array(VoteSuggestionSchema).optional(),
+});
+
+export type BindedVote = z.infer<typeof BindedVoteSchema>;
+
+export function isVoteSelection(v: unknown): v is VoteSelection {
+  return VoteSchema.safeParse(v).success;
 }
 
 export type Vote = z.infer<typeof VoteSchema>;
+
+export const BEST_RANK = 1;

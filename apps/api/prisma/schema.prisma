@@ -119,8 +119,8 @@ model Candidate {
     proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     proposalId String
 
-    votes       Vote[] @relation("VoteSelections")
-    suggestedIn Vote[] @relation("ManagerSuggestions")
+    suggestedIn    VoteSuggestion[]
+    voteSelections VoteSelection[]
 
     @@unique([value, proposalId])
 }
@@ -166,7 +166,8 @@ model Manager {
 
     user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     userId String
-    Vote   Vote[]
+
+    voteSuggestions VoteSuggestion[]
 }
 
 enum VoteStatus {
@@ -179,16 +180,44 @@ model Vote {
     id     String     @id @default(uuid())
     status VoteStatus @default(PENDING)
 
-    user                User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    userId              String
-    proposal            Proposal    @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    proposalId          String
-    candidates          Candidate[] @relation("VoteSelections")
-    suggestedCandidates Candidate[] @relation("ManagerSuggestions")
-    suggestedBy         Manager?    @relation(fields: [suggestedManagerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    suggestedManagerId  String?
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    userId     String
+    proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    proposalId String
+
+    voteSelections  VoteSelection[]
+    voteSuggestions VoteSuggestion[]
 
     @@unique([userId, proposalId])
+}
+
+model VoteSelection {
+    id String @id @default(uuid())
+
+    vote   Vote?   @relation(fields: [voteId], references: [id])
+    voteId String?
+
+    candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    candidateId String
+
+    rank Int @default(1)
+
+    @@index([voteId])
+}
+
+model VoteSuggestion {
+    id String @id @default(uuid())
+
+    vote   Vote?   @relation(fields: [voteId], references: [id])
+    voteId String?
+
+    candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    candidateId String
+
+    suggestedByManager   Manager @relation(fields: [suggestedByManagerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    suggestedByManagerId String  @unique
+
+    rank Int @default(1)
 }
 
 model UserActionLog {

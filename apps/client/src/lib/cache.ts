@@ -7,7 +7,7 @@ class ValidCache<T> {
 
   private validateSize() {
     if (this.cacheStore.size > this.maxCacheSize) {
-      const oldestKey = Array.from(this.cacheStore.entries()).reduce(
+      const oldestEntry = Array.from(this.cacheStore.entries()).reduce(
         (oldest, [key, { timestamp }]) => {
           if (timestamp < oldest.timestamp) {
             return { key, timestamp };
@@ -16,7 +16,7 @@ class ValidCache<T> {
         },
         { key: '', timestamp: Date.now() },
       );
-      this.cacheStore.delete(oldestKey.key);
+      this.cacheStore.delete(oldestEntry.key);
     }
   }
 
