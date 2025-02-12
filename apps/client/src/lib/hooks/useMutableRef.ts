@@ -8,6 +8,7 @@ export default function useMutableRef<T>(value: T | null) {
       setMutableRef(node);
     }
   }, []);
+
   return {
     setRef,
     mutableRef,
