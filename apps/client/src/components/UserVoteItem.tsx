@@ -29,7 +29,7 @@ function getSelectedChoices(
   allCandidates: Candidate[],
 ) {
   const selectedChoiceIdSet = new Set(
-    voteSelections.map(selection => selection.candidate.id),
+    voteSelections.map(selection => selection.candidateId),
   );
   return allCandidates.map(choice => ({
     ...choice,
@@ -164,7 +164,11 @@ export default function UserVoteItem({
           </Badge>
           <p className="mt-1 text-sm text-muted-foreground">
             {vote.voteSelections
-              .map(selection => selection.candidate.value)
+              .map(
+                selection =>
+                  allChoices.find(choice => choice.id === selection.candidateId)
+                    ?.value,
+              )
               .join(', ')}
           </p>
         </div>

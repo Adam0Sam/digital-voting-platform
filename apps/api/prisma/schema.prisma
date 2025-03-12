@@ -215,7 +215,7 @@ model VoteSuggestion {
     candidateId String
 
     suggestedByManager   Manager @relation(fields: [suggestedByManagerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    suggestedByManagerId String  @unique
+    suggestedByManagerId String
 
     rank Int @default(1)
 }
@@ -287,6 +287,5 @@ model UserNotification {
     proposal                  Proposal @relation(fields: [proposalId], references: [id], onUpdate: Cascade)
     userNotificationPackageId String
 
-    @@index([userId])
-    @@index([proposalId])
+    @@index([userId, proposalId])
 }

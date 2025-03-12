@@ -150,7 +150,7 @@ export default function VotePage() {
   const revalidator = useRevalidator();
   const navigate = useNavigate();
   const userVote = proposal.votes[0];
-
+  console.log('userVote', userVote);
   const [voteSelections, setVoteSelections] = useState<VoteSelection[]>(
     userVote.voteSelections,
   );
@@ -168,8 +168,14 @@ export default function VotePage() {
   const votesLeft = proposal.choiceCount - voteSelections.length;
   const progressPercentage =
     (voteSelections.length / proposal.choiceCount) * 100;
-  const suggestedCandidates =
-    userVote?.suggestedVotes?.map(suggestion => suggestion.candidate) ?? [];
+  const suggestedCandidateIds =
+    userVote?.voteSuggestions?.map(suggestion => suggestion.candidateId) ?? [];
+
+  console.log('suggestedCandidateIds', suggestedCandidateIds);
+
+  const candidateNameIdMap = new Map(
+    proposal.candidates.map(candidate => [candidate.id, candidate.value]),
+  );
 
   const handleVoteSubmission = async () => {
     await api.vote.voteForProposal(proposal.id, voteSelections);
@@ -183,7 +189,7 @@ export default function VotePage() {
   };
 
   const handleSuggestionAccept = async () => {
-    if (!suggestedCandidates) return;
+    if (!suggestedCandidateIds) return;
     await api.vote.acceptVoteSuggestion(proposal.id);
     revalidator.revalidate();
     toast('Suggestion Accepted', {
@@ -195,7 +201,7 @@ export default function VotePage() {
   };
 
   const handleSuggestionReject = async () => {
-    if (!suggestedCandidates) return;
+    if (!suggestedCandidateIds) return;
     await api.vote.rejectVoteSuggestion(proposal.id);
     revalidator.revalidate();
     toast('Suggestion Rejected', {
@@ -229,7 +235,7 @@ export default function VotePage() {
               key={candidate.id}
               candidate={candidate}
               isSelected={voteSelections.some(
-                selection => selection.candidate.value === candidate.value,
+                selection => selection.candidateId === candidate.id,
               )}
               handleClick={() => {
                 if (!canVote) return;
@@ -247,7 +253,7 @@ export default function VotePage() {
                   }
                   return [
                     ...prevSelections.filter(
-                      selection => selection.candidate.id !== candidate.id,
+                      selection => selection.candidateId !== candidate.id,
                     ),
                     {
                       voteId: userVote.id,
@@ -265,7 +271,7 @@ export default function VotePage() {
   );
 
   const renderSuggestionInterface = () =>
-    suggestedCandidates.length !== 0 && (
+    suggestedCandidateIds.length !== 0 && (
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="text-xl">Vote Suggestion</CardTitle>
@@ -275,12 +281,12 @@ export default function VotePage() {
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            {suggestedCandidates.map(candidate => (
+            {suggestedCandidateIds.map(candidateId => (
               <span
-                key={candidate.id}
+                key={candidateId}
                 className="mb-2 mr-2 inline-block rounded-full bg-secondary px-3 py-1 text-sm font-semibold text-secondary-foreground"
               >
-                {candidate.value}
+                {candidateNameIdMap.get(candidateId)}
               </span>
             ))}
           </div>
@@ -368,8 +374,8 @@ export default function VotePage() {
                       </h4>
                       <ul className="list-inside list-disc">
                         {voteSelections.map(selection => (
-                          <li key={selection.candidate.id}>
-                            {selection.candidate.value}
+                          <li key={selection.candidateId}>
+                            {candidateNameIdMap.get(selection.candidateId)!}
                           </li>
                         ))}
                       </ul>

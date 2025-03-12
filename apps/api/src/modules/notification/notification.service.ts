@@ -1,4 +1,4 @@
-import { CreateUserNotificationDto } from '@ambassador';
+import { CreateUserNotificationDto } from '@ambassador/notifications';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
 
@@ -17,6 +17,11 @@ export class NotificationService {
       });
 
     if (isDedicatedToSingleUser) {
+      console.log('notification', {
+        userId: notification.userId,
+        proposalId: notification.proposalId,
+        userNotificationPackageId: notificationPackage.id,
+      });
       return this.prisma.userNotification.create({
         data: {
           userId: notification.userId,
