@@ -17,11 +17,6 @@ export class NotificationService {
       });
 
     if (isDedicatedToSingleUser) {
-      console.log('notification', {
-        userId: notification.userId,
-        proposalId: notification.proposalId,
-        userNotificationPackageId: notificationPackage.id,
-      });
       return this.prisma.userNotification.create({
         data: {
           userId: notification.userId,

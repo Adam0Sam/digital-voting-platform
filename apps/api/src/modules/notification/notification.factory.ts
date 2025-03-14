@@ -1,8 +1,6 @@
 import {
-  CreateBaseUserNotificationDto,
   CreateUserNotificationDto,
   isMutableIntrinsicProposalProp,
-  isMutableProposalKey,
   Proposal,
   UserNotificationType,
 } from '@ambassador';
@@ -20,70 +18,64 @@ export class ProposalNotificationFactory {
     const notifications: CreateUserNotificationDto[] = [];
 
     for (const key in this.updateInput) {
-      if (!isMutableProposalKey(key)) {
+      if (!isMutableIntrinsicProposalProp(key)) {
         continue;
       }
 
-      if (isMutableIntrinsicProposalProp(key)) {
-        if (key === 'status') {
-          const baseNotification: CreateBaseUserNotificationDto = {
-            proposalId: this.meta.proposalId,
-            userId: this.meta.userId,
-          };
-
-          switch (this.updateInput[key]) {
-            case 'ABORTED':
-              notifications.push({
-                ...baseNotification,
-                package: {
-                  type: UserNotificationType.PROPOSAL_ABORTION,
-                  content: {
-                    reason: 'Proposal was aborted',
-                  },
+      if (key === 'status') {
+        switch (this.updateInput[key]) {
+          case 'ABORTED':
+            notifications.push({
+              proposalId: this.meta.proposalId,
+              package: {
+                type: UserNotificationType.PROPOSAL_ABORTION,
+                content: {
+                  reason: 'Proposal was aborted',
                 },
-              });
-              break;
-
-            case 'ACTIVE':
-              notifications.push({
-                ...baseNotification,
-                package: {
-                  type: UserNotificationType.PROPOSAL_ACTIVATION,
-                  content: {
-                    startDate: new Date(this.prevProposal.startDate),
-                    endDate: new Date(this.prevProposal.endDate),
-                  },
-                },
-              });
-              break;
-
-            case 'RESOLVED':
-              notifications.push({
-                ...baseNotification,
-                package: {
-                  type: UserNotificationType.PROPOSAL_RESOLUTION,
-                  content: null,
-                },
-              });
-              break;
-          }
-        } else {
-          notifications.push({
-            proposalId: this.meta.proposalId,
-            package: {
-              type: UserNotificationType.PROPOSAL_UPDATE,
-              content: {
-                updatedFields: [key],
-                updatedValues: Array.isArray(this.updateInput[key])
-                  ? this.updateInput[key]
-                  : [this.updateInput[key]],
               },
-            },
-          });
+            });
+            break;
+
+          case 'ACTIVE':
+            notifications.push({
+              proposalId: this.meta.proposalId,
+              package: {
+                type: UserNotificationType.PROPOSAL_ACTIVATION,
+                content: {
+                  startDate: new Date(this.prevProposal.startDate),
+                  endDate: new Date(this.prevProposal.endDate),
+                },
+              },
+            });
+            break;
+
+          case 'RESOLVED':
+            notifications.push({
+              proposalId: this.meta.proposalId,
+              package: {
+                type: UserNotificationType.PROPOSAL_RESOLUTION,
+                content: null,
+              },
+            });
+            break;
         }
+      } else {
+        notifications.push({
+          proposalId: this.meta.proposalId,
+          package: {
+            type: UserNotificationType.PROPOSAL_UPDATE,
+            content: {
+              updatedFields: [key],
+              updatedValues: Array.isArray(this.updateInput[key])
+                ? this.updateInput[key]
+                : [this.updateInput[key]],
+            },
+          },
+        });
       }
     }
 
+    console.log('notifications from factory', notifications);
     return notifications;
   }
 }

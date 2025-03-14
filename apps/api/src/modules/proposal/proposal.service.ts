@@ -165,6 +165,8 @@ export class ProposalService {
       { userId, proposalId },
     ).generateNotifications();
 
+    console.log('notifications from service', notifications);
+
     for (const notification of notifications) {
       this.notifier.notifyUsers(notification);
     }

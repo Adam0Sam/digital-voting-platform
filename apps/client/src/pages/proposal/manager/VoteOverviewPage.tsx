@@ -10,7 +10,7 @@ import UserVoteItem from '@/components/UserVoteItem';
 import {
   BindedVote,
   Candidate,
-  CreateVoteSuggestionsDto,
+  CreateVoteSuggestionDto,
   ProposalStatus,
   Vote,
   VoteStatus,
@@ -75,7 +75,7 @@ export default function VoteOverviewPage() {
   const [suggestedVotes, setSuggestedVotes] = useState<BindedVote[]>(
     proposal.votes.map(vote => ({
       ...vote,
-      voteSelections: vote.suggestedVotes ?? [],
+      voteSelections: vote.voteSuggestions ?? [],
     })),
   );
   const [highlightedChoices, setHighlightedChoices] = useState<string[]>([]);
@@ -99,7 +99,7 @@ export default function VoteOverviewPage() {
     voteId: string,
     candidates: Candidate[],
   ) => {
-    const voteSuggestions: CreateVoteSuggestionsDto[] = candidates.map(
+    const voteSuggestions: CreateVoteSuggestionDto[] = candidates.map(
       candidate => ({
         voteId,
         candidateId: candidate.id,
@@ -206,7 +206,7 @@ export default function VoteOverviewPage() {
                       onFocus={vote => {
                         setHighlightedChoices(
                           vote.voteSelections.map(
-                            selection => selection.candidate.value,
+                            selection => selection.candidateId,
                           ),
                         );
                       }}
@@ -255,7 +255,7 @@ export default function VoteOverviewPage() {
                       onFocus={vote => {
                         setHighlightedChoices(
                           vote.voteSelections.map(
-                            selection => selection.candidate.value,
+                            selection => selection.candidateId,
                           ),
                         );
                       }}

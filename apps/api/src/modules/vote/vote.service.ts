@@ -196,7 +196,7 @@ export class VoteService {
 
     this.notifier.notifyUsers({
       proposalId,
-      userId,
+      userId: voteUser.id,
       package: {
         type: NotificationType.VOTE_SUGGESTION,
         content: {
@@ -377,7 +377,7 @@ export class VoteService {
     });
 
     this.notifier.notifyUsers({
-      userId: userVote.voteSuggestions[0].suggestedByManagerId,
+      userId: userVote.voteSuggestions[0].suggestedByManager.userId,
       proposalId,
       package: {
         type: NotificationType.VOTE_SUGGESTION_REJECTED,
