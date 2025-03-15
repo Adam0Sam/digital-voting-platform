@@ -3,7 +3,7 @@ import CardWrapper from '@/components/CardWrapper';
 import DateForm from '@/components/forms/DateForm';
 import TitleDescriptionForm from '@/components/forms/TitleDescriptionForm';
 import { CarouselScrollHandles } from '@/components/ui/carousel';
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api';
 import {
   Card,
@@ -288,6 +288,14 @@ export default function ProposalCreationPage() {
 
   const [filledCards, setFilledCards] = useState<number[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+
+  useEffect(() => {
+    if (votingSystem === VotingSystem.RANKED_CHOICE) {
+      setProposalChoiceCount(candidates.length);
+    } else {
+      setProposalChoiceCount(1);
+    }
+  }, [votingSystem, candidates]);
 
   const carouselApi = {
     scrollNext: () => {

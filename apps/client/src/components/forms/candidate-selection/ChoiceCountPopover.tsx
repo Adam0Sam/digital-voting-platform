@@ -13,10 +13,12 @@ export default function ChoiceCountPopover({
   maxChoiceCount,
   handleSelect,
   defaultChoiceCount,
+  disableEdit,
 }: {
   maxChoiceCount: number;
   handleSelect?: (value: number) => void;
   defaultChoiceCount?: number;
+  disableEdit?: boolean;
 }) {
   const [choiceCount, setChoiceCount] = useState(defaultChoiceCount ?? 1);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export default function ChoiceCountPopover({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" disabled={disableEdit}>
           <p className="mr-4">Settings</p>
           <Settings />
         </Button>

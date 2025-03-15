@@ -6,6 +6,7 @@ import { PenBoxIcon } from 'lucide-react';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { useRef, useState } from 'react';
 import { api } from '@/lib/api';
+import { VotingSystem } from '@ambassador/voting-system';
 
 export default function CandidateOverviewPage() {
   const { proposal, permissions } = useManagerProposal();
@@ -18,6 +19,9 @@ export default function CandidateOverviewPage() {
         initialCandidates={proposal.candidates}
         formSubmitLabel="Edit Choices"
         disableEdit={!permissions.canEditCandidates}
+        disableChoiceCountEdit={
+          proposal.votingSystem === VotingSystem.RANKED_CHOICE
+        }
         disableSubmit={!permissions.canEditCandidates}
         initialChoiceCount={proposal.choiceCount}
         ref={candidateFormRef}

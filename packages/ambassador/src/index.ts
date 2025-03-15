@@ -6,3 +6,4 @@ export * from "./user/index.js";
 export * from "./utils/index.js";
 export * from "./vote/index.js";
 export * from "./notifications/index.js";
+export * from "./voting-system/index.js";

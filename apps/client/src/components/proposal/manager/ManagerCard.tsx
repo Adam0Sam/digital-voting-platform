@@ -21,7 +21,7 @@ import { Proposal } from '@ambassador';
 import { SingularLabeledBarChart } from '@/components/bar-chart/SingularLabeledChart';
 import { PROPOSAL_HREFS, PROPOSAL_OVERVIEW_PATHS } from '@/lib/routes';
 import StatusBadge from '@/components/StatusBadge';
-import { getVoteDistribution } from '@/lib/resolution-results';
+import { getVoteDistribution } from '@/lib/resolution/resolution-results';
 import { cacheFunction } from '@/lib/cache';
 import { getProposalStatusInfo } from '@/lib/get-status';
 

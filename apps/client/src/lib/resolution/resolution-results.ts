@@ -1,5 +1,4 @@
-import { BEST_RANK, Candidate, VoteSelection } from '@ambassador';
-import { VotingSystem } from '@ambassador/voting-system';
+import { VotingSystem, BEST_RANK, Candidate, VoteSelection } from '@ambassador';
 
 export type VoteDistributionItem = {
   optionValue: string;
@@ -46,6 +45,20 @@ export function getRankedChoiceWinner(
   while (winnerItem === null) {
     const { roundTallyMap, worstPerformingCandidate, bestPerformingCandidate } =
       getRoundTally(candidates, votes, remainingCandidates);
+    console.log('roundTallyMap', roundTallyMap);
+    console.log('worstPerformingCandidate', worstPerformingCandidate);
+    console.log('bestPerformingCandidate', bestPerformingCandidate);
+    console.log('remainingCandidates', remainingCandidates);
+    if (remainingCandidates.size <= 1) {
+      const lastCandidateId = Array.from(remainingCandidates)[0];
+      winnerItem = {
+        optionValue: candidates.find(
+          candidate => candidate.id === lastCandidateId,
+        )!.value,
+        voteCount: roundTallyMap.get(lastCandidateId) || 0,
+      };
+      break;
+    }
 
     if (
       roundTallyMap.get(bestPerformingCandidate.candidateId)! >
@@ -80,7 +93,9 @@ export function getWinningCandidate(
         getVoteDistribution(candidates, votes).voteDistribution,
       );
     case VotingSystem.RANKED_CHOICE:
-      return getRankedChoiceWinner(candidates, votes);
+      console.log('candidates', candidates);
+      console.log('votes', votes);
+    // return getRankedChoiceWinner(candidates, votes);
   }
 }
 
@@ -110,7 +125,7 @@ function getCurrentFavoriteCandidates(
   return favoriteCandidates;
 }
 
-function getRoundTally(
+export function getRoundTally(
   candidates: Candidate[],
   votes: VoteSelection[][],
   availableCandidateIds: Set<string>,
@@ -125,7 +140,7 @@ function getRoundTally(
     candidateId: string;
     voteCount: number;
   } = {
-    candidateId: candidates[0].id,
+    candidateId: '',
     voteCount: Infinity,
   };
 
@@ -133,7 +148,7 @@ function getRoundTally(
     candidateId: string;
     voteCount: number;
   } = {
-    candidateId: candidates[0].id,
+    candidateId: '',
     voteCount: -Infinity,
   };
 
@@ -142,6 +157,7 @@ function getRoundTally(
       voteSelections,
       availableCandidateIds,
     );
+
     for (const favoriteCandidateId of favoriteCandidateIds) {
       if (!roundTallyMap.has(favoriteCandidateId)) {
         throw new Error(

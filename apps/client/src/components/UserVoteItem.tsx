@@ -47,6 +47,7 @@ type UserVoteItemProps = {
   saveVoteSuggestionOffer: (voteId: string, candidates: Candidate[]) => void;
   handleVoteStatusToggle: (vote: BindedVote) => Promise<void>;
   isProposalActive: boolean;
+  isProposalRankedChoice?: boolean;
 };
 
 export default function UserVoteItem({
@@ -59,6 +60,7 @@ export default function UserVoteItem({
   saveVoteSuggestionOffer,
   handleVoteStatusToggle,
   isProposalActive,
+  isProposalRankedChoice = false,
 }: UserVoteItemProps) {
   const navigate = useNavigate();
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
@@ -267,11 +269,12 @@ export default function UserVoteItem({
             </ScrollArea>
           </div>
           <div className="flex w-full justify-center gap-4">
-            {permissions?.canOfferVoteSuggestions && (
-              <Button onClick={handleSuggestionOffer} className="flex-1">
-                Save Suggestions
-              </Button>
-            )}
+            {permissions?.canOfferVoteSuggestions &&
+              !isProposalRankedChoice && (
+                <Button onClick={handleSuggestionOffer} className="flex-1">
+                  Save Suggestions
+                </Button>
+              )}
             {permissions?.canChangeVoteStatus && (
               <ConfirmDialog
                 triggerButton={{

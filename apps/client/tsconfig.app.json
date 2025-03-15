@@ -41,5 +41,6 @@
     "src",
     "../../packages/ambassador/dist/**/*.ts",
     "../../packages/ambassador/src/utils",
+    "src/lib/resolution/resolution.test.ts",
   ]
 }

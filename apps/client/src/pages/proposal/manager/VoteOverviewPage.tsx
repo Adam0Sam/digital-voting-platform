@@ -23,7 +23,7 @@ import {
   Lightbulb,
 } from 'lucide-react';
 import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
-import { getVoteDistribution } from '@/lib/resolution-results';
+import { getVoteDistribution } from '@/lib/resolution/resolution-results';
 import { cacheFunction } from '@/lib/cache';
 import { useRevalidator } from 'react-router-dom';
 

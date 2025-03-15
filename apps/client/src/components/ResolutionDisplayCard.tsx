@@ -13,9 +13,10 @@ import { useEffect, useState } from 'react';
 import {
   getVoteDistribution,
   getWinningCandidate,
-} from '@/lib/resolution-results';
+} from '@/lib/resolution/resolution-results';
 import { cacheFunction } from '@/lib/cache';
 import { VotingSystem } from '@ambassador/voting-system';
+import { determineWinner } from '@/lib/resolution/majority-2';
 
 const getCachedVoteDistribution = cacheFunction(getVoteDistribution);
 const getCachedWinningCandidate = cacheFunction(getWinningCandidate);
@@ -46,17 +47,24 @@ export default function ResolutionDisplayCard({
   const voteResults = useAnonVoteResults(proposal.id);
   const getVoteDistribution =
     voteDistributionCallback ?? getCachedVoteDistribution;
-
+  console.log('voteResults', voteResults);
   const { voteDistribution, finalizedVoteCount } = getVoteDistribution(
     proposal.candidates,
     voteResults,
   );
+  console.log('voteDistribution', voteDistribution);
 
-  const winningCandidate = getCachedWinningCandidate(
-    proposal.candidates,
-    voteResults,
-    proposal.votingSystem as VotingSystem,
-  );
+  let fptpWinner;
+  let rankedChoiceWinner;
+  if (proposal.votingSystem === VotingSystem.RANKED_CHOICE) {
+    rankedChoiceWinner = determineWinner(proposal.candidates, voteResults);
+  } else {
+    fptpWinner = getCachedWinningCandidate(
+      proposal.candidates,
+      voteResults,
+      proposal.votingSystem as VotingSystem,
+    );
+  }
 
   const statusConfig = {
     [ProposalStatus.ABORTED]: {
@@ -125,32 +133,37 @@ export default function ResolutionDisplayCard({
                 <div>
                   <p className="text-sm font-medium">Winning Choice</p>
                   <p className="text-2xl font-bold">
-                    {winningCandidate?.optionValue ?? 'No Winner'}
+                    {proposal.votingSystem === VotingSystem.RANKED_CHOICE
+                      ? rankedChoiceWinner?.value
+                      : fptpWinner?.optionValue}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium">Votes for Winner</p>
-                  <p className="text-2xl font-bold">
-                    {winningCandidate?.voteCount ?? 0}
-                  </p>
-                </div>
+                {proposal.votingSystem !== VotingSystem.RANKED_CHOICE && (
+                  <div>
+                    <p className="text-sm font-medium">Votes for Winner</p>
+                    <p className="text-2xl font-bold">
+                      {fptpWinner?.voteCount}
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </div>
         </div>
-        {proposal.status === ProposalStatus.RESOLVED && (
-          <div className="mt-4">
-            <h4 className="mb-2 text-lg font-semibold">
-              Final Vote Distribution
-            </h4>
-            <SingularLabeledBarChart
-              chartData={voteDistribution}
-              dataLabelKey="optionValue"
-              dataValueKey="voteCount"
-              className="h-[200px] w-full"
-            />
-          </div>
-        )}
+        {proposal.status === ProposalStatus.RESOLVED &&
+          proposal.votingSystem !== VotingSystem.RANKED_CHOICE && (
+            <div className="mt-4">
+              <h4 className="mb-2 text-lg font-semibold">
+                Final Vote Distribution
+              </h4>
+              <SingularLabeledBarChart
+                chartData={voteDistribution}
+                dataLabelKey="optionValue"
+                dataValueKey="voteCount"
+                className="h-[200px] w-full"
+              />
+            </div>
+          )}
       </CardContent>
     </Card>
   );

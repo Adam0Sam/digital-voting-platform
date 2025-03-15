@@ -25,7 +25,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { api } from '@/lib/api';
 import { LOADER_IDS, useLoadedData } from '@/lib/loaders';
 import { PROPOSAL_HREFS } from '@/lib/routes';
-import { ProposalStatus, VoteSelection, VoteStatus } from '@ambassador';
+import {
+  Candidate,
+  ProposalStatus,
+  VoteSelection,
+  VoteStatus,
+} from '@ambassador';
 import {
   ArrowLeft,
   Clock,
@@ -43,6 +48,14 @@ import ResolutionDisplayCard from '@/components/ResolutionDisplayCard';
 import { getProgressBetweenDates } from '@/lib/utils';
 import Timeline, { constructMarkerArray } from '@/components/Timeline';
 import { toast } from 'sonner';
+import { VotingSystem } from '@ambassador/voting-system';
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from 'react-beautiful-dnd';
+import { GripVertical } from 'lucide-react';
 
 function StatusAlert({ proposalStatus }: { proposalStatus: ProposalStatus }) {
   type StatusConfig = {
@@ -150,7 +163,7 @@ export default function VotePage() {
   const revalidator = useRevalidator();
   const navigate = useNavigate();
   const userVote = proposal.votes[0];
-  console.log('userVote', userVote);
+
   const [voteSelections, setVoteSelections] = useState<VoteSelection[]>(
     userVote.voteSelections,
   );
@@ -171,14 +184,37 @@ export default function VotePage() {
   const suggestedCandidateIds =
     userVote?.voteSuggestions?.map(suggestion => suggestion.candidateId) ?? [];
 
-  console.log('suggestedCandidateIds', suggestedCandidateIds);
-
   const candidateNameIdMap = new Map(
     proposal.candidates.map(candidate => [candidate.id, candidate.value]),
   );
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const items = Array.from(voteSelections);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    const updatedItems = items.map((item, index) => ({
+      ...item,
+      rank: index + 1,
+    }));
+
+    setVoteSelections(updatedItems);
+  };
+
+  console.log('voteSelections', voteSelections);
+
   const handleVoteSubmission = async () => {
-    await api.vote.voteForProposal(proposal.id, voteSelections);
+    const voteSelectionsToSubmit =
+      proposal.votingSystem === VotingSystem.RANKED_CHOICE
+        ? voteSelections.map((selection, index) => ({
+            ...selection,
+            rank: selection.rank || index + 1,
+          }))
+        : voteSelections;
+
+    await api.vote.voteForProposal(proposal.id, voteSelectionsToSubmit);
     revalidator.revalidate();
     toast('Vote Submitted', {
       description: 'Your vote has been successfully recorded.',
@@ -186,6 +222,47 @@ export default function VotePage() {
       dismissible: false,
     });
     navigate(PROPOSAL_HREFS.VOTE_ALL);
+  };
+
+  const toggleCandidateInRanking = (candidate: Candidate) => {
+    if (!canVote) return;
+
+    setVoteSelections(prevSelections => {
+      const existingIndex = prevSelections.findIndex(
+        selection => selection.candidateId === candidate.id,
+      );
+
+      if (existingIndex >= 0) {
+        const newSelections = prevSelections.filter(
+          selection => selection.candidateId !== candidate.id,
+        );
+        return newSelections.map((selection, index) => ({
+          ...selection,
+          rank: index + 1,
+        }));
+      } else {
+        if (prevSelections.length >= proposal.choiceCount) {
+          return [
+            {
+              voteId: userVote.id,
+              candidateId: candidate.id,
+              candidate,
+              rank: 1,
+            },
+          ];
+        }
+        const newSelections = [
+          ...prevSelections,
+          {
+            voteId: userVote.id,
+            candidateId: candidate.id,
+            candidate,
+            rank: prevSelections.length + 1,
+          },
+        ];
+        return newSelections;
+      }
+    });
   };
 
   const handleSuggestionAccept = async () => {
@@ -211,60 +288,182 @@ export default function VotePage() {
     });
   };
 
-  const renderVotingInterface = () => (
+  const renderVotingInterface = () => {
+    if (proposal.votingSystem === VotingSystem.RANKED_CHOICE) {
+      return renderRankedChoiceInterface();
+    }
+
+    return (
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-xl">
+            {canVote ? 'Select Your Candidates' : 'Your Submitted Votes'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {canVote ? `Votes left: ${votesLeft}` : 'Votes submitted'}
+            </span>
+            <span className="text-sm font-medium">
+              {voteSelections.length}/{proposal.choiceCount}
+            </span>
+          </div>
+          <Progress value={progressPercentage} className="h-2" />
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {proposal.candidates?.map(candidate => (
+              <CandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                isSelected={voteSelections.some(
+                  selection => selection.candidateId === candidate.id,
+                )}
+                handleClick={() => {
+                  if (!canVote) return;
+
+                  setVoteSelections(prevSelections => {
+                    console.log('prevSelections', prevSelections);
+                    if (proposal.choiceCount <= prevSelections.length) {
+                      return [
+                        {
+                          candidate,
+                          candidateId: candidate.id,
+                          voteId: userVote.id,
+                        },
+                      ];
+                    }
+                    return [
+                      ...prevSelections.filter(
+                        selection => selection.candidateId !== candidate.id,
+                      ),
+                      {
+                        voteId: userVote.id,
+                        candidate,
+                        candidateId: candidate.id,
+                      },
+                    ];
+                  });
+                }}
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderRankedChoiceInterface = () => (
     <Card className="mb-8">
       <CardHeader>
         <CardTitle className="text-xl">
-          {canVote ? 'Select Your Candidates' : 'Your Submitted Votes'}
+          {canVote ? 'Rank Your Candidates' : 'Your Submitted Rankings'}
         </CardTitle>
+        <CardDescription>
+          {canVote
+            ? 'Drag and drop candidates to rank them in your preferred order. Your first choice should be at the top.'
+            : 'These are your submitted rankings.'}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex items-center justify-between">
           <span className="text-sm font-medium">
-            {canVote ? `Votes left: ${votesLeft}` : 'Votes submitted'}
-          </span>
-          <span className="text-sm font-medium">
-            {voteSelections.length}/{proposal.choiceCount}
+            {canVote
+              ? `Candidates selected: ${voteSelections.length}/${proposal.choiceCount}`
+              : 'Rankings submitted'}
           </span>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+        <Progress
+          value={(voteSelections.length / proposal.choiceCount) * 100}
+          className="h-2"
+        />
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {proposal.candidates?.map(candidate => (
-            <CandidateCard
-              key={candidate.id}
-              candidate={candidate}
-              isSelected={voteSelections.some(
-                selection => selection.candidateId === candidate.id,
-              )}
-              handleClick={() => {
-                if (!canVote) return;
+        {canVote && (
+          <div className="mb-8 mt-6">
+            <h3 className="mb-2 text-sm font-medium">Available Candidates</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {proposal.candidates?.map(candidate => (
+                <CandidateCard
+                  key={candidate.id}
+                  candidate={candidate}
+                  isSelected={voteSelections.some(
+                    selection => selection.candidateId === candidate.id,
+                  )}
+                  handleClick={() => toggleCandidateInRanking(candidate)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
-                setVoteSelections(prevSelections => {
-                  console.log('prevSelections', prevSelections);
-                  if (proposal.choiceCount <= prevSelections.length) {
-                    return [
-                      {
-                        candidate,
-                        candidateId: candidate.id,
-                        voteId: userVote.id,
-                      },
-                    ];
-                  }
-                  return [
-                    ...prevSelections.filter(
-                      selection => selection.candidateId !== candidate.id,
-                    ),
-                    {
-                      voteId: userVote.id,
-                      candidate,
-                      candidateId: candidate.id,
-                    },
-                  ];
-                });
-              }}
-            />
-          ))}
+        <div className="mt-8">
+          <h3 className="mb-2 text-sm font-medium">Your Ranking</h3>
+          {voteSelections.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No candidates selected yet.
+            </p>
+          ) : (
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="candidates" isDropDisabled={!canVote}>
+                {provided => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="space-y-2"
+                  >
+                    {[...voteSelections]
+                      .sort((a, b) => (a.rank || 1) - (b.rank || 1))
+                      .map((selection, index) => {
+                        const candidate = proposal.candidates.find(
+                          c => c.id === selection.candidateId,
+                        );
+                        if (!candidate) return null;
+
+                        return (
+                          <Draggable
+                            key={selection.candidateId}
+                            draggableId={selection.candidateId}
+                            index={index}
+                            isDragDisabled={!canVote}
+                          >
+                            {provided => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className="flex items-center rounded-md border bg-card p-3"
+                              >
+                                {canVote && (
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="mr-2"
+                                  >
+                                    <GripVertical className="h-5 w-5 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <div className="mr-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                  {selection.rank || index + 1}
+                                </div>
+                                <div className="flex-grow">
+                                  <p className="font-medium">
+                                    {candidate.value}
+                                  </p>
+                                  {candidate.description && (
+                                    <p className="text-sm text-muted-foreground">
+                                      {candidate.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          )}
         </div>
       </CardContent>
     </Card>

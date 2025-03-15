@@ -26,6 +26,7 @@ export type CandidateFormProps = ExtendedFormProps<FormValues> & {
   initialCandidates?: CreateCandidateDto[];
   initialChoiceCount?: number;
   disableEdit?: boolean;
+  disableChoiceCountEdit?: boolean;
   children?: React.JSX.Element;
   className?: string;
   errorMessage?: string | null;
@@ -115,6 +116,7 @@ function _CandidateForm(
               if (props.disableEdit) return;
               choiceCount.current = value;
             }}
+            disableEdit={props.disableChoiceCountEdit}
           />
         </div>
         <SheetContent
