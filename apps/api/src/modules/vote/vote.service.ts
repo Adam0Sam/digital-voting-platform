@@ -87,22 +87,29 @@ export class VoteService {
       },
     });
 
-    return await this.prisma.vote.update({
-      where: {
-        id: userVote.id,
-      },
-      data: {
-        status: VoteStatus.RESOLVED,
-        voteSelections: {
-          createMany: {
-            data: voteSelections.map((selection) => ({
-              candidateId: selection.candidateId,
-              rank: selection.rank,
-            })),
+    return await this.prisma.$transaction([
+      this.prisma.voteSelection.deleteMany({
+        where: {
+          voteId: userVote.id,
+        },
+      }),
+      this.prisma.vote.update({
+        where: {
+          id: userVote.id,
+        },
+        data: {
+          status: VoteStatus.RESOLVED,
+          voteSelections: {
+            createMany: {
+              data: voteSelections.map((selection) => ({
+                candidateId: selection.candidateId,
+                rank: selection.rank,
+              })),
+            },
           },
         },
-      },
-    });
+      }),
+    ]);
   }
 
   async suggestVote(

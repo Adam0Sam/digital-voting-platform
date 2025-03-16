@@ -16,7 +16,7 @@ import {
 } from '@/lib/resolution/resolution-results';
 import { cacheFunction } from '@/lib/cache';
 import { VotingSystem } from '@ambassador/voting-system';
-import { determineWinner } from '@/lib/resolution/majority-2';
+import { determineWinner } from '@/lib/resolution/condorcet';
 
 const getCachedVoteDistribution = cacheFunction(getVoteDistribution);
 const getCachedWinningCandidate = cacheFunction(getWinningCandidate);

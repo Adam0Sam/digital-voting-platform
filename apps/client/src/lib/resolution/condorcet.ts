@@ -7,7 +7,7 @@ import { Candidate, VoteSelection } from '@ambassador';
  * @param allVoteSelections - Array of arrays where each inner array contains the vote selections for one user
  * @returns The winning candidate or null if no winner can be determined
  */
-function determineWinner(
+function getCondorcetWinner(
   candidates: Candidate[],
   allVoteSelections: VoteSelection[][],
 ): Candidate | null {
@@ -16,6 +16,10 @@ function determineWinner(
 
   // Compute the Smith set
   const smithSet = computeSmithSet(candidates, votes);
+
+  if (smithSet.length < 0) {
+    throw new Error('No winner found');
+  }
 
   // If the Smith set has only one candidate, that's our winner
   if (smithSet.length === 1) {
@@ -61,50 +65,45 @@ function tiebreaker(
   smithSet: Candidate[],
   allVoteSelections: VoteSelection[][],
 ): Candidate | null {
-  if (smithSet.length === 0) return null;
+  // Calculate stats for each candidate
+  const candidateStats = smithSet.map(candidate => {
+    let firstPlaceVotes = 0;
+    let rankSum = 0;
 
-  // Calculate average rank for each candidate in the Smith set
-  const avgRanks = new Map<string, { total: number; count: number }>();
-
-  // Initialize
-  smithSet.forEach(candidate => {
-    avgRanks.set(candidate.id, { total: 0, count: 0 });
-  });
-
-  // Sum up all ranks
-  allVoteSelections.forEach(userVoteSelections => {
-    userVoteSelections.forEach(selection => {
-      if (
-        selection.rank !== undefined &&
-        smithSet.some(c => c.id === selection.candidateId)
-      ) {
-        const stats = avgRanks.get(selection.candidateId);
-        if (stats) {
-          stats.total += selection.rank;
-          stats.count += 1;
-        }
+    // Count votes for this candidate
+    allVoteSelections.forEach(userVoteSelections => {
+      const selection = userVoteSelections.find(
+        s => s.candidateId === candidate.id,
+      );
+      if (selection?.rank !== undefined) {
+        if (selection.rank === 1) firstPlaceVotes++;
+        rankSum += selection.rank;
       }
     });
+
+    return {
+      candidate,
+      firstPlaceVotes,
+      rankSum,
+    };
   });
 
-  // Find candidate with lowest average rank (best)
-  let bestCandidate: Candidate | null = null;
-  let bestAvg = Infinity;
-
-  smithSet.forEach(candidate => {
-    const stats = avgRanks.get(candidate.id);
-    if (stats && stats.count > 0) {
-      const avg = stats.total / stats.count;
-      if (avg < bestAvg) {
-        bestAvg = avg;
-        bestCandidate = candidate;
-      }
+  // Sort candidates by:
+  // 1. Most first-place votes
+  // 2. If tied, lowest average rank
+  candidateStats.sort((a, b) => {
+    if (a.firstPlaceVotes !== b.firstPlaceVotes) {
+      return b.firstPlaceVotes - a.firstPlaceVotes; // Higher first-place votes wins
     }
+    return a.rankSum - b.rankSum; // Lower average rank wins
   });
 
-  return bestCandidate;
-}
+  if (!candidateStats[0]) {
+    throw new Error('No winner found');
+  }
 
+  return candidateStats[0].candidate;
+}
 /**
  * Computes the Smith set using Kosaraju's algorithm for finding SCCs.
  * The Smith set is the top tier of strongly connected components in the majority graph.
@@ -122,9 +121,15 @@ function computeSmithSet(
     candidates,
     votes,
   );
-
+  console.group('buildMajorityGraphAndTranspose');
+  console.log('adj', adj);
+  console.log('candidates', candidates);
+  console.groupEnd();
   // Find the SCCs using Kosaraju's algorithm
   const components = kosaraju(adj, transposeAdj, candidates);
+  console.group('kosaraju');
+  console.log('components', components);
+  console.groupEnd();
 
   // The Smith set is the first SCC in the list (top SCC)
   const smithSetIds = components[0];
@@ -167,7 +172,9 @@ function buildMajorityGraphAndTranspose(
   candidates.forEach(a => {
     candidates.forEach(b => {
       // If a defeats b in a majority of votes
-      if (a.id !== b.id && pairwiseResults.get(a.id)?.get(b.id) > threshold) {
+      const aResults = pairwiseResults.get(a.id);
+      const bDefeats = aResults?.get(b.id);
+      if (a.id !== b.id && bDefeats !== undefined && bDefeats > threshold) {
         // Add edge a -> b in original graph
         adj.get(a.id)?.push(b.id);
 
@@ -240,14 +247,14 @@ function kosaraju(
   const components: string[][] = [];
 
   // First pass: DFS on original graph and fill the order stack
-  function dfs1(nodeId: string): void {
+  function visit(nodeId: string): void {
     if (!visited.has(nodeId)) {
       visited.add(nodeId);
       const neighbors = adj.get(nodeId) || [];
 
       // Visit all neighbors
       for (const neighbor of neighbors) {
-        dfs1(neighbor);
+        visit(neighbor);
       }
 
       // Push node to order after all neighbors are processed
@@ -258,7 +265,7 @@ function kosaraju(
   // Run DFS on each unvisited node
   candidates.forEach(candidate => {
     if (!visited.has(candidate.id)) {
-      dfs1(candidate.id);
+      visit(candidate.id);
     }
   });
 
@@ -266,7 +273,7 @@ function kosaraju(
   visited.clear();
 
   // Second pass: DFS on transpose graph in reverse order
-  function dfs2(nodeId: string, component: string[]): void {
+  function assign(nodeId: string, component: string[]): void {
     if (!visited.has(nodeId)) {
       visited.add(nodeId);
       component.push(nodeId);
@@ -274,7 +281,7 @@ function kosaraju(
       const neighbors = transposeAdj.get(nodeId) || [];
       // Visit all neighbors in transpose graph
       for (const neighbor of neighbors) {
-        dfs2(neighbor, component);
+        assign(neighbor, component);
       }
     }
   }
@@ -284,7 +291,7 @@ function kosaraju(
     const nodeId = order.pop()!;
     if (!visited.has(nodeId)) {
       const component: string[] = [];
-      dfs2(nodeId, component);
+      assign(nodeId, component);
       components.push(component);
     }
   }
@@ -292,5 +299,4 @@ function kosaraju(
   return components;
 }
 
-// Export the function to be used in your application
-export { determineWinner };
+export { getCondorcetWinner as determineWinner };

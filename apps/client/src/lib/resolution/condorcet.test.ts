@@ -1,4 +1,4 @@
-import { determineWinner } from './majority-2'; // Update with actual path
+import { determineWinner } from './condorcet'; // Update with actual path
 import { VoteSelection } from '@ambassador';
 
 describe('Smith Set Voting System', () => {

@@ -44,36 +44,41 @@ export default function VotingSystemForm({
         <h2 className="text-center text-2xl font-bold">
           {selectedSystem ? VotingSystem[selectedSystem] : 'None'}
         </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {VotingSystems.map(system => (
-            <Card
-              key={system}
-              className={`relative cursor-pointer ${
-                selectedSystem === system
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-background'
-              }`}
-              onClick={() => setSelectedSystem(system)}
-            >
-              <CardContent className="flex flex-col p-0 pb-4">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="mr-2 mt-2 h-5 w-5 self-end text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-40">
-                        {votingSystemDescriptions[system]}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <h3 className="mx-4 self-center font-semibold">
-                  {VotingSystem[system]}
-                </h3>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {VotingSystems.map(system => {
+            if (system === VotingSystem.ABSOLUTE_MAJORITY) {
+              return null;
+            }
+            return (
+              <Card
+                key={system}
+                className={`relative cursor-pointer ${
+                  selectedSystem === system
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border bg-background'
+                }`}
+                onClick={() => setSelectedSystem(system)}
+              >
+                <CardContent className="flex flex-col p-0 pb-4">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="mr-2 mt-2 h-5 w-5 self-end text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-40">
+                          {votingSystemDescriptions[system]}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <h3 className="mx-4 self-center font-semibold">
+                    {VotingSystem[system]}
+                  </h3>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
       <FormHandleButtons

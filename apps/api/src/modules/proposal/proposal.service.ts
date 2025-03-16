@@ -172,21 +172,51 @@ export class ProposalService {
     }
 
     if (updateInputFactory.shouldResetVotes) {
-      for (const candidate of prevProposal.candidates) {
-        await this.prisma.candidate.update({
+      await this.prisma.$transaction(async (tx) => {
+        await tx.voteSelection.deleteMany({
           where: {
-            id: candidate.id,
-          },
-          data: {
-            suggestedIn: {
-              set: [],
-            },
-            voteSelections: {
-              set: [],
+            candidateId: {
+              in: prevProposal.candidates.map((c) => c.id),
             },
           },
         });
-      }
+
+        await tx.voteSuggestion.deleteMany({
+          where: {
+            candidateId: {
+              in: prevProposal.candidates.map((c) => c.id),
+            },
+          },
+        });
+
+        await tx.vote.updateMany({
+          where: {
+            proposalId: prevProposal.id,
+            status: 'RESOLVED',
+          },
+          data: {
+            status: 'PENDING',
+          },
+        });
+
+        await Promise.all(
+          prevProposal.candidates.map((candidate) =>
+            tx.candidate.update({
+              where: {
+                id: candidate.id,
+              },
+              data: {
+                suggestedIn: {
+                  set: [],
+                },
+                voteSelections: {
+                  set: [],
+                },
+              },
+            }),
+          ),
+        );
+      });
     }
 
     return this.prisma.proposal.update({

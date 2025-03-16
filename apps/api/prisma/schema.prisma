@@ -84,7 +84,6 @@ enum ProposalVisibility {
 enum VotingSystem {
     FIRST_PAST_THE_POST
     RANKED_CHOICE
-    ABSOLUTE_MAJORITY
 }
 
 model Proposal {
